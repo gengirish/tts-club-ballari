@@ -9,6 +9,15 @@ const STEPS = ["You", "Health", "Movement", "Goals"] as const;
 
 const ACTIVITY_IDS = ["SEDENTARY", "WALKING", "RUNNING", "GYM", "YOGA", "SPORTS"] as const;
 
+const ACTIVITY_LABEL: Record<(typeof ACTIVITY_IDS)[number], string> = {
+  SEDENTARY: "Mostly seated",
+  WALKING: "Walking",
+  RUNNING: "Running",
+  GYM: "Gym",
+  YOGA: "Yoga",
+  SPORTS: "Sports",
+};
+
 const GOAL_OPTIONS: { value: OnboardingInput["goals"][number]; label: string }[] = [
   { value: "WEIGHT_LOSS", label: "Weight loss" },
   { value: "WEIGHT_GAIN", label: "Strength & gain" },
@@ -397,7 +406,7 @@ export function OnboardingStepper() {
                           : "bg-paper border-paper-deep text-ink hover:border-magenta/40"
                       }`}
                     >
-                      {id.charAt(0) + id.slice(1).toLowerCase().replace("_", " ")}
+                      {ACTIVITY_LABEL[id]}
                     </button>
                   );
                 })}

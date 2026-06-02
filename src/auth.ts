@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import type { User } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/auth.config";
@@ -29,7 +30,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           create: { phone, role: "MEMBER", city: "Ballari" },
         });
 
-        return { id: user.id, name: user.name ?? undefined, role: user.role } as any;
+        return {
+          id: user.id,
+          name: user.name ?? undefined,
+          role: user.role,
+        } as User;
       },
     }),
   ],

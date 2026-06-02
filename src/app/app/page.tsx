@@ -1,11 +1,15 @@
 import { getSessionUser } from "@/lib/rbac";
+import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { redirect } from "next/navigation";
 
-// Protected by middleware; this is the member home shell.
-// Build the full dashboard UI from the design board (Prompt 6 in README).
+// Protected by middleware; member home (full dashboard in Phase 6).
 export default async function AppHome() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
+
+  if (!(await isMemberOnboarded(user.id))) {
+    redirect("/app/onboarding");
+  }
 
   return (
     <main className="min-h-screen p-6">

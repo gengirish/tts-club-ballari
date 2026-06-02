@@ -41,6 +41,12 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 - **Fitness Score** engine (`server/fitness/score.ts`).
 - Example RBAC routes: `/api/members` (ADMIN list + self onboarding), `/api/challenges/[id]/join`.
 
+### Shipped checklist (rolling)
+
+| Phase | Routes / pages |
+|------|----------------|
+| **1 — Onboarding** | `GET/POST /api/members` (POST: signed-in self onboarding with `onboardingSchema`), `/app/onboarding` (4-step flow), `/app` redirects to onboarding until profile + goals exist. |
+
 ## 4. AISensy templates to create & approve (dashboard)
 
 Create these as **approved** campaigns; names map via `.env`:
