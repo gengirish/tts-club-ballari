@@ -36,7 +36,7 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 - **RBAC**: `MEMBER < COACH/HOST < ADMIN`. `requireAuth()`, `requireRole()`, route guards in `middleware.ts`.
 - **Phone-OTP login (primary for India)**: OTP issued + delivered over WhatsApp (AISensy auth template). `auth.ts`, `server/auth/otp.ts`, `/api/auth/otp`. **Redis-backed rate limits** (per IP + per phone on send; per phone on failed verify when `REDIS_URL` is set). **Admin** `/admin` includes a failed OTP send panel for the AISensy login campaign. SMS/email OTP fallback is not implemented — extend integrations if you need non‑WhatsApp users.
 - **Email / username + password**: `POST /api/auth/register` (Zod-validated sign-up), `email-password` Credentials provider in `auth.ts`, and **login tabs** on `/login` (OTP vs password vs register). Phone OTP remains the default path for the Indian, phone-first context.
-- **AISensy** template client + typed campaign registry (`integrations/aisensy/*`).
+- **AISensy** template client + typed campaign registry (`integrations/aisensy/*`). **Operator CLI:** `npm run aisensy` — see [docs/AISENSY_CLI.md](./docs/AISENSY_CLI.md) (dashboard setup + `env` / `ping` against the campaign API).
 - **AgentMail** send/reply client + inbound webhook handler (`integrations/agentmail/*`, `/api/webhooks/agentmail`).
 - **BullMQ** notifications queue + Fly.io worker (event reminders, challenge nudges, C25K alerts, email).
 - **Fitness Score** engine (`server/fitness/score.ts`).
@@ -55,7 +55,7 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 | **7 — Events + host** | `GET/POST /api/events`, `POST /api/events/[id]/register`, `POST /api/events/[id]/check-in`, `/host`; `scheduleEventReminderForRegistrant` (~12h). |
 | **8 — Coaches** | `/app/coaches`, `POST /api/coaches/[id]/book`, `/coach` desk (scoped enrollments). |
 | **9 — Community + SOS** | `GET/POST /api/community/posts`, like + comments routes, `/app/community` + wellness list, `POST /api/sos` + optional email enqueue. |
-| **10 — Admin** | `/admin` aggregates (members, activity, challenges, events, wellness, growth, coach leaderboard). |
+| **10 — Admin** | `/admin` aggregates (members, activity, challenges, events, wellness, growth, coach leaderboard) + **WhatsApp OTP failure** feed for the AISensy login campaign. |
 
 After **Prisma schema** changes (for example optional `phone`, `username`, `passwordHash` on `User`), run `npm run db:push` locally or your migration flow, then **`npm run build`** so TypeScript and the app stay aligned with the schema before you ship or merge.
 
@@ -73,6 +73,8 @@ npm run test:e2e
 ```
 
 ## 4. AISensy templates to create & approve (dashboard)
+
+End-to-end checklist (dashboard + local `.env` + test send): **[docs/AISENSY_CLI.md](./docs/AISENSY_CLI.md)** — includes `npm run aisensy -- env` and `npm run aisensy -- ping`.
 
 Create these as **approved** campaigns; names map via `.env`:
 

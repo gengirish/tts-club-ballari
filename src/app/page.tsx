@@ -15,7 +15,7 @@ export default function Home() {
       </p>
       <Link
         href="/login"
-        className="mt-8 inline-block bg-white text-violet font-extrabold rounded-full px-8 py-4"
+        className="mt-8 inline-block cursor-pointer rounded-full bg-white px-8 py-4 font-extrabold text-violet shadow-lg shadow-black/15 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-violet motion-reduce:hover:translate-y-0 motion-reduce:transition-none"
       >
         Get started →
       </Link>
