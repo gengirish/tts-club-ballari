@@ -1,8 +1,8 @@
-# Steel Sisters & Striders (SSS Club Ballari)
+# Steel Sisters & Striders (SSS Club Ballari) — **Sister Stride**
 
 **Pitch deck — Markdown source**
 
-*Women-first fitness ecosystem · Ballari, India · IntelliForge*
+*Women-first fitness ecosystem · Ballari, India · IntelliForge · **Sister Stride** = consumer-facing product name (see Slide 1).*
 
 Fill bracketed fields (`[like this]`) before sending to investors. Remove this note block from export if desired.
 
@@ -10,13 +10,24 @@ Fill bracketed fields (`[like this]`) before sending to investors. Remove this n
 
 ## Slide 1 — Title
 
-**Steel Sisters & Striders (SSS Club)**  
+**Sister Stride**  
 *Women-first fitness — community, coaching, and progress in Ballari.*
+
+**Formal / legal entity (footer or small type on title slide):**  
+Steel Sisters & Striders (**SSS Club**)
 
 **Tagline (pick one):**
 
 - “Fitness built for women — where you live.”
 - “Your club. Your pace. Your people.”
+- “Your pace. Your people. Your proof.” *(global fitness tone)*
+
+**Brand architecture (for designers & copy):**
+
+| Layer | Use for |
+|-------|---------|
+| **Sister Stride** | App store, social, member-facing campaigns, English-first surfaces |
+| **Steel Sisters & Striders (SSS Club)** | Legal, partnerships, press, “who we are” story |
 
 **Footer:** [Founder names] · [Email] · [Phone] · [Website]
 
@@ -47,7 +58,7 @@ Fill bracketed fields (`[like this]`) before sending to investors. Remove this n
 
 ## Slide 4 — Solution
 
-**SSS Club — the operating system for a women-first fitness community.**
+**Sister Stride (SSS Club) — the operating system for a women-first fitness community.**
 
 One place for:
 
@@ -124,7 +135,7 @@ We productise what strong women’s clubs already do in chats — and make it **
 
 **If pre-launch / early scaffold (honest framing)**
 
-- **Shipped today:** Auth (phone OTP), RBAC, Prisma data model, notification pipeline (BullMQ + templates), payments integration, core API patterns (Zod + `ApiResponse` envelope).
+- **Shipped today:** Auth (phone OTP primary; email/username + password supported), RBAC, Prisma data model, notification pipeline (BullMQ + templates), payments integration, core API patterns (Zod + `ApiResponse` envelope).
 - **Next 60–90 days:** [N] onboarded members · [K] weekly actives · [M] paid seats · [retention definition, e.g. 7-day active].
 - **Proof artefacts:** Real cohort screenshot, testimonial quotes, end-to-end payment demo.
 
@@ -239,7 +250,7 @@ We productise what strong women’s clubs already do in chats — and make it **
 
 ## One-minute pitch (script)
 
-“Millions of women want to get fitter but do not trust generic apps or mixed gyms. They already coordinate in WhatsApp — but that breaks for payments, progress, and structured programs. **Steel Sisters & Striders** is a women-first club OS: phone login, challenges, coach-led programs like Couch to 5K, and events — with WhatsApp and email where she already is. We are proving retention and paid cohorts in **Ballari**, then replicating the playbook in similar Indian cities. We are raising **[amount]** to **[hire / run cohorts / complete core product]** and reach **[milestone]** in **[timeframe].**”
+“Millions of women want to get fitter but do not trust generic apps or mixed gyms. They already coordinate in WhatsApp — but that breaks for payments, progress, and structured programs. We go to market as **Sister Stride** — the women-first club OS from **Steel Sisters & Striders**: phone login, challenges, coach-led programs like Couch to 5K, and events, with WhatsApp and email where she already is. We are proving retention and paid cohorts in **Ballari**, then replicating the playbook in similar Indian cities. We are raising **[amount]** to **[hire / run cohorts / complete core product]** and reach **[milestone]** in **[timeframe].**”
 
 ---
 
@@ -251,4 +262,4 @@ We productise what strong women’s clubs already do in chats — and make it **
 
 ---
 
-*Document version: 1.0 · Aligned with repo README product scope and India-first stack (paise, IST, E.164, Razorpay, Auth.js RBAC).*
+*Document version: 1.1 · Sister Stride consumer naming on Slide 1, Solution, and one-minute script. Aligned with repo README product scope and India-first stack (paise, IST, E.164, Razorpay, Auth.js RBAC).*

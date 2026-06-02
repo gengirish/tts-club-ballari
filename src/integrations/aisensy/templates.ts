@@ -3,9 +3,14 @@
 
 const env = (k: string, fallback: string) => process.env[k] ?? fallback;
 
+/** AISensy campaign name for login OTP (matches `NotificationLog.template`). */
+export function getAisensyOtpCampaignName(): string {
+  return env("AISENSY_CAMPAIGN_OTP", "sss_otp_login");
+}
+
 export const AisensyTemplates = {
   otpLogin: (code: string) => ({
-    campaignName: env("AISENSY_CAMPAIGN_OTP", "sss_otp_login"),
+    campaignName: getAisensyOtpCampaignName(),
     templateParams: [code],
   }),
 

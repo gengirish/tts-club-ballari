@@ -27,6 +27,7 @@ export function RecomputeScoreButton() {
     <div>
       <button
         type="button"
+        data-testid="score-recompute"
         onClick={run}
         disabled={loading}
         className="rounded-full bg-energy px-6 py-2.5 text-sm font-extrabold text-white disabled:opacity-60"

@@ -21,18 +21,21 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   const coach = await prisma.coach.findUnique({
     where: { id: params.id },
-    include: { user: { select: { name: true, phone: true } } },
+    include: { user: { select: { name: true, phone: true, email: true } } },
   });
   if (!coach) return notFound("Coach not found");
 
-  const member = await prisma.user.findUnique({ where: { id: user.id }, select: { name: true, phone: true } });
+  const member = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { name: true, phone: true, email: true },
+  });
   const inbox = process.env.COACH_BOOKING_INBOX ?? process.env.SOS_FORWARD_EMAIL;
   if (inbox) {
     await enqueueNotification({
       kind: "email",
       to: inbox,
       subject: `Coach booking request — ${coach.user.name ?? "Coach"}`,
-      html: `<p>Member: ${member?.name ?? ""} (${member?.phone})</p><p>Coach: ${coach.user.name} (${coach.user.phone})</p><p>Coach id: ${coach.id}</p>`,
+      html: `<p>Member: ${member?.name ?? ""} (${member?.phone ?? member?.email ?? "—"})</p><p>Coach: ${coach.user.name} (${coach.user.phone ?? coach.user.email ?? "—"})</p><p>Coach id: ${coach.id}</p>`,
     });
   }
 

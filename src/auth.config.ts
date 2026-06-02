@@ -12,8 +12,9 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        const u = user as { role?: Role };
+        const u = user as { role?: Role; email?: string | null };
         token.role = u.role ?? "MEMBER";
+        token.email = typeof u.email === "string" ? u.email : undefined;
       }
       return token;
     },
@@ -21,6 +22,9 @@ export const authConfig: NextAuthConfig = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = (token.role as Role | undefined) ?? "MEMBER";
+        if (typeof token.email === "string") {
+          session.user.email = token.email;
+        }
       }
       return session;
     },

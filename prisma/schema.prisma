@@ -113,11 +113,13 @@ enum WellnessTopic {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  phone         String    @unique // E.164, e.g. +919620010983
+  phone         String?   @unique // E.164; set for OTP members; optional for email/password-only until linked
   email         String?   @unique
   emailVerified DateTime?
   image         String?
   role          Role      @default(MEMBER)
+  username      String?   @unique // lowercase handle for password login (optional)
+  passwordHash  String?   // bcrypt; set when using email/username + password
 
   dob        DateTime?
   gender     Gender?

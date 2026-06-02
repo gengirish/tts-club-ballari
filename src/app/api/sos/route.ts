@@ -28,12 +28,16 @@ export async function POST(req: Request) {
 
   const forward = process.env.SOS_FORWARD_EMAIL;
   if (forward) {
-    const u = await prisma.user.findUnique({ where: { id: user.id }, select: { name: true, phone: true } });
+    const u = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { name: true, phone: true, email: true },
+    });
+    const contact = u?.phone ?? u?.email ?? "no phone/email on file";
     await enqueueNotification({
       kind: "email",
       to: forward,
       subject: "SSS SOS alert",
-      html: `<p><b>SOS</b> from ${u?.name ?? "member"} (${u?.phone}).</p><p>Alert id: ${alert.id}</p>`,
+      html: `<p><b>SOS</b> from ${u?.name ?? "member"} (${contact}).</p><p>Alert id: ${alert.id}</p>`,
     });
   }
 

@@ -158,6 +158,12 @@ Always run one **integration** session after parallel work: `npm run build`, mid
 
 ---
 
+## Post–Phase 10 / maintenance
+
+Phases **1 through 10** in this document describe the **baseline product** that the scaffold targets; treat that stack as shipped when your branch matches the README shipped checklist and builds cleanly. For ongoing work or refactors, **parallel Cursor agents** should still avoid editing the **same file** in the same window of time so merges stay predictable. The **integration gate** for any batch of changes remains **`npm run build`** passing on a single branch before you call the work done.
+
+---
+
 ## AISensy template names
 
 Your README uses `sss_*` prefix in the table; `.cursorrules` / integrations may use a variant — **normalize to whatever exists in `integrations/aisensy`** and `.env.example` before enqueueing jobs. The implementing agent must grep the repo and align names, not assume.

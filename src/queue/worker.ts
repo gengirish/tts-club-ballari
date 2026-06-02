@@ -25,6 +25,7 @@ const worker = new Worker<NotificationJob>(
         include: { event: true, user: true },
       });
       if (!reg) return;
+      if (!reg.user.phone) return;
       const tpl = AisensyTemplates.eventReminder(
         reg.event.title,
         formatDateTimeIST(reg.event.startsAt),
@@ -46,6 +47,7 @@ const worker = new Worker<NotificationJob>(
         include: { challenge: true, user: true },
       });
       if (!cp) return;
+      if (!cp.user.phone) return;
       const line = `${cp.progress}/${cp.challenge.targetValue} ${cp.challenge.unit}`;
       const tpl = AisensyTemplates.challengeNudge(cp.challenge.title, line);
       const res = await sendWhatsApp({
@@ -64,6 +66,7 @@ const worker = new Worker<NotificationJob>(
         include: { member: true },
       });
       if (!enr) return;
+      if (!enr.member.phone) return;
       // Session line could be looked up from a plan table; kept simple here.
       const tpl = AisensyTemplates.c25kSession(String(enr.weekNo), "Today's session is ready in the app.");
       const res = await sendWhatsApp({

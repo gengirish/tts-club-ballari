@@ -1,5 +1,6 @@
 import { createHash, randomInt } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { toE164 } from "@/lib/utils/phone";
 import { sendWhatsApp } from "@/integrations/aisensy/client";
 import { AisensyTemplates } from "@/integrations/aisensy/templates";
 
@@ -8,8 +9,35 @@ const MAX_ATTEMPTS = 5;
 
 const hash = (code: string) => createHash("sha256").update(code).digest("hex");
 
+/** Invalidate unconsumed OTP rows so only the newest send remains valid. */
+async function invalidatePendingOtpsForPhone(phoneE164: string): Promise<void> {
+  await prisma.otpCode.updateMany({
+    where: { phone: phoneE164, consumed: false },
+    data: { consumed: true },
+  });
+}
+
 /** Generate + persist an OTP and deliver it over WhatsApp (AISensy auth template). */
 export async function issueOtp(phone: string): Promise<{ sent: boolean }> {
+  const e2ePhone = process.env.E2E_TEST_PHONE?.trim();
+  const e2eOtpRaw = process.env.E2E_TEST_OTP?.trim();
+  if (e2ePhone && e2eOtpRaw) {
+    const normalized = toE164(phone);
+    const target = toE164(e2ePhone);
+    if (normalized && target && normalized === target) {
+      const digits = e2eOtpRaw.replace(/\D/g, "");
+      const code = digits.padStart(6, "0").slice(0, 6);
+      if (code.length === 6) {
+        await invalidatePendingOtpsForPhone(normalized);
+        await prisma.otpCode.create({
+          data: { phone: normalized, codeHash: hash(code), expiresAt: new Date(Date.now() + OTP_TTL_MS) },
+        });
+        return { sent: true };
+      }
+    }
+  }
+
+  await invalidatePendingOtpsForPhone(phone);
   const code = String(randomInt(100000, 999999));
   await prisma.otpCode.create({
     data: { phone, codeHash: hash(code), expiresAt: new Date(Date.now() + OTP_TTL_MS) },

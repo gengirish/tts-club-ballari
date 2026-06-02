@@ -52,7 +52,7 @@ export default async function ScorePage() {
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-xl mx-auto">
-        <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">
+        <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy" data-testid="score-page-title">
           Fitness score
         </h1>
         <p className="text-sm text-ink/60 mt-2 mb-8">

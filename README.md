@@ -34,7 +34,8 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 ## 3. What's already wired
 
 - **RBAC**: `MEMBER < COACH/HOST < ADMIN`. `requireAuth()`, `requireRole()`, route guards in `middleware.ts`.
-- **Phone-OTP login**: OTP issued + delivered over WhatsApp (AISensy auth template). `auth.ts`, `server/auth/otp.ts`, `/api/auth/otp`.
+- **Phone-OTP login (primary for India)**: OTP issued + delivered over WhatsApp (AISensy auth template). `auth.ts`, `server/auth/otp.ts`, `/api/auth/otp`.
+- **Email / username + password**: `POST /api/auth/register` (Zod-validated sign-up), `email-password` Credentials provider in `auth.ts`, and **login tabs** on `/login` (OTP vs password vs register). Phone OTP remains the default path for the Indian, phone-first context.
 - **AISensy** template client + typed campaign registry (`integrations/aisensy/*`).
 - **AgentMail** send/reply client + inbound webhook handler (`integrations/agentmail/*`, `/api/webhooks/agentmail`).
 - **BullMQ** notifications queue + Fly.io worker (event reminders, challenge nudges, C25K alerts, email).
@@ -56,7 +57,20 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 | **9 — Community + SOS** | `GET/POST /api/community/posts`, like + comments routes, `/app/community` + wellness list, `POST /api/sos` + optional email enqueue. |
 | **10 — Admin** | `/admin` aggregates (members, activity, challenges, events, wellness, growth, coach leaderboard). |
 
+After **Prisma schema** changes (for example optional `phone`, `username`, `passwordHash` on `User`), run `npm run db:push` locally or your migration flow, then **`npm run build`** so TypeScript and the app stay aligned with the schema before you ship or merge.
+
 Env additions (see `.env.example`): `SOS_FORWARD_EMAIL`, `COACH_BOOKING_INBOX` (optional; coach booking emails).
+
+## E2E (Playwright)
+
+See [docs/E2E_PLAYWRIGHT.md](./docs/E2E_PLAYWRIGHT.md). Quick start:
+
+```bash
+npx playwright install chromium
+$env:E2E_TEST_PHONE="+919999999999"; $env:E2E_TEST_OTP="999000"; $env:DATABASE_URL="..." 
+npm run test:e2e:seed
+npm run test:e2e
+```
 
 ## 4. AISensy templates to create & approve (dashboard)
 
