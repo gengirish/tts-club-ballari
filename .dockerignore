@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+.cursor
+*.md
+.DS_Store
+coverage
+.vercel
+.fly

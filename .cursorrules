@@ -1,0 +1,41 @@
+# SSS Club Ballari — Cursor Project Rules
+# Steel Sisters & Striders · Women-first fitness ecosystem · IntelliForge
+
+You are working on a production Next.js 14 (App Router) app for a women's fitness community in Ballari, India. Follow these rules WITHOUT being asked. No TODOs, no placeholders — ship complete files.
+
+## Stack (non-negotiable)
+- Next.js 14 App Router + TypeScript (strict)
+- Prisma + PostgreSQL (Supabase)
+- Auth.js v5 (next-auth@5) with role-based access control (RBAC)
+- BullMQ workers on Fly.io; web on Vercel (split deploy)
+- Email: AgentMail (two-way). WhatsApp: AISensy (template campaigns)
+- Payments: Razorpay. Validation: Zod on every input.
+- Tailwind with the SSS brand tokens (see tailwind.config.ts)
+
+## India-first conventions (apply everywhere, always)
+- MONEY: store and compute in PAISE (integer). Never floats for currency. Format to ₹ only at the view layer (see lib/utils/money.ts).
+- PERCENTAGES / RATINGS: store in BASIS POINTS (integer, 10000 = 100%). Convert at view layer.
+- TIME: store UTC in DB; display in IST (Asia/Kolkata). Use lib/utils/datetime.ts.
+- DATES (display): DD/MM/YYYY.
+- PHONE: E.164, default region IN (+91). Use lib/utils/phone.ts. Phone is the primary login identifier.
+- DISTANCE: kilometres. STEPS: integers.
+
+## API contract
+- EVERY route handler returns the ApiResponse<T> envelope from lib/api-response.ts:
+    { ok: true, data } | { ok: false, error: { code, message } }
+- Validate ALL inputs with Zod (lib/validation/*). Reject with 422 + envelope on failure.
+- Protect routes by role with requireRole()/requireAuth() from lib/rbac.ts. Never trust a client-sent role.
+
+## RBAC roles
+MEMBER < COACH/HOST < ADMIN. Coaches manage their enrollees; Hosts manage their events; Admins manage everything. A user can be MEMBER and additionally COACH or HOST (capabilities), but Role enum is the gate — use capability checks in rbac.ts for COACH/HOST data scoping.
+
+## Notifications
+- Side-effect notifications (event reminders, challenge nudges, C25K session alerts, OTP) go through src/server/notifications and are ENQUEUED to BullMQ, never sent inline in a request handler (except OTP, which is latency-sensitive — send directly).
+- WhatsApp = AISensy approved template campaigns only (24h window rule). Email = AgentMail.
+- Log every send to NotificationLog.
+
+## Code style
+- Server Components by default; "use client" only when needed.
+- Colocate Zod schema + inferred type. Export inferred types from src/types.
+- No `any`. No magic numbers for money/percent — use the unit helpers.
+- Prefer complete files over diffs when scaffolding.

@@ -1,0 +1,446 @@
+// SSS Club Ballari — schema
+// Conventions: money=paise (Int), rating/percent=basis points (Int),
+// timestamps stored UTC, phone E.164, distance km.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------- Enums ----------------
+enum Role {
+  MEMBER
+  COACH
+  HOST
+  ADMIN
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  UNDISCLOSED
+}
+
+enum FitnessLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ScoreLevel {
+  BEGINNER
+  ACTIVE
+  STRONG
+  ATHLETE
+  CHAMPION
+}
+
+enum Goal {
+  WEIGHT_LOSS
+  WEIGHT_GAIN
+  FITNESS_IMPROVEMENT
+  WALKING_HABIT
+  COUCH_TO_5K
+  RUNNER_5K
+  RUNNER_10K
+  HALF_MARATHON
+  STRENGTH_TRAINING
+  WOMENS_WELLNESS
+  HEALTHY_LIFESTYLE
+}
+
+enum CoachType {
+  RUNNING
+  WALKING
+  STRENGTH
+  YOGA
+  NUTRITION
+  PHYSIO
+}
+
+enum EventType {
+  WALK
+  RUN
+  YOGA
+  MEETUP
+  CYCLING
+  TREKKING
+}
+
+enum ChallengeType {
+  STEPS
+  WALKING
+  WEIGHT_LOSS
+  WATER_INTAKE
+  RUNNING
+  STRENGTH
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  DROPPED
+}
+
+enum NotifyChannel {
+  WHATSAPP
+  EMAIL
+}
+
+enum NotifyStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum WellnessTopic {
+  PCOS
+  MENOPAUSE
+  NUTRITION
+  BONE_HEALTH
+  MENTAL_WELLNESS
+  HORMONAL_HEALTH
+}
+
+// ---------------- Auth.js (adapter) ----------------
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  phone         String    @unique // E.164, e.g. +919620010983
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(MEMBER)
+
+  dob        DateTime?
+  gender     Gender?
+  occupation String?
+  city       String?   @default("Ballari")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  healthProfile HealthProfile?
+  goals         MemberGoal[]
+  scores        FitnessScore[]
+  progress      ProgressEntry[]
+  coach         Coach?
+  reviews       CoachReview[]
+  hostedEvents  Event[]                @relation("HostEvents")
+  eventRegs     EventRegistration[]
+  challengeRuns ChallengeParticipant[]
+  enrollments   ProgramEnrollment[]    @relation("MemberEnrollments")
+  badges        MemberBadge[]
+  articles      WellnessArticle[]
+  hostApp       HostApplication?
+  sosAlerts     SosAlert[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Phone OTP login (delivered via AISensy authentication template)
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+// ---------------- Health & profile ----------------
+model HealthProfile {
+  id                String       @id @default(cuid())
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  heightCm          Int?
+  weightKg          Float?
+  waistCm           Int?
+  bpSystolic        Int?
+  bpDiastolic       Int?
+  conditions        String?
+  hasDiabetes       Boolean      @default(false)
+  hasThyroid        Boolean      @default(false)
+  injuryHistory     String?
+  level             FitnessLevel @default(BEGINNER)
+  currentActivity   String[]     @default([]) // SEDENTARY, WALKING, RUNNING, GYM, YOGA, SPORTS
+  avgDailySteps     Int?
+  runningAbilityKm  Float?
+  walkingDistanceKm Float?
+  updatedAt         DateTime     @updatedAt
+}
+
+model MemberGoal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal   Goal
+
+  @@unique([userId, goal])
+}
+
+// ---------------- Fitness score (history) ----------------
+model FitnessScore {
+  id             String     @id @default(cuid())
+  userId         String
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score          Int        // 0-100
+  level          ScoreLevel
+  stepsBps       Int        @default(0) // basis points (10000 = 100%)
+  consistencyBps Int        @default(0)
+  bmiBps         Int        @default(0)
+  activityBps    Int        @default(0)
+  computedAt     DateTime   @default(now())
+
+  @@index([userId, computedAt])
+}
+
+// ---------------- Progress tracking ----------------
+model ProgressEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime // day bucket (UTC)
+  weightKg    Float?
+  waistCm     Int?
+  steps       Int?
+  walkKm      Float?
+  runKm       Float?
+  workoutMins Int?
+  waterMl     Int?
+  sleepHrs    Float?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// ---------------- Coaches ----------------
+model Coach {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          CoachType
+  qualification String?
+  experienceYrs Int       @default(0)
+  specialty     String?
+  bio           String?
+  ratingBps     Int       @default(0) // avg rating in basis points (50000 => 5.0000)
+  ratingCount   Int       @default(0)
+  sessionPaise  Int       @default(0) // price per session in paise
+  available     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  reviews     CoachReview[]
+  enrollments ProgramEnrollment[]
+}
+
+model CoachReview {
+  id        String   @id @default(cuid())
+  coachId   String
+  coach     Coach    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    User     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  ratingBps Int      // 10000 = 1 star ... 50000 = 5 stars
+  text      String?
+  createdAt DateTime @default(now())
+
+  @@unique([coachId, memberId])
+}
+
+// ---------------- Events ----------------
+model Event {
+  id        String    @id @default(cuid())
+  hostId    String
+  host      User      @relation("HostEvents", fields: [hostId], references: [id])
+  type      EventType
+  title     String
+  location  String
+  lat       Float?
+  lng       Float?
+  startsAt  DateTime  // UTC
+  capacity  Int?
+  createdAt DateTime  @default(now())
+
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id          String    @id @default(cuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkedInAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([eventId, userId])
+}
+
+// ---------------- Challenges ----------------
+model Challenge {
+  id          String        @id @default(cuid())
+  type        ChallengeType
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  targetValue Int           // steps | km | glasses | kg (see unit)
+  unit        String
+  badgeName   String?
+  createdAt   DateTime      @default(now())
+
+  participants ChallengeParticipant[]
+}
+
+model ChallengeParticipant {
+  id          String     @id @default(cuid())
+  challengeId String
+  challenge   Challenge  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  progress    Int        @default(0)
+  completedAt DateTime?
+  joinedAt    DateTime   @default(now())
+
+  @@unique([challengeId, userId])
+  @@index([challengeId, progress])
+}
+
+// ---------------- Programs (flagship: Couch to 5K, 12 weeks) ----------------
+model Program {
+  id          String   @id @default(cuid())
+  slug        String   @unique // "couch-to-5k"
+  title       String
+  weeks       Int      @default(12)
+  pricePaise  Int      @default(0)
+  description String?
+  createdAt   DateTime @default(now())
+
+  enrollments ProgramEnrollment[]
+}
+
+model ProgramEnrollment {
+  id          String           @id @default(cuid())
+  programId   String
+  program     Program          @relation(fields: [programId], references: [id])
+  memberId    String
+  member      User             @relation("MemberEnrollments", fields: [memberId], references: [id], onDelete: Cascade)
+  coachId     String?
+  coach       Coach?           @relation(fields: [coachId], references: [id])
+  status      EnrollmentStatus @default(ACTIVE)
+  weekNo      Int              @default(1)
+  assessment  Json?            // { currentWeight, age, activityLevel, dailySteps, injuryHistory, prevRunning }
+  startedAt   DateTime         @default(now())
+  completedAt DateTime?
+
+  @@unique([programId, memberId])
+}
+
+// ---------------- Gamification ----------------
+model Badge {
+  id      String        @id @default(cuid())
+  code    String        @unique // FIRST_WALK, FIRST_5K, KM_100, WEIGHT_5KG, STREAK_30, COMMUNITY_CHAMPION, EVENT_HOST
+  title   String
+  icon    String?
+  members MemberBadge[]
+}
+
+model MemberBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId  String
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+}
+
+// ---------------- Women's Wellness ----------------
+model WellnessArticle {
+  id        String        @id @default(cuid())
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id])
+  topic     WellnessTopic
+  title     String
+  body      String
+  mediaUrl  String?
+  published Boolean       @default(false)
+  createdAt DateTime      @default(now())
+}
+
+// ---------------- Host applications ----------------
+model HostApplication {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupType EventType
+  pitch     String?
+  approved  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
+
+// ---------------- Safety ----------------
+model SosAlert {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lat       Float?
+  lng       Float?
+  eventId   String?
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// ---------------- Notifications audit ----------------
+model NotificationLog {
+  id        String        @id @default(cuid())
+  channel   NotifyChannel
+  to        String        // phone (E.164) or email
+  template  String        // AISensy campaign name or AgentMail subject key
+  status    NotifyStatus  @default(QUEUED)
+  payload   Json?
+  error     String?
+  createdAt DateTime      @default(now())
+
+  @@index([channel, status])
+}

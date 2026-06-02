@@ -1,0 +1,12 @@
+# BullMQ worker - deploy: fly deploy --config fly.worker.toml
+app = "sss-club-worker"
+primary_region = "bom"
+
+[build]
+  dockerfile = "Dockerfile.worker"
+
+[processes]
+  worker = "node_modules/.bin/tsx src/queue/worker.ts"
+
+[env]
+  NODE_ENV = "production"

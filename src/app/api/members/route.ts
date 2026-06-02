@@ -1,0 +1,58 @@
+import { ok, forbidden, unauthorized, validationError } from "@/lib/api-response";
+import { requireRole, requireAuth, AuthError } from "@/lib/rbac";
+import { onboardingSchema } from "@/lib/validation/member";
+import { prisma } from "@/lib/prisma";
+
+// GET /api/members  -> ADMIN only: list members
+export async function GET() {
+  try {
+    await requireRole("ADMIN");
+  } catch (e) {
+    if (e instanceof AuthError) return e.kind === "UNAUTHORIZED" ? unauthorized() : forbidden();
+    throw e;
+  }
+
+  const members = await prisma.user.findMany({
+    where: { role: "MEMBER" },
+    select: { id: true, name: true, phone: true, city: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+  return ok(members);
+}
+
+// POST /api/members  -> signed-in user completes onboarding (self)
+export async function POST(req: Request) {
+  let user;
+  try {
+    user = await requireAuth();
+  } catch (e) {
+    if (e instanceof AuthError) return unauthorized();
+    throw e;
+  }
+
+  const json = await req.json().catch(() => null);
+  const parsed = onboardingSchema.safeParse(json);
+  if (!parsed.success) return validationError(parsed.error.flatten());
+
+  const { name, email, dob, gender, occupation, city, health, goals } = parsed.data;
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { name, email, dob, gender, occupation, city },
+    }),
+    prisma.healthProfile.upsert({
+      where: { userId: user.id },
+      update: health,
+      create: { userId: user.id, ...health },
+    }),
+    prisma.memberGoal.deleteMany({ where: { userId: user.id } }),
+    prisma.memberGoal.createMany({
+      data: goals.map((goal) => ({ userId: user.id, goal })),
+      skipDuplicates: true,
+    }),
+  ]);
+
+  return ok({ onboarded: true }, { status: 201 });
+}
