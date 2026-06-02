@@ -1,7 +1,7 @@
 // Runs on Fly.io (separate process). Consumes the notifications queue.
 import { Worker } from "bullmq";
 import { bullmqConnection } from "./connection";
-import type { NotificationJob } from "./queues";
+import { getNotificationsQueue, type NotificationJob } from "./queues";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsApp } from "@/integrations/aisensy/client";
 import { AisensyTemplates } from "@/integrations/aisensy/templates";
@@ -76,6 +76,30 @@ const worker = new Worker<NotificationJob>(
       return;
     }
 
+    if (data.kind === "challenge_nudge_scan") {
+      const now = new Date();
+      const challenges = await prisma.challenge.findMany({
+        where: { startDate: { lte: now }, endDate: { gte: now } },
+        include: { participants: true },
+      });
+      for (const ch of challenges) {
+        const totalMs = Math.max(ch.endDate.getTime() - ch.startDate.getTime(), 1);
+        const elapsedMs = Math.min(Math.max(now.getTime() - ch.startDate.getTime(), 0), totalMs);
+        const expected = Math.floor((ch.targetValue * elapsedMs) / totalMs);
+        for (const p of ch.participants) {
+          if (p.progress >= ch.targetValue) continue;
+          if (expected > 0 && p.progress < expected * 0.45) {
+            await getNotificationsQueue().add("challenge_nudge", {
+              kind: "challenge_nudge",
+              userId: p.userId,
+              challengeId: ch.id,
+            });
+          }
+        }
+      }
+      return;
+    }
+
     if (data.kind === "email") {
       const res = await sendEmail({ to: data.to, subject: data.subject, html: data.html });
       await prisma.notificationLog.create({
@@ -95,3 +119,11 @@ const worker = new Worker<NotificationJob>(
 
 worker.on("ready", () => console.log("[worker] notifications worker ready"));
 worker.on("failed", (job, err) => console.error("[worker] job failed", job?.id, err.message));
+
+getNotificationsQueue()
+  .add(
+    "repeat-challenge-nudge-scan",
+    { kind: "challenge_nudge_scan" } satisfies NotificationJob,
+    { repeat: { every: 86_400_000 }, jobId: "repeat-challenge-nudge-scan" }
+  )
+  .catch((e) => console.error("[worker] repeatable register", e));

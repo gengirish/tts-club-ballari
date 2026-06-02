@@ -143,6 +143,10 @@ model User {
   articles      WellnessArticle[]
   hostApp       HostApplication?
   sosAlerts     SosAlert[]
+  communityPosts CommunityPost[]    @relation("PostAuthor")
+  communityLikes CommunityLike[]
+  communityComments CommunityComment[]
+  payments      Payment[]
 }
 
 model Account {
@@ -354,6 +358,7 @@ model Program {
   createdAt   DateTime @default(now())
 
   enrollments ProgramEnrollment[]
+  payments    Payment[]
 }
 
 model ProgramEnrollment {
@@ -369,8 +374,56 @@ model ProgramEnrollment {
   assessment  Json?            // { currentWeight, age, activityLevel, dailySteps, injuryHistory, prevRunning }
   startedAt   DateTime         @default(now())
   completedAt DateTime?
+  razorpayOrderId   String?    @unique
+  razorpayPaymentId String?    @unique
 
   @@unique([programId, memberId])
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  programId         String?
+  program           Program? @relation(fields: [programId], references: [id])
+  amountPaise       Int
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String?  @unique
+  status            String   @default("created") // created | paid | failed
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CommunityPost {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  likes    CommunityLike[]
+  comments CommunityComment[]
+}
+
+model CommunityLike {
+  id        String        @id @default(cuid())
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([postId, userId])
+}
+
+model CommunityComment {
+  id        String        @id @default(cuid())
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime      @default(now())
 }
 
 // ---------------- Gamification ----------------

@@ -1,9 +1,10 @@
-import { ok, unauthorized, notFound } from "@/lib/api-response";
+import { ok, unauthorized, notFound, validationError } from "@/lib/api-response";
 import { requireAuth, AuthError } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
+import { challengeJoinBodySchema } from "@/lib/validation/challenge";
 
 // POST /api/challenges/:id/join
-export async function POST(_req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: { id: string } }) {
   let user;
   try {
     user = await requireAuth();
@@ -11,6 +12,10 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     if (e instanceof AuthError) return unauthorized();
     throw e;
   }
+
+  const json = await req.json().catch(() => ({}));
+  const parsed = challengeJoinBodySchema.safeParse(json);
+  if (!parsed.success) return validationError(parsed.error.flatten());
 
   const challenge = await prisma.challenge.findUnique({ where: { id: params.id } });
   if (!challenge) return notFound("Challenge not found");

@@ -46,6 +46,17 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 | Phase | Routes / pages |
 |------|----------------|
 | **1 — Onboarding** | `GET/POST /api/members` (POST: signed-in self onboarding with `onboardingSchema`), `/app/onboarding` (4-step flow), `/app` redirects to onboarding until profile + goals exist. |
+| **2 — Fitness score** | `POST /api/score/recompute`, `/app/score` (ring + ladder + component bars). |
+| **3 — Progress** | `POST /api/progress` (IST `istDayBucket`), `/app/progress` (log + week/month charts, positive weight framing). |
+| **4 — Challenges** | `/app/challenges`, join `POST /api/challenges/[id]/join` (Zod), leaderboard UI; worker repeatable `challenge_nudge_scan` → enqueues `challenge_nudge`. |
+| **5 — C25K + Razorpay** | `/app/programs/couch-to-5k`, `POST /api/programs/couch-to-5k/order`, `POST /api/webhooks/razorpay` (signature + idempotent pay capture), `scheduleC25kSessionReminders`. |
+| **6 — Member dashboard** | `/app` live widgets (steps, score, weight, challenge, next event). |
+| **7 — Events + host** | `GET/POST /api/events`, `POST /api/events/[id]/register`, `POST /api/events/[id]/check-in`, `/host`; `scheduleEventReminderForRegistrant` (~12h). |
+| **8 — Coaches** | `/app/coaches`, `POST /api/coaches/[id]/book`, `/coach` desk (scoped enrollments). |
+| **9 — Community + SOS** | `GET/POST /api/community/posts`, like + comments routes, `/app/community` + wellness list, `POST /api/sos` + optional email enqueue. |
+| **10 — Admin** | `/admin` aggregates (members, activity, challenges, events, wellness, growth, coach leaderboard). |
+
+Env additions (see `.env.example`): `SOS_FORWARD_EMAIL`, `COACH_BOOKING_INBOX` (optional; coach booking emails).
 
 ## 4. AISensy templates to create & approve (dashboard)
 
