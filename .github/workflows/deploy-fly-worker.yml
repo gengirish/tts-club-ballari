@@ -1,0 +1,37 @@
+# Deploy BullMQ worker to Fly.io from GitHub (no local Docker).
+#
+# Prerequisites (repo Settings → Secrets and variables):
+#   Secrets: FLY_API_TOKEN  (from `fly tokens create deploy -x 8760h` or the Fly dashboard)
+#   Variables: FLY_DEPLOY_ENABLED = true   (gates this job so forks without secrets stay green)
+#
+# To deploy only manually: use "Run workflow" (workflow_dispatch) with FLY_DEPLOY_ENABLED set.
+name: Deploy Fly worker
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "src/queue/**"
+      - "src/integrations/**"
+      - "src/server/notifications/**"
+      - "prisma/**"
+      - "Dockerfile.worker"
+      - "fly.worker.toml"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: flyctl deploy (worker)
+    runs-on: ubuntu-latest
+    if: ${{ vars.FLY_DEPLOY_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy worker app
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only --config fly.worker.toml --ha=false

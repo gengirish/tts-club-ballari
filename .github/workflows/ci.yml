@@ -1,0 +1,67 @@
+# IntelliForge / HRMS-style quality gate — every push & PR (no local Docker required).
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  NODE_OPTIONS: --max_old_space_size=4096
+  # Boot-time checks (Next/Prisma); replace in real deploy with Vercel/Fly secrets.
+  AUTH_SECRET: ci_dummy_auth_secret_please_override_in_prod_min_32_chars_xx
+  AUTH_URL: http://localhost:3000
+  AUTH_TRUST_HOST: "true"
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/sss_club?sslmode=disable
+  DIRECT_URL: postgresql://ci:ci@localhost:5432/sss_club?sslmode=disable
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  quality:
+    name: Lint + typecheck + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: sss_club
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d sss_club"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma generate + db push (schema sanity)
+        run: npx prisma db push
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build

@@ -14,6 +14,7 @@ cp .env.example .env        # fill in values
 npx auth secret             # writes AUTH_SECRET
 npm run db:push             # push schema to Supabase
 npm run db:seed             # program + badges + sample challenge
+npm run lint && npm run typecheck   # same checks as GitHub CI
 npm run dev                 # web (Vercel target)
 npm run worker              # BullMQ worker (Fly.io target) — separate terminal
 ```
@@ -119,42 +120,33 @@ Run these **in order** in Composer. Each assumes the scaffold + `.cursorrules` a
 **Prompt 10 — Admin dashboard**
 > Build `/admin` (ADMIN only) with totals: members, active members, community weight lost, total distance, event participation, challenge stats, coach performance, member growth.
 
-## 6. Deploy (Vercel UI + Fly API + Fly worker)
+## 6. Deploy (Vercel-first · CI/CD · optional Fly)
 
-**1 — API on Fly (deploy this first so you have a URL)**
+**Deployed URLs (production + webhooks):** [docs/DEPLOYED_URLS.md](./docs/DEPLOYED_URLS.md)
 
-```bash
-fly auth login
-fly apps create sss-club-api   # once; or edit `app` in fly.toml
-fly secrets set DATABASE_URL="..." DIRECT_URL="..." AUTH_SECRET="..." AUTH_URL="https://<your-vercel>.vercel.app" AUTH_TRUST_HOST="true"
-# …set the rest from .env.example (Redis, AISensy, AgentMail, Razorpay) as needed
-fly deploy                     # uses Dockerfile + fly.toml (Mumbai `bom`)
-```
+This project follows the **IntelliForge HRMS** style: **production traffic on Vercel** via GitHub integration, **quality gates in GitHub Actions**, and **no requirement to run Docker locally** for the web app. BullMQ still uses a **Fly.io worker** (TCP + long process); deploy that worker from **CI** or the Fly CLI.
 
-Copy the app URL (e.g. `https://sss-club-api.fly.dev`).
+**Full guide (secrets, `FLY_DEPLOY_ENABLED`, optional API split):** [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)
 
-**2 — UI on Vercel (CLI)**
+### TL;DR
 
-```bash
-npm i -g vercel
-vercel link
-vercel env pull                # optional: sync env locally
-# In Vercel project → Environment Variables: set the same secrets as Fly EXCEPT add:
-#   PROXY_API_TO = https://<your-fly-api>.fly.dev
-#   AUTH_URL = https://<your-vercel>.vercel.app
-vercel deploy --prod
-```
-
-`PROXY_API_TO` turns on Next **rewrites**: browser still calls `/api/*` on the Vercel origin, but those requests are proxied to Fly. Do **not** set `PROXY_API_TO` on the Fly machine.
-
-**3 — BullMQ worker on Fly**
+| Step | What to do |
+|------|----------------|
+| **1. Vercel** | Connect the repo → set env vars from `.env.example` → merge to `main` / `master` → auto deploy. |
+| **2. CI** | `.github/workflows/ci.yml` runs lint, typecheck, and build on every PR/push. |
+| **3. Fly worker (optional automation)** | Add secret `FLY_API_TOKEN` and variable `FLY_DEPLOY_ENABLED=true` → `.github/workflows/deploy-fly-worker.yml` deploys on relevant pushes or manual run. |
+| **4. Optional Fly API** | Only if you use `PROXY_API_TO` on Vercel; otherwise run all `/api/*` on Vercel like HRMS. |
 
 ```bash
+# Optional: synchronous production URL (after GitHub → Vercel is linked)
+vercel deploy --prod --yes
+
+# Optional: worker from laptop instead of Actions
 fly deploy --config fly.worker.toml
 ```
 
-(`fly.worker.toml` + `Dockerfile.worker` — no public HTTP.)
+**Webhooks:** point AgentMail (and similar) at your **Vercel** URL (same origin as `AUTH_URL`).
 
-**Webhooks**
+### Legacy: full Fly API container
 
-Point AgentMail (and any other inbound URL) at your **Vercel** site: `https://<vercel-domain>/api/webhooks/agentmail` so traffic matches `AUTH_URL` / same-origin cookies.
+If you maintain a separate Next API on Fly (`Dockerfile` + `fly.toml`), see [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md). That path is **advanced** and not required for a HRMS-style deployment.
