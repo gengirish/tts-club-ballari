@@ -44,8 +44,22 @@ Or use npm script: `npm run test:e2e:seed`.
 |--------|----------------|
 | `npm run test:e2e:seed` | Upserts onboarded user for `E2E_TEST_PHONE`. |
 | `npm run test:e2e` | Runs Playwright (starts `npm run dev` unless CI / reuse). |
+| `npm run test:e2e:prod` | Smoke **public** specs only; set `PLAYWRIGHT_BASE_URL` to production (see [DEPLOYED_URLS.md](./DEPLOYED_URLS.md)). Does **not** start a local dev server when the URL host is not `localhost` / `127.0.0.1`. |
 | `npm run test:e2e:ui` | Playwright UI mode for debugging. |
 | `npx playwright install chromium` | One-time browser download. |
+
+### E2E against Vercel (production smoke)
+
+Do **not** set `E2E_TEST_PHONE` / `E2E_TEST_OTP` on production — the OTP bypass must never be enabled there. Use read-only public checks:
+
+```bash
+# Windows PowerShell
+$env:PLAYWRIGHT_BASE_URL="https://sss-club.vercel.app"
+$env:CI="true"
+npm run test:e2e:prod
+```
+
+`password-login.spec.ts` and authenticated suites are for **staging/local** with a real DB you control; they create accounts or rely on the OTP bypass.
 
 With **`E2E_TEST_PHONE` + `E2E_TEST_OTP`** set, Playwright runs:
 

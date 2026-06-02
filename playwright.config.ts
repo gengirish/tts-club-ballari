@@ -1,6 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
+const baseURL = (process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000").trim();
+
+/** Only auto-start Next dev server when the target is local (not Vercel/preview). */
+function shouldStartLocalWebServer(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return true;
+  }
+}
+
+const startLocalWebServer = shouldStartLocalWebServer(baseURL);
 const e2eAuth = Boolean(process.env.E2E_TEST_PHONE?.trim() && process.env.E2E_TEST_OTP?.trim());
 
 export default defineConfig({
@@ -17,17 +29,21 @@ export default defineConfig({
   },
   timeout: 60_000,
   expect: { timeout: 15_000 },
-  webServer: {
-    command: "npm run dev",
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    env: {
-      ...process.env,
-      E2E_TEST_PHONE: process.env.E2E_TEST_PHONE ?? "",
-      E2E_TEST_OTP: process.env.E2E_TEST_OTP ?? "",
-    },
-  },
+  ...(startLocalWebServer
+    ? {
+        webServer: {
+          command: "npm run dev",
+          url: baseURL,
+          reuseExistingServer: !process.env.CI,
+          timeout: 120_000,
+          env: {
+            ...process.env,
+            E2E_TEST_PHONE: process.env.E2E_TEST_PHONE ?? "",
+            E2E_TEST_OTP: process.env.E2E_TEST_OTP ?? "",
+          },
+        },
+      }
+    : {}),
   projects: e2eAuth
     ? [
         { name: "setup", testMatch: /auth\.setup\.ts/ },

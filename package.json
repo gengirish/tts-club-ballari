@@ -15,6 +15,7 @@
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "test:e2e": "playwright test",
+    "test:e2e:prod": "playwright test e2e/public.spec.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:seed": "tsx e2e/seed-onboarded-user.ts",
     "aisensy": "tsx scripts/aisensy-cli.ts"
