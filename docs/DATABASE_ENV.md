@@ -59,6 +59,8 @@ Remove-Item $env:USERPROFILE\neon-database-url-pooled.txt, $env:USERPROFILE\neon
 - Apply schema: **`npx prisma db push`** (or your migration workflow) against the target database.
 - Optional: **`npm run db:seed`** for [beta test accounts](./BETA_USERS.md).
 
+If **`POST /api/auth/register`** returns **`503`** with code **`DATABASE_UNAVAILABLE`**, the server cannot open a Prisma connection (missing or wrong **`DATABASE_URL` / `DIRECT_URL`** on Vercel, network, or Neon paused). Fix env vars and redeploy.
+
 ---
 
 ## 5. CI / Playwright
