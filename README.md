@@ -34,7 +34,7 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 ## 3. What's already wired
 
 - **RBAC**: `MEMBER < COACH/HOST < ADMIN`. `requireAuth()`, `requireRole()`, route guards in `middleware.ts`.
-- **Phone-OTP login (primary for India)**: OTP issued + delivered over WhatsApp (AISensy auth template). `auth.ts`, `server/auth/otp.ts`, `/api/auth/otp`.
+- **Phone-OTP login (primary for India)**: OTP issued + delivered over WhatsApp (AISensy auth template). `auth.ts`, `server/auth/otp.ts`, `/api/auth/otp`. **Redis-backed rate limits** (per IP + per phone on send; per phone on failed verify when `REDIS_URL` is set). **Admin** `/admin` includes a failed OTP send panel for the AISensy login campaign. SMS/email OTP fallback is not implemented — extend integrations if you need non‑WhatsApp users.
 - **Email / username + password**: `POST /api/auth/register` (Zod-validated sign-up), `email-password` Credentials provider in `auth.ts`, and **login tabs** on `/login` (OTP vs password vs register). Phone OTP remains the default path for the Indian, phone-first context.
 - **AISensy** template client + typed campaign registry (`integrations/aisensy/*`).
 - **AgentMail** send/reply client + inbound webhook handler (`integrations/agentmail/*`, `/api/webhooks/agentmail`).

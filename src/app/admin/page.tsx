@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
+import { getAisensyOtpCampaignName } from "@/integrations/aisensy/templates";
 import { getSessionUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
+import { formatDateTimeIST } from "@/lib/utils/datetime";
 import { formatStars } from "@/lib/utils/percent";
 
 type StatCard = { label: string; value: string; footnote?: string };
@@ -20,6 +22,8 @@ export default async function AdminDashboardPage() {
 
   const since30 = new Date(Date.now() - 30 * 86400000);
   const since14 = new Date(Date.now() - 14 * 86400000);
+  const since7 = new Date(Date.now() - 7 * 86400000);
+  const otpCampaignName = getAisensyOtpCampaignName();
 
   const [
     members,
@@ -38,6 +42,8 @@ export default async function AdminDashboardPage() {
     communityComments,
     weightCheckIns30d,
     coachPerf,
+    otpSendFailures7d,
+    otpSendFailureRows,
   ] = await Promise.all([
     prisma.user.count({ where: { role: "MEMBER" } }),
     prisma.coach.count(),
@@ -68,6 +74,25 @@ export default async function AdminDashboardPage() {
       take: 8,
       orderBy: { ratingBps: "desc" },
       include: { user: { select: { name: true } }, _count: { select: { enrollments: true, reviews: true } } },
+    }),
+    prisma.notificationLog.count({
+      where: {
+        channel: "WHATSAPP",
+        status: "FAILED",
+        template: otpCampaignName,
+        createdAt: { gte: since7 },
+      },
+    }),
+    prisma.notificationLog.findMany({
+      where: {
+        channel: "WHATSAPP",
+        status: "FAILED",
+        template: otpCampaignName,
+        createdAt: { gte: since7 },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      select: { id: true, to: true, error: true, createdAt: true },
     }),
   ]);
 
@@ -122,6 +147,33 @@ export default async function AdminDashboardPage() {
             </div>
           ))}
         </div>
+
+        <section className="mt-10 rounded-card border border-paper-deep bg-white p-6">
+          <h2 className="font-display text-xl uppercase text-violet mb-2">WhatsApp OTP (AISensy)</h2>
+          <p className="text-xs text-ink/55 mb-4">
+            Failed sends for campaign <span className="font-mono">{otpCampaignName}</span> in the last 7 days (login
+            path). Spikes usually mean template or API key drift.
+          </p>
+          <p className="text-2xl font-display text-violet">{String(otpSendFailures7d)}</p>
+          <p className="text-xs text-ink/55 mt-1 mb-4">Failed OTP notifications (7d)</p>
+          {otpSendFailureRows.length === 0 ? (
+            <p className="text-sm text-ink/60">No failures in this window.</p>
+          ) : (
+            <ul className="divide-y divide-paper-deep text-sm max-h-72 overflow-y-auto">
+              {otpSendFailureRows.map((row) => (
+                <li key={row.id} className="py-2 flex flex-col gap-0.5">
+                  <span className="font-mono text-xs text-ink/80">{row.to}</span>
+                  <span className="text-xs text-ink/55">{formatDateTimeIST(row.createdAt)}</span>
+                  {row.error ? (
+                    <span className="text-xs text-magenta break-all line-clamp-2" title={row.error}>
+                      {row.error}
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         <section className="mt-10 rounded-card border border-paper-deep bg-white p-6">
           <h2 className="font-display text-xl uppercase text-violet mb-4">Coach signal</h2>

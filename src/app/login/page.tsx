@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { requestOtpSchema, verifyOtpSchema } from "@/lib/validation/auth";
 
 type Tab = "phone" | "password" | "register";
 
@@ -22,24 +23,54 @@ export default function LoginPage() {
   async function requestOtp() {
     setLoading(true);
     setError(null);
+    const parsed = requestOtpSchema.safeParse({ phone });
+    if (!parsed.success) {
+      const msg =
+        parsed.error.flatten().fieldErrors.phone?.[0] ?? "Enter a valid mobile number.";
+      setError(msg);
+      setLoading(false);
+      return;
+    }
     const res = await fetch("/api/auth/otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({ phone: parsed.data.phone }),
     });
     const body = await res.json();
     setLoading(false);
-    if (body.ok) setStage("otp");
-    else setError(body.error?.message ?? "Could not send OTP");
+    if (body.ok) {
+      setStage("otp");
+      setCode("");
+      return;
+    }
+    if (body.error?.code === "RATE_LIMITED") {
+      setError(body.error?.message ?? "Too many attempts. Please try again later.");
+      return;
+    }
+    setError(body.error?.message ?? "Could not send OTP");
   }
 
   async function verifyOtpLogin() {
     setLoading(true);
     setError(null);
-    const res = await signIn("phone-otp", { phone, code, redirect: false });
+    const parsed = verifyOtpSchema.safeParse({ phone, code });
+    if (!parsed.success) {
+      const flat = parsed.error.flatten().fieldErrors;
+      setError(flat.code?.[0] ?? flat.phone?.[0] ?? "Enter the 6-digit code from WhatsApp.");
+      setLoading(false);
+      return;
+    }
+    const res = await signIn("phone-otp", {
+      phone: parsed.data.phone,
+      code: parsed.data.code,
+      redirect: false,
+    });
     setLoading(false);
     if (res?.ok) window.location.href = "/app";
-    else setError("Invalid or expired code");
+    else
+      setError(
+        "Invalid or expired code, or too many tries for this number. Wait a few minutes and request a new code if needed."
+      );
   }
 
   async function passwordLogin() {
@@ -162,13 +193,19 @@ export default function LoginPage() {
               </>
             ) : (
               <>
+                <p className="text-xs text-ink/65 mb-3 leading-relaxed">
+                  Code arrives on WhatsApp. If you tap &quot;Send again&quot;, your previous code stops working — use
+                  only the newest 6 digits.
+                </p>
                 <input
                   data-testid="login-otp"
                   className="w-full border border-paper-deep rounded-card px-4 py-3 mb-3 tracking-[0.3em] text-center"
                   placeholder="••••••"
                   maxLength={6}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 />
                 <button
                   type="button"
@@ -179,6 +216,30 @@ export default function LoginPage() {
                 >
                   {loading ? "Verifying…" : "Verify & continue"}
                 </button>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    data-testid="login-resend-otp"
+                    onClick={() => void requestOtp()}
+                    disabled={loading}
+                    className="flex-1 rounded-full border border-paper-deep py-2 text-sm font-bold text-ink/80 disabled:opacity-60"
+                  >
+                    Send again
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="login-change-number"
+                    onClick={() => {
+                      setStage("phone");
+                      setCode("");
+                      setError(null);
+                    }}
+                    disabled={loading}
+                    className="flex-1 rounded-full border border-paper-deep py-2 text-sm font-bold text-ink/80 disabled:opacity-60"
+                  >
+                    Change number
+                  </button>
+                </div>
               </>
             )}
           </>

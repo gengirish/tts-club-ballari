@@ -10,7 +10,7 @@ export function getRedis(): Redis | null {
     shared = new Redis(url, {
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
-      lazyConnect: false,
+      lazyConnect: true,
     });
   }
   return shared;
