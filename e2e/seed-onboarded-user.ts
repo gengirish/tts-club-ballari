@@ -2,8 +2,10 @@
  * Ensures E2E_TEST_PHONE maps to a fully onboarded member (skips /app/onboarding redirect).
  * Run before Playwright when using authenticated specs:
  *   npx tsx e2e/seed-onboarded-user.ts
- * Requires DATABASE_URL and E2E_TEST_PHONE in the environment.
+ * Requires DATABASE_URL, DIRECT_URL (see .env.example), and E2E_TEST_PHONE in `.env` or the environment.
  */
+import "dotenv/config";
+
 import { PrismaClient } from "@prisma/client";
 import { toE164 } from "../src/lib/utils/phone";
 

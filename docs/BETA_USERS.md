@@ -32,7 +32,8 @@ OTP is **not** required for these accounts.
 ## Apply seed to your database
 
 ```bash
-# Ensure DATABASE_URL points at the DB you want (local, staging, or a dedicated beta Supabase)
+# Copy .env.example → .env and set DATABASE_URL + DIRECT_URL (Prisma requires both). See docs/DATABASE_ENV.md.
+# npm run db:seed loads .env automatically via dotenv.
 npm run db:push    # if schema not yet applied
 npm run db:seed
 ```
@@ -47,5 +48,7 @@ Re-running **`db:seed`** is **safe**: beta users are **upserted** by email; pass
 
 ## Related
 
+- [DATABASE_ENV.md](./DATABASE_ENV.md) — local `.env`, Vercel, Neon / pooled + direct URLs.
+- [BETA_TEST_PLAN.md](./BETA_TEST_PLAN.md) — structured checklist and exit criteria for the beta round.
 - [E2E_PLAYWRIGHT.md](./E2E_PLAYWRIGHT.md) — automation uses separate `E2E_TEST_*` env vars, not these beta accounts.
 - [DEPLOYED_URLS.md](./DEPLOYED_URLS.md) — where the app is hosted.

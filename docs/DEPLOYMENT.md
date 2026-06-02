@@ -15,7 +15,7 @@ SSS Club follows the same **broad pattern as IntelliForge HRMS** (`hrms-intellif
 ## 1. Vercel (primary path)
 
 1. Import the GitHub repository in [Vercel](https://vercel.com).
-2. Set **Environment variables** from `.env.example` (database, `AUTH_SECRET`, `AUTH_URL`, Redis if enqueueing from serverless, AISensy, AgentMail, Razorpay, etc.).
+2. Set **Environment variables** from `.env.example` (database, `AUTH_SECRET`, `AUTH_URL`, Redis if enqueueing from serverless, AISensy, AgentMail, Razorpay, etc.). For Postgres on **Vercel**, set **`DATABASE_URL`** and **`DIRECT_URL`** — see [DATABASE_ENV.md](./DATABASE_ENV.md).
 3. Production branch: **`main`** or **`master`** (match your repo default).
 4. Merge to that branch → **Vercel builds and deploys** (no `docker build` on your laptop).
 

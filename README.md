@@ -10,16 +10,16 @@ This is a **Cursor scaffold**: the foundation, conventions, and integrations are
 
 ```bash
 npm install
-cp .env.example .env        # fill in values
+cp .env.example .env        # set DATABASE_URL + DIRECT_URL (and other keys) — see docs/DATABASE_ENV.md
 npx auth secret             # writes AUTH_SECRET
-npm run db:push             # push schema to Supabase
-npm run db:seed             # program + badges + sample challenge + **beta test users** (see [docs/BETA_USERS.md](./docs/BETA_USERS.md))
+npm run db:push             # push schema to Postgres (Neon, Supabase, etc.)
+npm run db:seed             # program + badges + sample challenge + **beta test users** (loads .env via dotenv; see [docs/BETA_USERS.md](./docs/BETA_USERS.md))
 npm run lint && npm run typecheck   # same checks as GitHub CI
 npm run dev                 # web (Vercel target)
 npm run worker              # BullMQ worker (Fly.io target) — separate terminal
 ```
 
-Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account with **approved** WhatsApp templates, and an AgentMail inbox + API key.
+Requires: **PostgreSQL** with both **`DATABASE_URL`** and **`DIRECT_URL`** set (Neon recommended; Supabase works — see [docs/DATABASE_ENV.md](./docs/DATABASE_ENV.md)), **Redis** (BullMQ), an AISensy account with **approved** WhatsApp templates, and an AgentMail inbox + API key.
 
 ## 2. Conventions (enforced by `.cursorrules`)
 
@@ -41,7 +41,7 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 - **AgentMail** send/reply client + inbound webhook handler (`integrations/agentmail/*`, `/api/webhooks/agentmail`).
 - **BullMQ** notifications queue + Fly.io worker (event reminders, challenge nudges, C25K alerts, email).
 - **Fitness Score** engine (`server/fitness/score.ts`).
-- **Beta test users** — `npm run db:seed` upserts password-based accounts (member ×2, admin, coach + `Coach` row, host) with onboarding complete. Handover: [docs/BETA_USERS.md](./docs/BETA_USERS.md).
+- **Beta test users** — `npm run db:seed` upserts password-based accounts (member ×2, admin, coach + `Coach` row, host) with onboarding complete. Handover: [docs/BETA_USERS.md](./docs/BETA_USERS.md). Test plan: [docs/BETA_TEST_PLAN.md](./docs/BETA_TEST_PLAN.md).
 
 ### Shipped checklist (rolling)
 
@@ -68,7 +68,8 @@ See [docs/E2E_PLAYWRIGHT.md](./docs/E2E_PLAYWRIGHT.md). Quick start:
 
 ```bash
 npx playwright install chromium
-$env:E2E_TEST_PHONE="+919999999999"; $env:E2E_TEST_OTP="999000"; $env:DATABASE_URL="..." 
+# Prefer a filled .env (DATABASE_URL + DIRECT_URL + AUTH_SECRET); seed script loads it via dotenv.
+$env:E2E_TEST_PHONE="+919999999999"; $env:E2E_TEST_OTP="999000"
 npm run test:e2e:seed
 npm run test:e2e
 ```
@@ -132,7 +133,7 @@ This project follows the **IntelliForge HRMS** style: **production traffic on Ve
 
 | Step | What to do |
 |------|----------------|
-| **1. Vercel** | Connect the repo → set env vars from `.env.example` → merge to `main` / `master` → auto deploy. |
+| **1. Vercel** | Connect the repo → set env vars from `.env.example` (incl. **`DATABASE_URL`** + **`DIRECT_URL`** — [docs/DATABASE_ENV.md](./docs/DATABASE_ENV.md)) → merge to `main` / `master` → auto deploy. |
 | **2. CI** | `.github/workflows/ci.yml` runs lint, typecheck, and build on every PR/push. |
 | **3. Fly worker (optional automation)** | Add secret `FLY_API_TOKEN` and variable `FLY_DEPLOY_ENABLED=true` → `.github/workflows/deploy-fly-worker.yml` deploys on relevant pushes or manual run. |
 | **4. Optional Fly API** | Only if you use `PROXY_API_TO` on Vercel; otherwise run all `/api/*` on Vercel like HRMS. |

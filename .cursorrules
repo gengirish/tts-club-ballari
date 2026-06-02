@@ -5,7 +5,7 @@ You are working on a production Next.js 14 (App Router) app for a women's fitnes
 
 ## Stack (non-negotiable)
 - Next.js 14 App Router + TypeScript (strict)
-- Prisma + PostgreSQL (Supabase)
+- Prisma + PostgreSQL (managed: Neon, Supabase, or compatible)
 - Auth.js v5 (next-auth@5) with role-based access control (RBAC)
 - BullMQ workers on Fly.io; web on Vercel (split deploy)
 - Email: AgentMail (two-way). WhatsApp: AISensy (template campaigns)

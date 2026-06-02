@@ -4,9 +4,9 @@ This repo uses [**Playwright**](https://playwright.dev/) for browser and API che
 
 ## Prerequisites
 
-1. **PostgreSQL** reachable via `DATABASE_URL` (same as local dev).
+1. **PostgreSQL** with **`DATABASE_URL`** and **`DIRECT_URL`** set (same as local dev — see [DATABASE_ENV.md](./DATABASE_ENV.md)).
 2. **`npm run db:push`** so the Prisma schema matches the app.
-3. **Auth secret**: `AUTH_SECRET` (and other vars from `.env.example` as needed).
+3. **Auth secret**: `AUTH_SECRET` (and other vars from `.env.example` as needed). The E2E seed script loads **`.env`** via `dotenv` when present.
 
 ## Auth path in E2E (OTP by default)
 
@@ -30,10 +30,14 @@ When both are set and `issueOtp` is called for that phone, the server persists t
 Authenticated specs expect `/app` **not** to redirect to `/app/onboarding`. Seed a member tied to `E2E_TEST_PHONE`:
 
 ```bash
-# Windows PowerShell (example)
+# Windows PowerShell — with .env containing DATABASE_URL, DIRECT_URL, AUTH_SECRET, E2E_*:
+npm run test:e2e:seed
+
+# Or set explicitly (CI):
 $env:DATABASE_URL="postgresql://..."
+$env:DIRECT_URL="postgresql://..."
 $env:E2E_TEST_PHONE="+919999999999"
-npx tsx e2e/seed-onboarded-user.ts
+npm run test:e2e:seed
 ```
 
 Or use npm script: `npm run test:e2e:seed`.
@@ -82,6 +86,7 @@ Without those env vars, only **`public`** runs (smoke on `/` and `/login`).
 ```yaml
 env:
   DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+  DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
   E2E_TEST_PHONE: ${{ secrets.E2E_TEST_PHONE }}
   E2E_TEST_OTP: ${{ secrets.E2E_TEST_OTP }}
   AUTH_SECRET: ${{ secrets.AUTH_SECRET }}

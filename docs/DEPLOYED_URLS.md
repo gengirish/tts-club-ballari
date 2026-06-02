@@ -38,4 +38,5 @@ PLAYWRIGHT_BASE_URL=https://sss-club.vercel.app npm run test:e2e
 ## Related docs
 
 - [DEPLOYMENT.md](./DEPLOYMENT.md) — Vercel-first flow, CI, Fly worker CD.
+- [DATABASE_ENV.md](./DATABASE_ENV.md) — `DATABASE_URL` + `DIRECT_URL` (local, Vercel, Neon / Prisma).
 - [E2E_PLAYWRIGHT.md](./E2E_PLAYWRIGHT.md) — local vs remote test setup.
