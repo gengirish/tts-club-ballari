@@ -13,7 +13,7 @@ npm install
 cp .env.example .env        # fill in values
 npx auth secret             # writes AUTH_SECRET
 npm run db:push             # push schema to Supabase
-npm run db:seed             # program + badges + sample challenge
+npm run db:seed             # program + badges + sample challenge + **beta test users** (see [docs/BETA_USERS.md](./docs/BETA_USERS.md))
 npm run lint && npm run typecheck   # same checks as GitHub CI
 npm run dev                 # web (Vercel target)
 npm run worker              # BullMQ worker (Fly.io target) — separate terminal
@@ -41,7 +41,7 @@ Requires: a Supabase Postgres DB, a Redis instance (BullMQ), an AISensy account 
 - **AgentMail** send/reply client + inbound webhook handler (`integrations/agentmail/*`, `/api/webhooks/agentmail`).
 - **BullMQ** notifications queue + Fly.io worker (event reminders, challenge nudges, C25K alerts, email).
 - **Fitness Score** engine (`server/fitness/score.ts`).
-- Example RBAC routes: `/api/members` (ADMIN list + self onboarding), `/api/challenges/[id]/join`.
+- **Beta test users** — `npm run db:seed` upserts password-based accounts (member ×2, admin, coach + `Coach` row, host) with onboarding complete. Handover: [docs/BETA_USERS.md](./docs/BETA_USERS.md).
 
 ### Shipped checklist (rolling)
 

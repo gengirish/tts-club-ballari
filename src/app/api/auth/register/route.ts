@@ -29,9 +29,22 @@ export async function POST(req: Request) {
     });
     return ok({ userId: user.id }, { status: 201 });
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      return fail("DUPLICATE", "An account with this email or username already exists", 409);
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === "P2002") {
+        return fail("DUPLICATE", "An account with this email or username already exists", 409);
+      }
+      return fail(
+        "DATABASE_ERROR",
+        "Could not save your account (database issue). Try again in a moment or contact support if it continues.",
+        503,
+        { prismaCode: e.code }
+      );
     }
-    throw e;
+    console.error("[register]", e);
+    return fail(
+      "REGISTRATION_FAILED",
+      "Could not create your account. Please try again.",
+      500
+    );
   }
 }

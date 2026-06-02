@@ -351,9 +351,10 @@ export default function LoginPage() {
 
             {tab === "register" && (
               <>
-                <p className="mb-3 text-xs leading-relaxed text-ink/65">
-                  Use at least one of email or username (you can set both).
-                </p>
+            <p className="mb-3 text-xs leading-relaxed text-ink/65">
+              Use at least one of email or username (you can set both). Username: letters, numbers,{" "}
+              <strong className="font-semibold text-ink/80">dot</strong>, or underscore — no spaces.
+            </p>
                 <label htmlFor="register-email" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
                   Email
                 </label>
@@ -375,7 +376,7 @@ export default function LoginPage() {
                   id="register-username"
                   data-testid="register-username"
                   className={`${inputNoIconClass} mb-3`}
-                  placeholder="letters, numbers, underscore"
+                  placeholder="e.g. girish_h or girish.h (no spaces)"
                   value={regUsername}
                   onChange={(e) => setRegUsername(e.target.value)}
                   autoComplete="username"

@@ -14,14 +14,28 @@ const usernameField = z
   .trim()
   .min(3, "At least 3 characters")
   .max(30)
-  .regex(/^[a-zA-Z0-9_]+$/, "Use letters, numbers, or underscore")
+  .regex(/^[a-zA-Z0-9_.]+$/, "Use letters, numbers, dot, or underscore (no spaces)")
   .transform((s) => s.toLowerCase());
 
 /** Sign-up: at least one of email or username, plus password. */
 export const registerSchema = z
   .object({
-    email: z.string().trim().email().optional(),
-    username: usernameField.optional(),
+    email: z.preprocess(
+      (v) => {
+        if (v === undefined || v === null) return undefined;
+        if (typeof v === "string" && v.trim() === "") return undefined;
+        return typeof v === "string" ? v.trim().toLowerCase() : v;
+      },
+      z.string().email("Enter a valid email address").optional()
+    ),
+    username: z.preprocess(
+      (v) => {
+        if (v === undefined || v === null) return undefined;
+        if (typeof v === "string" && v.trim() === "") return undefined;
+        return typeof v === "string" ? v.trim() : v;
+      },
+      usernameField.optional()
+    ),
     password: z.string().min(8, "At least 8 characters").max(128),
     name: z.string().trim().max(100).optional(),
   })
