@@ -146,7 +146,7 @@ vercel deploy --prod --yes
 fly deploy --config fly.worker.toml
 ```
 
-**Webhooks:** point AgentMail (and similar) at your **Vercel** URL (same origin as `AUTH_URL`).
+**Webhooks:** point AgentMail (and similar) at your **production origin** (same as `AUTH_URL` — e.g. [sister-stride.intelliforge.tech](https://sister-stride.intelliforge.tech/); see [docs/DEPLOYED_URLS.md](./docs/DEPLOYED_URLS.md)).
 
 ### Legacy: full Fly API container
 

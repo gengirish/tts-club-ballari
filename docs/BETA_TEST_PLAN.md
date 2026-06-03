@@ -23,7 +23,7 @@ This document is for **QA leads and beta testers**. Use it to run a structured p
 
 | Item | Action |
 |------|--------|
-| **App URL** | Confirm the build under test (e.g. [DEPLOYED_URLS.md](./DEPLOYED_URLS.md) — typically `https://sss-club.vercel.app` or a Vercel preview URL). |
+| **App URL** | Confirm the build under test (e.g. [DEPLOYED_URLS.md](./DEPLOYED_URLS.md) — typically `https://sister-stride.intelliforge.tech` or a Vercel preview URL). |
 | **Database** | Beta DB must be **seeded** so shared accounts exist: `npm run db:seed` (after `db:push` if needed). Requires **`DATABASE_URL`** + **`DIRECT_URL`** in `.env` (see [DATABASE_ENV.md](./DATABASE_ENV.md)). Accounts: [BETA_USERS.md](./BETA_USERS.md). |
 | **Devices** | At least **one Android Chrome** and **one iPhone Safari** (or two real phones). Include **one desktop** for admin/coach/host. |
 | **Network** | Real 4G/5G/Wi‑Fi in India where possible; note if testing only on Wi‑Fi. |

@@ -58,7 +58,7 @@ Do **not** set `E2E_TEST_PHONE` / `E2E_TEST_OTP` on production — the OTP bypas
 
 ```bash
 # Windows PowerShell
-$env:PLAYWRIGHT_BASE_URL="https://sss-club.vercel.app"
+$env:PLAYWRIGHT_BASE_URL="https://sister-stride.intelliforge.tech"
 $env:CI="true"
 npm run test:e2e:prod
 ```
