@@ -149,6 +149,7 @@ model User {
   communityLikes    CommunityLike[]
   communityComments CommunityComment[]
   payments          Payment[]
+  coachBookingRequests CoachBookingRequest[]
 }
 
 model Account {
@@ -283,6 +284,18 @@ model Coach {
 
   reviews     CoachReview[]
   enrollments ProgramEnrollment[]
+  bookingRequests CoachBookingRequest[]
+}
+
+model CoachBookingRequest {
+  id        String   @id @default(cuid())
+  coachId   String
+  coach     Coach    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    User     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([coachId, memberId])
 }
 
 model CoachReview {

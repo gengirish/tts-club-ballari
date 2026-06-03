@@ -18,6 +18,12 @@ export default async function CoachesMarketplacePage() {
     include: { user: { select: { name: true, city: true } } },
   });
 
+  const bookingRows = await prisma.coachBookingRequest.findMany({
+    where: { memberId: user.id },
+    select: { coachId: true },
+  });
+  const bookedCoachIds = new Set(bookingRows.map((r) => r.coachId));
+
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -36,7 +42,7 @@ export default async function CoachesMarketplacePage() {
                   {formatStars(c.ratingBps)}★ · {formatPaiseShort(c.sessionPaise)}
                 </p>
               </div>
-              <CoachesBookButtons coachId={c.id} />
+              <CoachesBookButtons coachId={c.id} alreadyRequested={bookedCoachIds.has(c.id)} />
             </li>
           ))}
         </ul>

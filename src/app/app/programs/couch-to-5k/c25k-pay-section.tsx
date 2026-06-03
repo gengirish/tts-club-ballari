@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { formatPaiseShort } from "@/lib/utils/money";
+import { c25kOrderBodySchema } from "@/lib/validation/program";
 
 declare global {
   interface Window {
@@ -48,11 +49,18 @@ export function C25kPaySection({
   async function pay() {
     setErr(null);
     setLoading(true);
+    const validated = c25kOrderBodySchema.safeParse({ assessment });
+    if (!validated.success) {
+      const first = validated.error.issues[0];
+      setErr(first?.message ?? "Check the assessment fields and try again.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch("/api/programs/couch-to-5k/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assessment }),
+        body: JSON.stringify({ assessment: validated.data.assessment }),
       });
       const body = await res.json();
       if (!res.ok || !body.ok) {
@@ -60,7 +68,19 @@ export function C25kPaySection({
         setLoading(false);
         return;
       }
-      const { orderId, keyId, amountPaise: amt, currency } = body.data as {
+      const data = body.data as {
+        devCheckout?: boolean;
+        orderId?: string;
+        keyId?: string;
+        amountPaise?: number;
+        currency?: string;
+      };
+      if (data.devCheckout) {
+        router.refresh();
+        setLoading(false);
+        return;
+      }
+      const { orderId, keyId, amountPaise: amt, currency } = data as {
         orderId: string;
         keyId: string;
         amountPaise: number;
@@ -118,7 +138,12 @@ export function C25kPaySection({
             Premium · {formatPaiseShort(amountPaise)}
           </span>
         </div>
-        <p className="mt-1 text-xs text-ink/55">Coach intake + Razorpay — enrollment activates after webhook.</p>
+        <p className="mt-1 text-xs text-ink/55">
+          Coach intake + Razorpay — enrollment activates after the payment webhook. Use Razorpay test keys locally, or
+          set <code className="rounded bg-paper px-1 py-0.5 text-[10px]">C25K_DEV_CHECKOUT=1</code> with{" "}
+          <code className="rounded bg-paper px-1 py-0.5 text-[10px]">NODE_ENV=development</code> for a no-checkout test
+          enrollment.
+        </p>
       </div>
 
       <div className="space-y-4 p-5 sm:p-6">

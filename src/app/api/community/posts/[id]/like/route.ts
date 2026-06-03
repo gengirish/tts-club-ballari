@@ -21,10 +21,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const post = await prisma.communityPost.findUnique({ where: { id: params.id } });
   if (!post) return notFound("Post not found");
 
-  await prisma.communityLike.upsert({
+  const existing = await prisma.communityLike.findUnique({
     where: { postId_userId: { postId: post.id, userId: user.id } },
-    update: {},
-    create: { postId: post.id, userId: user.id },
+  });
+
+  if (existing) {
+    await prisma.communityLike.delete({ where: { id: existing.id } });
+    return ok({ liked: false });
+  }
+
+  await prisma.communityLike.create({
+    data: { postId: post.id, userId: user.id },
   });
 
   return ok({ liked: true }, { status: 201 });

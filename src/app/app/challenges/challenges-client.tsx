@@ -12,14 +12,25 @@ type ChallengeRow = {
   participants: { userId: string; progress: number; user: { name: string | null } }[];
 };
 
-export function ChallengesClient({ challenges, userId }: { challenges: ChallengeRow[]; userId: string }) {
+export function ChallengesClient({
+  challenges,
+  userId,
+  joinedChallengeIds,
+}: {
+  challenges: ChallengeRow[];
+  userId: string;
+  joinedChallengeIds: string[];
+}) {
   const router = useRouter();
   const [selected, setSelected] = useState(challenges[0]?.id ?? "");
   const [msg, setMsg] = useState<string | null>(null);
+  const [optimisticJoined, setOptimisticJoined] = useState<string[]>([]);
+  const joinedSet = new Set([...joinedChallengeIds, ...optimisticJoined]);
 
   const board = challenges.find((c) => c.id === selected);
 
   async function join(id: string) {
+    if (joinedSet.has(id)) return;
     setMsg(null);
     const res = await fetch(`/api/challenges/${id}/join`, {
       method: "POST",
@@ -28,30 +39,41 @@ export function ChallengesClient({ challenges, userId }: { challenges: Challenge
     });
     const body = await res.json();
     if (!res.ok || !body.ok) setMsg(body.error?.message ?? "Could not join");
-    else router.refresh();
+    else {
+      setOptimisticJoined((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      router.refresh();
+    }
   }
 
   return (
     <div className="space-y-8">
       <div className="grid gap-4">
-        {challenges.map((c) => (
-          <div key={c.id} className="rounded-card border border-paper-deep bg-white p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h2 className="font-display text-xl uppercase text-violet">{c.title}</h2>
-              {c.description && <p className="text-sm text-ink/60 mt-1">{c.description}</p>}
-              <p className="text-xs text-ink/50 mt-2">
-                Target {c.targetValue.toLocaleString("en-IN")} {c.unit}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => join(c.id)}
-              className="rounded-full bg-magenta px-5 py-2 text-sm font-extrabold text-white shrink-0"
+        {challenges.map((c) => {
+          const joined = joinedSet.has(c.id);
+          return (
+            <div
+              key={c.id}
+              className="rounded-card border border-paper-deep bg-white p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
             >
-              Join
-            </button>
-          </div>
-        ))}
+              <div>
+                <h2 className="font-display text-xl uppercase text-violet">{c.title}</h2>
+                {c.description && <p className="text-sm text-ink/60 mt-1">{c.description}</p>}
+                <p className="text-xs text-ink/50 mt-2">
+                  Target {c.targetValue.toLocaleString("en-IN")} {c.unit}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => join(c.id)}
+                disabled={joined}
+                aria-disabled={joined}
+                className="rounded-full bg-magenta px-5 py-2 text-sm font-extrabold text-white shrink-0 disabled:cursor-not-allowed disabled:bg-ink/25 disabled:text-white/90"
+              >
+                {joined ? "Joined" : "Join"}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {board && (

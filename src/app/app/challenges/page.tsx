@@ -10,22 +10,30 @@ export default async function ChallengesPage() {
   if (!(await isMemberOnboarded(user.id))) redirect("/app/onboarding");
 
   const now = new Date();
-  const challenges = await prisma.challenge.findMany({
-    where: { endDate: { gte: now } },
-    orderBy: { startDate: "desc" },
-    include: {
-      participants: {
-        include: { user: { select: { name: true } } },
+  const [challenges, joinedRows] = await Promise.all([
+    prisma.challenge.findMany({
+      where: { endDate: { gte: now } },
+      orderBy: { startDate: "desc" },
+      include: {
+        participants: {
+          include: { user: { select: { name: true } } },
+        },
       },
-    },
-  });
+    }),
+    prisma.challengeParticipant.findMany({
+      where: { userId: user.id },
+      select: { challengeId: true },
+    }),
+  ]);
+
+  const joinedChallengeIds = joinedRows.map((r) => r.challengeId);
 
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-3xl mx-auto">
         <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">Challenges</h1>
         <p className="text-sm text-ink/60 mt-2 mb-8">Active challenges and live leaderboards.</p>
-        <ChallengesClient challenges={challenges} userId={user.id} />
+        <ChallengesClient challenges={challenges} userId={user.id} joinedChallengeIds={joinedChallengeIds} />
       </div>
     </main>
   );

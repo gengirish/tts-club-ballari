@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import type { Role } from "@prisma/client";
 
-export type SessionUser = { id: string; role: Role; name?: string | null };
+export type SessionUser = { id: string; role: Role; name?: string | null; email?: string | null };
 
 // Role hierarchy weight. ADMIN sees everything.
 const RANK: Record<Role, number> = { MEMBER: 0, COACH: 1, HOST: 1, ADMIN: 9 };
@@ -13,6 +13,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     id: session.user.id,
     role: (session.user as { role?: Role }).role ?? "MEMBER",
     name: session.user.name,
+    email: session.user.email ?? null,
   };
 }
 

@@ -30,6 +30,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     select: { name: true, phone: true, email: true },
   });
   const inbox = process.env.COACH_BOOKING_INBOX ?? process.env.SOS_FORWARD_EMAIL;
+  await prisma.coachBookingRequest.upsert({
+    where: { coachId_memberId: { coachId: coach.id, memberId: user.id } },
+    update: {},
+    create: { coachId: coach.id, memberId: user.id },
+  });
+
   if (inbox) {
     await enqueueNotification({
       kind: "email",

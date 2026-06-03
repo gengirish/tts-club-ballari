@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export function CoachesBookButtons({ coachId }: { coachId: string }) {
+export function CoachesBookButtons({
+  coachId,
+  alreadyRequested,
+}: {
+  coachId: string;
+  alreadyRequested: boolean;
+}) {
+  const router = useRouter();
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [requested, setRequested] = useState(alreadyRequested);
+
+  useEffect(() => {
+    setRequested(alreadyRequested);
+  }, [alreadyRequested]);
 
   async function book() {
+    if (requested) return;
     setMsg(null);
     setLoading(true);
     const res = await fetch(`/api/coaches/${coachId}/book`, {
@@ -17,7 +31,11 @@ export function CoachesBookButtons({ coachId }: { coachId: string }) {
     const body = await res.json();
     setLoading(false);
     if (!res.ok || !body.ok) setMsg(body.error?.message ?? "Request failed");
-    else setMsg("Request sent — we will reach out on email.");
+    else {
+      setRequested(true);
+      setMsg("Request sent — we will reach out on email.");
+      router.refresh();
+    }
   }
 
   return (
@@ -25,10 +43,10 @@ export function CoachesBookButtons({ coachId }: { coachId: string }) {
       <button
         type="button"
         onClick={book}
-        disabled={loading}
-        className="rounded-full bg-energy px-5 py-2 text-sm font-extrabold text-white disabled:opacity-60"
+        disabled={loading || requested}
+        className="rounded-full bg-energy px-5 py-2 text-sm font-extrabold text-white disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {loading ? "Sending…" : "Book session"}
+        {loading ? "Sending…" : requested ? "Requested" : "Book session"}
       </button>
       {msg && <p className="text-xs text-ink/70 max-w-[200px]">{msg}</p>}
     </div>

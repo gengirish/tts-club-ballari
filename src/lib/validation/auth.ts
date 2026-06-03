@@ -1,7 +1,14 @@
 import { z } from "zod";
+import { isValidPhone } from "@/lib/utils/phone";
 
 export const requestOtpSchema = z.object({
-  phone: z.string().min(6, "Phone required"),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Enter your mobile number.")
+    .refine((s) => isValidPhone(s), {
+      message: "Enter a valid 10-digit Indian mobile number (you can include +91 or spaces).",
+    }),
 });
 
 export const verifyOtpSchema = z.object({

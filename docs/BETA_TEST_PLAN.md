@@ -76,6 +76,7 @@ Use **Pass / Fail / Blocked** + short notes and **approx. date**. “Blocked” 
 |---|------|--------|----------|
 | P1 | Couch to 5K page | `/app/programs/couch-to-5k` | Content and assessment UI load. |
 | P2 | Razorpay checkout | Start payment in **test mode** only (per env keys) | Success/cancel/failure paths are clear; no real money in beta unless explicitly agreed. |
+| P3 | Local dev without Razorpay | `NODE_ENV=development` + `C25K_DEV_CHECKOUT=1` in `.env.local` (never production) | Pay CTA enrolls without checkout for QA; production still requires keys + webhook. |
 
 ### 4.4 Community & safety
 
