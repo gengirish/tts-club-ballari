@@ -14,7 +14,7 @@ function StepsRing({ steps }: { steps: number }) {
   const dash = pct * c;
   return (
     <svg width="160" height="160" viewBox="0 0 140 140" aria-label={`Steps ${steps}`}>
-      <circle cx="70" cy="70" r={r} fill="none" stroke="#ece4f3" strokeWidth="12" />
+      <circle cx="70" cy="70" r={r} fill="none" stroke="#2a2438" strokeWidth="12" />
       <circle
         cx="70"
         cy="70"
@@ -80,7 +80,7 @@ export default async function AppHome() {
               <Link
                 key={href}
                 href={href}
-                className="rounded-full bg-white border border-paper-deep px-3 py-1.5 text-violet hover:border-magenta"
+                className="rounded-full bg-paper-raised border border-paper-deep px-3 py-1.5 text-violet hover:border-magenta"
               >
                 {label}
               </Link>
@@ -89,12 +89,12 @@ export default async function AppHome() {
         </header>
 
         <section className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-card border border-paper-deep bg-white p-6 text-center md:col-span-1">
+          <div className="rounded-card border border-paper-deep bg-paper-raised p-6 text-center md:col-span-1">
             <p className="text-xs font-bold uppercase text-magenta mb-2">Steps today</p>
             <StepsRing steps={steps} />
             <p className="text-xs text-ink/50 mt-2">Goal 10,000 · {formatBps(Math.round((steps / 10000) * 10000))} of goal</p>
           </div>
-          <div className="rounded-card border border-paper-deep bg-white p-6">
+          <div className="rounded-card border border-paper-deep bg-paper-raised p-6">
             <p className="text-xs font-bold uppercase text-violet">Fitness score</p>
             {latestScore ? (
               <>
@@ -105,7 +105,7 @@ export default async function AppHome() {
               <p className="text-sm text-ink/60 mt-4">Compute your score on the Score tab.</p>
             )}
           </div>
-          <div className="rounded-card border border-paper-deep bg-white p-6">
+          <div className="rounded-card border border-paper-deep bg-paper-raised p-6">
             <p className="text-xs font-bold uppercase text-violet">Weight snapshot</p>
             <p className="font-display text-4xl text-magenta mt-2">{weight != null ? `${weight} kg` : "—"}</p>
             <p className="text-xs text-progress mt-2 font-semibold">Every healthy shift counts.</p>
@@ -113,7 +113,7 @@ export default async function AppHome() {
         </section>
 
         <section className="grid md:grid-cols-2 gap-4">
-          <div className="rounded-card border border-paper-deep bg-white p-6">
+          <div className="rounded-card border border-paper-deep bg-paper-raised p-6">
             <p className="text-xs font-bold uppercase text-magenta">Active challenge</p>
             {challengePart ? (
               <>
@@ -127,7 +127,7 @@ export default async function AppHome() {
               <p className="text-sm text-ink/60 mt-2">Join a challenge to see progress here.</p>
             )}
           </div>
-          <div className="rounded-card border border-paper-deep bg-white p-6">
+          <div className="rounded-card border border-paper-deep bg-paper-raised p-6">
             <p className="text-xs font-bold uppercase text-magenta">Next event</p>
             {nextReg ? (
               <>

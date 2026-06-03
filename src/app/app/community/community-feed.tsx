@@ -51,10 +51,15 @@ export function CommunityComposer() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-card border border-paper-deep bg-white p-4 mb-6">
+    <form
+      onSubmit={submit}
+      className="rounded-card border border-paper-deep bg-paper-raised p-4 mb-6"
+      data-testid="community-composer-form"
+    >
       <label className="text-sm font-semibold text-ink">Share a win or ask the circle</label>
       <textarea
-        className="mt-2 w-full border border-paper-deep rounded-card px-3 py-2 min-h-[88px]"
+        data-testid="community-composer-body"
+        className="mt-2 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2 min-h-[88px]"
         value={body}
         onChange={(e) => {
           setBody(e.target.value);
@@ -65,12 +70,13 @@ export function CommunityComposer() {
         aria-describedby={error ? "composer-error" : undefined}
       />
       {error ? (
-        <p id="composer-error" className="mt-2 text-sm font-semibold text-magenta" role="alert">
+        <p id="composer-error" className="mt-2 text-sm font-semibold text-magenta" role="alert" data-testid="community-composer-error">
           {error}
         </p>
       ) : null}
       <button
         type="submit"
+        data-testid="community-composer-submit"
         disabled={loading}
         className="mt-3 rounded-full bg-energy px-5 py-2 text-sm font-extrabold text-white disabled:opacity-60"
       >
@@ -144,7 +150,7 @@ export function CommunityPostCard({ post }: { post: Post }) {
   }
 
   return (
-    <article className="rounded-card border border-paper-deep bg-white p-4 overflow-hidden">
+    <article className="rounded-card border border-paper-deep bg-paper-raised p-4 overflow-hidden">
       <header className="flex justify-between text-xs text-ink/50 gap-2">
         <span className="font-bold text-violet shrink-0">{post.author.name ?? "Sister"}</span>
         <time className="shrink-0" dateTime={post.createdAt}>
@@ -157,20 +163,24 @@ export function CommunityPostCard({ post }: { post: Post }) {
       <footer className="mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold">
         <button
           type="button"
+          data-testid="community-post-like"
           onClick={() => void toggleLike()}
           aria-pressed={liked}
+          aria-label={liked ? "Unlike post" : "Like post"}
           className={liked ? "text-magenta" : "text-ink/60"}
         >
           ♥ {likeCount}
         </button>
         <button
           type="button"
+          data-testid="community-post-comments-toggle"
           onClick={() => {
             setCommentsOpen((o) => !o);
             setCommentError(null);
           }}
           className="text-ink/60 hover:text-violet focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet rounded"
           aria-expanded={commentsOpen}
+          aria-label="Comments"
         >
           💬 {commentCount}
         </button>
@@ -192,7 +202,8 @@ export function CommunityPostCard({ post }: { post: Post }) {
             </label>
             <textarea
               id={`comment-${post.id}`}
-              className="w-full border border-paper-deep rounded-card px-3 py-2 text-sm min-h-[72px]"
+              data-testid="community-post-comment-body"
+              className="w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2 text-sm min-h-[72px]"
               placeholder="Add a supportive comment…"
               value={commentBody}
               onChange={(e) => {
@@ -209,6 +220,7 @@ export function CommunityPostCard({ post }: { post: Post }) {
             ) : null}
             <button
               type="submit"
+              data-testid="community-post-comment-submit"
               disabled={commentLoading}
               className="rounded-full bg-violet px-4 py-2 text-xs font-extrabold text-white disabled:opacity-60"
             >

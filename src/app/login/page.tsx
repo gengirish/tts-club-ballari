@@ -63,10 +63,10 @@ function friendlyMagicLinkError(code: string | undefined): string {
 }
 
 const inputClass =
-  "w-full rounded-card border border-paper-deep bg-white px-4 py-3.5 pl-11 text-ink shadow-sm placeholder:text-ink/45 transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60";
+  "w-full rounded-card border border-paper-deep bg-paper-muted px-4 py-3.5 pl-11 text-ink shadow-sm placeholder:text-ink/45 transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60";
 
 const inputNoIconClass =
-  "w-full rounded-card border border-paper-deep bg-white px-4 py-3.5 text-ink shadow-sm placeholder:text-ink/45 transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60";
+  "w-full rounded-card border border-paper-deep bg-paper-muted px-4 py-3.5 text-ink shadow-sm placeholder:text-ink/45 transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60";
 
 export default function LoginPage() {
   const baseId = useId();
@@ -227,7 +227,7 @@ export default function LoginPage() {
       className={`flex min-h-[44px] w-full min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full py-2.5 text-[0.7rem] font-bold leading-tight transition-colors duration-200 sm:gap-1.5 sm:text-xs ${
         tab === t
           ? "bg-energy text-white shadow-md shadow-violet/30"
-          : "border border-paper-deep bg-white text-ink/80 hover:border-violet/30 hover:bg-paper-deep/60"
+          : "border border-paper-deep bg-paper-raised text-ink/80 hover:border-violet/30 hover:bg-paper-muted/80"
       }`}
     >
       <Icon className={`shrink-0 ${tab === t ? "text-white" : "text-violet"}`} />
@@ -246,7 +246,7 @@ export default function LoginPage() {
       </div>
 
       <div className="relative mx-auto w-full max-w-md">
-        <div className="rounded-screen border border-white/60 bg-white/90 p-6 shadow-xl shadow-violet/10 backdrop-blur-md sm:p-8">
+        <div className="rounded-screen border border-steel/35 bg-paper-raised/92 p-6 shadow-xl shadow-violet/10 backdrop-blur-md sm:p-8">
           <h1 className="font-display text-3xl uppercase leading-tight text-violet sm:text-4xl">
             Welcome, sister
           </h1>
@@ -333,7 +333,7 @@ export default function LoginPage() {
                         data-testid="login-resend-otp"
                         onClick={() => void requestOtp()}
                         disabled={loading}
-                        className="min-h-[44px] flex-1 cursor-pointer rounded-full border border-paper-deep bg-white py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-deep/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="min-h-[44px] flex-1 cursor-pointer rounded-full border border-paper-deep bg-paper-raised py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         Send again
                       </button>
@@ -346,7 +346,7 @@ export default function LoginPage() {
                           setError(null);
                         }}
                         disabled={loading}
-                        className="min-h-[44px] flex-1 cursor-pointer rounded-full border border-paper-deep bg-white py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-deep/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="min-h-[44px] flex-1 cursor-pointer rounded-full border border-paper-deep bg-paper-raised py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         Change number
                       </button>
@@ -425,7 +425,7 @@ export default function LoginPage() {
                         setMagicEmail("");
                         setError(null);
                       }}
-                      className="mt-4 w-full cursor-pointer rounded-full border border-paper-deep bg-white py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-deep/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
+                      className="mt-4 w-full cursor-pointer rounded-full border border-paper-deep bg-paper-raised py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
                     >
                       Use a different email
                     </button>
@@ -539,7 +539,11 @@ export default function LoginPage() {
           </div>
 
           {error ? (
-            <p className="mt-4 rounded-card border border-magenta/25 bg-magenta/5 px-3 py-2 text-sm font-semibold text-magenta" role="alert">
+            <p
+              className="mt-4 rounded-card border border-magenta/25 bg-magenta/5 px-3 py-2 text-sm font-semibold text-magenta"
+              role="alert"
+              data-testid="login-form-error"
+            >
               {error}
             </p>
           ) : null}

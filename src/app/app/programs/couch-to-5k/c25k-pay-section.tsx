@@ -97,7 +97,7 @@ export function C25kPaySection({
         handler: () => {
           router.refresh();
         },
-        theme: { color: "#6320b3" },
+        theme: { color: "#6d28d9" },
       });
       rzp.open();
     } catch {
@@ -109,11 +109,11 @@ export function C25kPaySection({
   if (hasEnrollment) {
     return (
       <div
-        className="overflow-hidden rounded-card border border-progress/35 bg-white shadow-lg shadow-progress/10"
+        className="overflow-hidden rounded-card border border-progress/35 bg-paper-raised shadow-lg shadow-progress/10"
         data-testid="c25k-enrolled-banner"
       >
         <div className="bg-energy px-5 py-4 text-center">
-          <span className="inline-flex rounded-full bg-white/25 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white">
+          <span className="inline-flex rounded-full bg-paper-raised/18 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white">
             Enrolled
           </span>
           <p className="mt-2 font-display text-lg uppercase text-white">You are in the arc</p>
@@ -128,13 +128,13 @@ export function C25kPaySection({
 
   return (
     <div
-      className="overflow-hidden rounded-card border border-paper-deep bg-white/90 shadow-xl shadow-violet/10 backdrop-blur-sm"
+      className="overflow-hidden rounded-card border border-paper-deep bg-paper-raised/92 shadow-xl shadow-violet/10 backdrop-blur-sm"
       data-testid="c25k-pay-section"
     >
       <div className="border-b border-paper-deep bg-gradient-to-r from-violet/8 via-paper to-magenta/8 px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-display text-xl uppercase text-violet">Assessment & checkout</h2>
-          <span className="rounded-full border border-white/40 bg-white/70 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-violet shadow-sm backdrop-blur-sm">
+          <span className="rounded-full border border-steel/30 bg-paper-raised/72 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-violet shadow-sm backdrop-blur-sm">
             Premium · {formatPaiseShort(amountPaise)}
           </span>
         </div>
@@ -151,7 +151,8 @@ export function C25kPaySection({
           <label className="col-span-2 md:col-span-1">
             <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Current weight (kg)</span>
             <input
-              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              data-testid="c25k-assessment-weight"
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
               type="number"
               value={assessment.currentWeightKg ?? ""}
               onChange={(e) =>
@@ -165,7 +166,7 @@ export function C25kPaySection({
           <label className="col-span-2 md:col-span-1">
             <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Age</span>
             <input
-              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
               type="number"
               value={assessment.age ?? ""}
               onChange={(e) =>
@@ -176,7 +177,7 @@ export function C25kPaySection({
           <label className="col-span-2">
             <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Activity today (short note)</span>
             <input
-              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
               value={assessment.activityLevel ?? ""}
               onChange={(e) => setAssessment((a) => ({ ...a, activityLevel: e.target.value }))}
             />
@@ -184,7 +185,7 @@ export function C25kPaySection({
           <label className="col-span-2 md:col-span-1">
             <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Daily steps (avg)</span>
             <input
-              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
               type="number"
               value={assessment.dailySteps ?? ""}
               onChange={(e) =>
@@ -198,13 +199,13 @@ export function C25kPaySection({
           <label className="col-span-2">
             <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Injury history (optional)</span>
             <textarea
-              className="mt-1.5 min-h-[72px] w-full resize-y rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              className="mt-1.5 min-h-[72px] w-full resize-y rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
               value={assessment.injuryHistory ?? ""}
               onChange={(e) => setAssessment((a) => ({ ...a, injuryHistory: e.target.value }))}
               rows={2}
             />
           </label>
-          <label className="col-span-2 flex min-h-[44px] items-center gap-3 rounded-card border border-dashed border-paper-deep bg-paper/50 px-3 py-2">
+          <label className="col-span-2 flex min-h-[44px] items-center gap-3 rounded-card border border-dashed border-paper-deep bg-paper-muted/50 px-3 py-2">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-paper-deep text-violet focus:ring-violet"

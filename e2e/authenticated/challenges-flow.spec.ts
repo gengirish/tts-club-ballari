@@ -6,10 +6,13 @@ test.describe("challenges UI (authenticated)", () => {
     await expect(page.getByRole("heading", { name: /Challenges/i })).toBeVisible();
     const joinButtons = page.getByRole("button", { name: /^Join$/ });
     if ((await joinButtons.count()) === 0) {
-      test.skip();
+      await expect(page.getByRole("button", { name: /^Joined$/ }).first()).toBeVisible();
       return;
     }
     await joinButtons.first().click();
     await expect(page.getByText(/Could not join/i)).toBeHidden({ timeout: 15_000 });
+    const joinedBtn = page.getByRole("button", { name: /^Joined$/ }).first();
+    await expect(joinedBtn).toBeVisible({ timeout: 15_000 });
+    await expect(joinedBtn).toBeDisabled();
   });
 });

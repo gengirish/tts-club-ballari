@@ -13,8 +13,8 @@ test.describe("member UI actions (authenticated)", () => {
     const snippet = `E2E UI ${Date.now()}`;
     await page.goto("/app/community");
     await expect(page.getByRole("heading", { name: /Community/i })).toBeVisible();
-    await page.locator("form textarea").first().fill(snippet);
-    await page.getByRole("button", { name: /^Post$/ }).click();
+    await page.getByTestId("community-composer-body").fill(snippet);
+    await page.getByTestId("community-composer-submit").click();
     await expect(page.getByText(snippet, { exact: false })).toBeVisible({ timeout: 20_000 });
   });
 });

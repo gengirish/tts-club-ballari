@@ -27,7 +27,7 @@ export function C25kSessionBlocks({ weekNo }: Props) {
   ] as const;
 
   return (
-    <section className="rounded-card border border-paper-deep bg-white p-4 sm:p-6" data-testid="c25k-session-blocks">
+    <section className="rounded-card border border-paper-deep bg-paper-raised p-4 sm:p-6" data-testid="c25k-session-blocks">
       <span className="inline-flex rounded-full bg-magenta/15 px-3 py-1 text-[11px] font-extrabold text-magenta">
         Week {weekNo} · {phase.title}
       </span>

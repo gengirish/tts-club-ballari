@@ -202,7 +202,7 @@ export function OnboardingStepper() {
         />
       </div>
 
-      <div className="rounded-card border border-paper-deep bg-white/80 backdrop-blur-sm p-6 shadow-sm">
+      <div className="rounded-card border border-paper-deep bg-paper-raised/85 backdrop-blur-sm p-6 shadow-sm">
         {step === 0 && (
           <section className="space-y-4" aria-labelledby="step-personal">
             <h2 id="step-personal" className="font-display text-2xl uppercase text-violet">
@@ -240,7 +240,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Gender
               <select
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 bg-white"
+                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 bg-paper-raised"
                 value={form.gender}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, gender: e.target.value as FormState["gender"] }))
@@ -376,7 +376,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Fitness level
               <select
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 bg-white"
+                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 bg-paper-raised"
                 value={form.level}
                 onChange={(e) =>
                   setForm((f) => ({
@@ -461,7 +461,7 @@ export function OnboardingStepper() {
                     className={`rounded-full px-4 py-2 text-sm font-semibold border transition-colors ${
                       on
                         ? "bg-energy text-white border-transparent shadow-md"
-                        : "bg-white border-magenta/30 text-ink hover:border-magenta"
+                        : "bg-paper-raised border-magenta/30 text-ink hover:border-magenta"
                     }`}
                   >
                     {label}

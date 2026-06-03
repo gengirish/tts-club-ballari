@@ -16,11 +16,11 @@ function ScoreRing({ score }: { score: number }) {
     <svg width="200" height="200" viewBox="0 0 140 140" className="mx-auto drop-shadow-md" aria-hidden>
       <defs>
         <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#6320b3" />
-          <stop offset="100%" stopColor="#ec0f8c" />
+          <stop offset="0%" stopColor="#6d28d9" />
+          <stop offset="100%" stopColor="#ec4899" />
         </linearGradient>
       </defs>
-      <circle cx="70" cy="70" r={r} fill="none" stroke="#ece4f3" strokeWidth="12" />
+      <circle cx="70" cy="70" r={r} fill="none" stroke="#2a2438" strokeWidth="12" />
       <circle
         cx="70"
         cy="70"
@@ -62,12 +62,12 @@ export default async function ScorePage() {
 
         {latest ? (
           <>
-            <div className="rounded-card border border-paper-deep bg-white p-8 mb-6 text-center">
+            <div className="rounded-card border border-paper-deep bg-paper-raised p-8 mb-6 text-center">
               <ScoreRing score={latest.score} />
               <p className="mt-4 text-lg font-bold text-violet capitalize">{latest.level.toLowerCase()}</p>
             </div>
 
-            <div className="rounded-card border border-paper-deep bg-white p-6 mb-6">
+            <div className="rounded-card border border-paper-deep bg-paper-raised p-6 mb-6">
               <p className="text-xs font-bold uppercase tracking-wider text-magenta mb-4">Your mix</p>
               <ul className="space-y-3">
                 {(
@@ -94,7 +94,7 @@ export default async function ScorePage() {
               </ul>
             </div>
 
-            <div className="rounded-card border border-paper-deep bg-white p-6 mb-8">
+            <div className="rounded-card border border-paper-deep bg-paper-raised p-6 mb-8">
               <p className="text-xs font-bold uppercase tracking-wider text-violet mb-4">Beginner → Champion</p>
               <ol className="flex flex-wrap gap-2">
                 {LEVEL_ORDER.map((lv) => {

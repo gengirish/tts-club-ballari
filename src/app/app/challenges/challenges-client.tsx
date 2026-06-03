@@ -53,7 +53,7 @@ export function ChallengesClient({
           return (
             <div
               key={c.id}
-              className="rounded-card border border-paper-deep bg-white p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+              className="rounded-card border border-paper-deep bg-paper-raised p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
             >
               <div>
                 <h2 className="font-display text-xl uppercase text-violet">{c.title}</h2>
@@ -77,7 +77,7 @@ export function ChallengesClient({
       </div>
 
       {board && (
-        <div className="rounded-card border border-paper-deep bg-white p-6">
+        <div className="rounded-card border border-paper-deep bg-paper-raised p-6">
           <div className="flex flex-wrap gap-2 mb-4">
             {challenges.map((c) => (
               <button

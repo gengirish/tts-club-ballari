@@ -140,7 +140,7 @@ export default async function AdminDashboardPage() {
         <p className="text-sm text-ink/60 mt-2 mb-8">Operational snapshot — efficient counts, no N+1 loops.</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {statCards.map((card) => (
-            <div key={card.label} className="rounded-card border border-paper-deep bg-white p-4">
+            <div key={card.label} className="rounded-card border border-paper-deep bg-paper-raised p-4">
               <p className="text-xs font-bold uppercase text-magenta">{card.label}</p>
               <p className="text-3xl font-display text-violet mt-1">{card.value}</p>
               {card.footnote ? <p className="text-xs text-ink/55 mt-2 leading-snug">{card.footnote}</p> : null}
@@ -148,7 +148,7 @@ export default async function AdminDashboardPage() {
           ))}
         </div>
 
-        <section className="mt-10 rounded-card border border-paper-deep bg-white p-6">
+        <section className="mt-10 rounded-card border border-paper-deep bg-paper-raised p-6">
           <h2 className="font-display text-xl uppercase text-violet mb-2">WhatsApp OTP (AISensy)</h2>
           <p className="text-xs text-ink/55 mb-4">
             Failed sends for campaign <span className="font-mono">{otpCampaignName}</span> in the last 7 days (login
@@ -175,7 +175,7 @@ export default async function AdminDashboardPage() {
           )}
         </section>
 
-        <section className="mt-10 rounded-card border border-paper-deep bg-white p-6">
+        <section className="mt-10 rounded-card border border-paper-deep bg-paper-raised p-6">
           <h2 className="font-display text-xl uppercase text-violet mb-4">Coach signal</h2>
           <ul className="space-y-2 text-sm">
             {coachPerf.map((c) => (

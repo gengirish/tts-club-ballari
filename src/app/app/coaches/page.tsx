@@ -31,7 +31,7 @@ export default async function CoachesMarketplacePage() {
         <p className="text-sm text-ink/60">Running, yoga, strength, and more — book through the crew inbox.</p>
         <ul className="space-y-4">
           {coaches.map((c) => (
-            <li key={c.id} className="rounded-card border border-paper-deep bg-white p-5 flex flex-col md:flex-row md:justify-between gap-4">
+            <li key={c.id} className="rounded-card border border-paper-deep bg-paper-raised p-5 flex flex-col md:flex-row md:justify-between gap-4">
               <div>
                 <p className="font-display text-xl uppercase text-violet">{c.user.name ?? "Coach"}</p>
                 <p className="text-xs text-ink/50 mt-1">

@@ -15,7 +15,7 @@ export function C25kStrengthReference({ weekNo }: { weekNo: number }) {
   const active = STRENGTH_PHASES.find((p) => p.id === tab) ?? STRENGTH_PHASES[0]!;
 
   return (
-    <section className="rounded-card border border-paper-deep bg-white p-4 sm:p-6" data-testid="c25k-strength">
+    <section className="rounded-card border border-paper-deep bg-paper-raised p-4 sm:p-6" data-testid="c25k-strength">
       <h2 className="font-display text-xl uppercase text-violet">Strength & mobility</h2>
       <p className="mt-1 text-xs text-ink/55">Bodyweight only — phases follow the Steel Sisters 12-week reference (weeks 1–3, 4–6, 7–11, taper).</p>
 
@@ -26,7 +26,7 @@ export function C25kStrengthReference({ weekNo }: { weekNo: number }) {
             type="button"
             onClick={() => setTab(p.id)}
             className={`min-h-[44px] flex-1 rounded-lg px-2 py-2 text-center text-[11px] font-extrabold transition sm:text-xs ${
-              tab === p.id ? "bg-white text-violet shadow-md shadow-violet/10" : "text-ink/50 hover:text-ink/75"
+              tab === p.id ? "bg-paper-raised text-violet shadow-md shadow-violet/10" : "text-ink/50 hover:text-ink/75"
             }`}
           >
             {p.label}

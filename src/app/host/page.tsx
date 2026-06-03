@@ -24,7 +24,7 @@ export default async function HostDashboardPage() {
         <HostEventForm />
         <ul className="space-y-3">
           {events.map((ev) => (
-            <li key={ev.id} className="rounded-card border border-paper-deep bg-white p-4">
+            <li key={ev.id} className="rounded-card border border-paper-deep bg-paper-raised p-4">
               <p className="font-bold text-ink">{ev.title}</p>
               <p className="text-xs text-ink/50 mt-1">{formatDateTimeIST(ev.startsAt)}</p>
               <p className="text-xs text-violet mt-1">{ev._count.registrations} registered</p>

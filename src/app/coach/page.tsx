@@ -39,7 +39,7 @@ export default async function CoachDashboardPage() {
         <h2 className="font-display text-lg uppercase text-magenta mt-8 mb-3">Your enrollees</h2>
         <ul className="space-y-3">
           {enrollments.map((e) => (
-            <li key={e.id} className="rounded-card border border-paper-deep bg-white p-4">
+            <li key={e.id} className="rounded-card border border-paper-deep bg-paper-raised p-4">
               <p className="font-bold">{e.member.name ?? "Member"}</p>
               <p className="text-xs text-ink/50">{e.program.title}</p>
               <p className="text-xs text-violet mt-1">

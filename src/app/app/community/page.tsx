@@ -56,7 +56,7 @@ export default async function CommunityPage() {
           <h2 className="font-display text-xl uppercase text-violet mb-3">Women&apos;s wellness</h2>
           <ul className="space-y-3">
             {articles.map((a) => (
-              <li key={a.id} className="rounded-card border border-paper-deep bg-white p-4">
+              <li key={a.id} className="rounded-card border border-paper-deep bg-paper-raised p-4">
                 <p className="text-xs font-bold text-magenta uppercase">{String(a.topic).replaceAll("_", " ")}</p>
                 <p className="font-bold text-ink mt-1">{a.title}</p>
                 <p className="text-xs text-ink/50 mt-1">By {a.author.name ?? "Author"}</p>

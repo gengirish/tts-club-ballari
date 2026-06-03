@@ -15,7 +15,7 @@ export function C25kSafetyAndGraduation({ weekNo, maxWeeks, isEnrolled }: Props)
       {showCountdown && (
         <section className="overflow-hidden rounded-card bg-magenta text-white shadow-lg shadow-magenta/30">
           <div className="bg-energy px-5 py-6 text-center sm:px-8">
-            <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide">
+            <span className="inline-flex rounded-full bg-paper-raised/14 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide">
               Graduation
             </span>
             <h2 className="font-display mt-3 text-3xl uppercase leading-tight">SSS 5K run</h2>
@@ -25,7 +25,7 @@ export function C25kSafetyAndGraduation({ weekNo, maxWeeks, isEnrolled }: Props)
         </section>
       )}
 
-      <section className="rounded-card border border-paper-deep bg-white p-4 sm:p-6">
+      <section className="rounded-card border border-paper-deep bg-paper-raised p-4 sm:p-6">
         <h2 className="font-display text-xl uppercase text-violet">Run safe</h2>
         <p className="mt-1 text-xs text-ink/55">Monsoon-aware habits for Ballari — ties into SOS in the app.</p>
 

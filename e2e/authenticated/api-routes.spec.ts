@@ -95,12 +95,30 @@ test.describe("authenticated API (session cookie)", () => {
     expect(likeRes.status()).toBe(201);
     const likeBody: unknown = await likeRes.json();
     expect(assertApiEnvelope(likeBody).ok).toBe(true);
+    expect((likeBody as { data?: { liked?: boolean } }).data?.liked).toBe(true);
+
+    const unlikeRes = await request.post(`/api/community/posts/${postId}/like`, {
+      data: {},
+    });
+    expect(unlikeRes.ok()).toBeTruthy();
+    const unlikeBody: unknown = await unlikeRes.json();
+    expect(assertApiEnvelope(unlikeBody).ok).toBe(true);
+    expect((unlikeBody as { data?: { liked?: boolean } }).data?.liked).toBe(false);
 
     const commentRes = await request.post(`/api/community/posts/${postId}/comments`, {
       data: { body: "E2E comment — great work!" },
     });
     expect(commentRes.status()).toBe(201);
     assertApiOk(await commentRes.json());
+  });
+
+  test("POST /api/community/posts rejects whitespace-only body", async ({ request }) => {
+    const res = await request.post("/api/community/posts", {
+      data: { body: "  \n\t  " },
+    });
+    expect(res.status()).toBe(422);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
   });
 
   test("POST /api/progress rejects empty body", async ({ request }) => {

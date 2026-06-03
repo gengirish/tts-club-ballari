@@ -13,13 +13,13 @@ export function C25kWeekStack({ weekNo, coachName }: Props) {
     <section className="space-y-4" data-testid="c25k-week-stack">
       <div className="rounded-card bg-energy p-5 text-white shadow-lg shadow-magenta/25 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide">
+          <span className="inline-flex rounded-full bg-paper-raised/14 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide">
             Week {weekNo}
           </span>
           <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="font-display text-sm text-white/90">{week.phaseTitle}</span>
             {week.isCutback && (
-              <span className="rounded-full bg-white/25 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+              <span className="rounded-full bg-paper-raised/18 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
                 Cutback
               </span>
             )}
@@ -29,12 +29,12 @@ export function C25kWeekStack({ weekNo, coachName }: Props) {
               </span>
             )}
             {week.milestone === "star" && (
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-sm" aria-hidden title="Milestone week">
+              <span className="rounded-full bg-paper-raised/14 px-2 py-0.5 text-sm" aria-hidden title="Milestone week">
                 ★
               </span>
             )}
             {week.milestone === "double" && (
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-sm" aria-hidden title="Peak milestone weeks">
+              <span className="rounded-full bg-paper-raised/14 px-2 py-0.5 text-sm" aria-hidden title="Peak milestone weeks">
                 ★★
               </span>
             )}
@@ -54,7 +54,7 @@ export function C25kWeekStack({ weekNo, coachName }: Props) {
         {sessions.map((s) => (
           <div
             key={s.tag}
-            className={`rounded-card border bg-white p-4 sm:p-5 ${
+            className={`rounded-card border bg-paper-raised p-4 sm:p-5 ${
               s.highlight ? "border-magenta/50 ring-1 ring-magenta/20" : "border-paper-deep"
             }`}
           >

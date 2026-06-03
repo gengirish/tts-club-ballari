@@ -24,7 +24,7 @@ function BarChart({
   const values = rows.map((r) => r[accessor]).filter((v): v is number => v != null && !Number.isNaN(v));
   if (values.length === 0) {
     return (
-      <div className="rounded-card border border-paper-deep bg-white p-4">
+      <div className="rounded-card border border-paper-deep bg-paper-raised p-4">
         <h3 className="font-display text-lg uppercase text-violet mb-2">{title}</h3>
         <p className="text-sm text-ink/50">No entries in this range yet.</p>
       </div>
@@ -35,7 +35,7 @@ function BarChart({
   const span = max - min || 1;
 
   return (
-    <div className="rounded-card border border-paper-deep bg-white p-4">
+    <div className="rounded-card border border-paper-deep bg-paper-raised p-4">
       <div className="flex items-baseline justify-between mb-2">
         <h3 className="font-display text-lg uppercase text-violet">{title}</h3>
         {positiveDown && accessor === "weightKg" && (
@@ -108,7 +108,7 @@ export function ProgressLogForm() {
   }
 
   return (
-    <div className="rounded-card border border-paper-deep bg-white p-6 mb-8">
+    <div className="rounded-card border border-paper-deep bg-paper-raised p-6 mb-8">
       <h2 className="font-display text-xl uppercase text-violet mb-4">Log today</h2>
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm font-semibold">

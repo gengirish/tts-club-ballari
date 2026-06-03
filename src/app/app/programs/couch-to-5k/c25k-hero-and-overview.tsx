@@ -52,10 +52,10 @@ export function C25kHeroAndOverview({
           <span className="rounded-full bg-energy px-4 py-2 text-[12px] font-extrabold text-white shadow-md shadow-magenta/30">
             Absolute beginner
           </span>
-          <span className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-[12px] font-bold text-white/90">
+          <span className="rounded-full border border-steel/25 bg-paper-raised/10 px-3 py-2 text-[12px] font-bold text-white/90">
             No time target — finishing wins
           </span>
-          <span className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-[12px] font-bold text-white/90">
+          <span className="rounded-full border border-steel/25 bg-paper-raised/10 px-3 py-2 text-[12px] font-bold text-white/90">
             {priceLabel}
           </span>
         </div>
@@ -80,7 +80,7 @@ export function C25kHeroAndOverview({
           ].map((cell) => (
             <div
               key={cell.k}
-              className="rounded-xl border border-paper-deep bg-white px-3 py-3 shadow-sm sm:px-3.5"
+              className="rounded-xl border border-paper-deep bg-paper-raised px-3 py-3 shadow-sm sm:px-3.5"
             >
               <p className="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink/45">{cell.k}</p>
               <p className="font-display text-xl leading-none text-violet">{cell.v}</p>

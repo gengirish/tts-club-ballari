@@ -39,7 +39,7 @@ export function HostEventForm() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-card border border-paper-deep bg-white p-6 space-y-3 mb-8">
+    <form onSubmit={submit} className="rounded-card border border-paper-deep bg-paper-raised p-6 space-y-3 mb-8">
       <h2 className="font-display text-xl uppercase text-violet">New event</h2>
       <input
         className="w-full border rounded-card px-3 py-2"

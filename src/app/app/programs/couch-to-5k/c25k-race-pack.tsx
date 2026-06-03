@@ -29,7 +29,7 @@ export function C25kRacePack({ weekNo }: Props) {
       </p>
       <ol className="mt-4 space-y-3">
         {RACE_TIMELINE.map((row, i) => (
-          <li key={i} className="flex gap-3 rounded-xl border border-paper-deep bg-white/90 p-3 sm:p-4">
+          <li key={i} className="flex gap-3 rounded-xl border border-paper-deep bg-paper-raised/92 p-3 sm:p-4">
             <span className="shrink-0 font-display text-[11px] font-extrabold uppercase tracking-wide text-violet">
               {row.when}
             </span>

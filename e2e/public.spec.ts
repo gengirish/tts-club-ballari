@@ -14,6 +14,15 @@ test.describe("public shell", () => {
     await expect(page.getByTestId("login-send-otp")).toBeVisible();
   });
 
+  test("login phone OTP shows validation for invalid short number", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByTestId("login-phone").fill("123");
+    await page.getByTestId("login-send-otp").click();
+    await expect(page.getByTestId("login-form-error")).toContainText(/10-digit|Indian mobile|valid/i, {
+      timeout: 10_000,
+    });
+  });
+
   test("login password tab shows identifier + password fields", async ({ page }) => {
     await page.goto("/login");
     await page.getByTestId("login-tab-password").click();

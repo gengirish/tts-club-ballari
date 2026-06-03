@@ -12,7 +12,7 @@ export default function VerifyRequestPage() {
       </div>
 
       <div className="relative mx-auto w-full max-w-md">
-        <div className="rounded-screen border border-white/60 bg-white/90 p-6 shadow-xl shadow-violet/10 backdrop-blur-md sm:p-8">
+        <div className="rounded-screen border border-steel/35 bg-paper-raised/92 p-6 shadow-xl shadow-violet/10 backdrop-blur-md sm:p-8">
           <h1 className="font-display text-3xl uppercase leading-tight text-violet sm:text-4xl">
             Check your email
           </h1>
@@ -25,7 +25,7 @@ export default function VerifyRequestPage() {
           </p>
           <Link
             href="/login"
-            className="mt-6 inline-flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-full border border-paper-deep bg-white px-4 py-3 text-center text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-deep/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
+            className="mt-6 inline-flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-full border border-paper-deep bg-paper-raised px-4 py-3 text-center text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
           >
             Back to sign in
           </Link>
