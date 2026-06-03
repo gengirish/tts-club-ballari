@@ -2,9 +2,9 @@
 
 import { useId, useState } from "react";
 import { signIn } from "next-auth/react";
-import { requestOtpSchema, verifyOtpSchema } from "@/lib/validation/auth";
+import { magicLinkEmailSchema, requestOtpSchema, verifyOtpSchema } from "@/lib/validation/auth";
 
-type Tab = "phone" | "password" | "register";
+type Tab = "phone" | "password" | "magic" | "register";
 
 function IconPhone({ className }: { className?: string }) {
   return (
@@ -38,6 +38,30 @@ function IconUserPlus({ className }: { className?: string }) {
   );
 }
 
+function IconMail({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function friendlyMagicLinkError(code: string | undefined): string {
+  switch (code) {
+    case "EmailSignin":
+      return "We could not send the email. Check the address and try again, or wait a few minutes and retry.";
+    case "Configuration":
+      return "Sign-in is temporarily unavailable. Please try again later or use another method.";
+    case "AccessDenied":
+      return "This email cannot be used for a magic link right now. Try another method or contact support.";
+    case "OAuthAccountNotLinked":
+      return "This email is linked to another sign-in method. Use password or phone OTP instead.";
+    default:
+      return "Something went wrong sending the link. Please try again or use phone or password sign-in.";
+  }
+}
+
 const inputClass =
   "w-full rounded-card border border-paper-deep bg-white px-4 py-3.5 pl-11 text-ink shadow-sm placeholder:text-ink/45 transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60";
 
@@ -56,6 +80,8 @@ export default function LoginPage() {
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regName, setRegName] = useState("");
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -125,6 +151,32 @@ export default function LoginPage() {
     else setError("Invalid email/username or password");
   }
 
+  async function sendMagicLink() {
+    setLoading(true);
+    setError(null);
+    setMagicLinkSent(false);
+    const parsed = magicLinkEmailSchema.safeParse({ email: magicEmail });
+    if (!parsed.success) {
+      const msg = parsed.error.flatten().fieldErrors.email?.[0] ?? "Enter a valid email address.";
+      setError(msg);
+      setLoading(false);
+      return;
+    }
+    const normalizedEmail = parsed.data.email;
+    const res = await signIn("magic-link", {
+      email: normalizedEmail,
+      callbackUrl: "/app",
+      redirect: false,
+    });
+    setLoading(false);
+    const verifyUrl = typeof res?.url === "string" && res.url.includes("/login/verify-request");
+    if (res?.ok || verifyUrl) {
+      setMagicLinkSent(true);
+      return;
+    }
+    setError(friendlyMagicLinkError(res?.error ?? undefined));
+  }
+
   async function register() {
     setLoading(true);
     setError(null);
@@ -170,8 +222,9 @@ export default function LoginPage() {
       onClick={() => {
         setTab(t);
         setError(null);
+        if (t !== "magic") setMagicLinkSent(false);
       }}
-      className={`flex min-h-[44px] min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full py-2.5 text-[0.7rem] font-bold leading-tight transition-colors duration-200 sm:gap-1.5 sm:text-xs ${
+      className={`flex min-h-[44px] w-full min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full py-2.5 text-[0.7rem] font-bold leading-tight transition-colors duration-200 sm:gap-1.5 sm:text-xs ${
         tab === t
           ? "bg-energy text-white shadow-md shadow-violet/30"
           : "border border-paper-deep bg-white text-ink/80 hover:border-violet/30 hover:bg-paper-deep/60"
@@ -198,16 +251,17 @@ export default function LoginPage() {
             Welcome, sister
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">
-            Log in with your mobile (WhatsApp OTP) or use email or username with a password.
+            Log in with your mobile (WhatsApp OTP), a one-time email link, or email or username with a password.
           </p>
 
           <div
-            className="mt-6 flex gap-2"
+            className="mt-6 grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap"
             role="tablist"
             aria-label="Sign in method"
           >
             {tabBtn("phone", "Phone OTP", "login-tab-phone", IconPhone)}
             {tabBtn("password", "Password", "login-tab-password", IconLock)}
+            {tabBtn("magic", "Email link", "login-tab-magic", IconMail)}
             {tabBtn("register", "Sign up", "login-tab-register", IconUserPlus)}
           </div>
 
@@ -346,6 +400,69 @@ export default function LoginPage() {
                 >
                   {loading ? "Signing in…" : "Sign in"}
                 </button>
+              </>
+            )}
+
+            {tab === "magic" && (
+              <>
+                {magicLinkSent ? (
+                  <div
+                    className="rounded-card border border-violet/30 bg-violet/5 px-4 py-4 text-sm leading-relaxed text-ink/85"
+                    role="status"
+                  >
+                    <p className="font-display text-lg font-bold uppercase tracking-wide text-violet">
+                      Check your email
+                    </p>
+                    <p className="mt-2">
+                      We sent a sign-in link to your inbox. Open it on this device to continue. If you do not see it,
+                      check spam or promotions.
+                    </p>
+                    <button
+                      type="button"
+                      data-testid="login-magic-reset"
+                      onClick={() => {
+                        setMagicLinkSent(false);
+                        setMagicEmail("");
+                        setError(null);
+                      }}
+                      className="mt-4 w-full cursor-pointer rounded-full border border-paper-deep bg-white py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-deep/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
+                    >
+                      Use a different email
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mb-3 text-xs leading-relaxed text-ink/65">
+                      No password needed — we email you a one-time link. It expires after a short time.
+                    </p>
+                    <label htmlFor="login-magic-email" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                      Email
+                    </label>
+                    <div className="relative mb-4">
+                      <IconMail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-violet/70" />
+                      <input
+                        id="login-magic-email"
+                        data-testid="login-magic-email"
+                        type="email"
+                        className={inputClass}
+                        placeholder="you@example.com"
+                        value={magicEmail}
+                        onChange={(e) => setMagicEmail(e.target.value)}
+                        autoComplete="email"
+                        disabled={loading}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      data-testid="login-magic-submit"
+                      onClick={() => void sendMagicLink()}
+                      disabled={loading}
+                      className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-extrabold text-white shadow-md shadow-violet/25 transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:active:scale-[0.99]"
+                    >
+                      {loading ? "Sending link…" : "Email me a link"}
+                    </button>
+                  </>
+                )}
               </>
             )}
 

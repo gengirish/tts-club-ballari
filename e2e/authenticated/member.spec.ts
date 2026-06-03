@@ -9,6 +9,13 @@ test.describe("member area (authenticated)", () => {
     await expect(page.getByRole("link", { name: "Challenges" })).toBeVisible();
   });
 
+  test("dashboard nav reaches C25K program page", async ({ page }) => {
+    await page.goto("/app");
+    await page.getByRole("link", { name: "C25K" }).click();
+    await expect(page).toHaveURL(/\/app\/programs\/couch-to-5k/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  });
+
   test("fitness score page loads and recompute is clickable", async ({ page }) => {
     await page.goto("/app/score");
     await expect(page.getByTestId("score-page-title")).toBeVisible();

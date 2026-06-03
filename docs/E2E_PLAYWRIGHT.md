@@ -68,18 +68,19 @@ npm run test:e2e:prod
 With **`E2E_TEST_PHONE` + `E2E_TEST_OTP`** set, Playwright runs:
 
 - **`setup`** — `e2e/auth.setup.ts` logs in and writes `e2e/.auth/member.json`.
-- **`chromium`** — tests under `e2e/authenticated/` with that storage state.
-- **`public`** — `e2e/public.spec.ts` (no login).
+- **`chromium`** — `e2e/authenticated/*.spec.ts` (member UI, **API routes** with session cookie, challenges join) using `e2e/.auth/member.json`.
+- **`public`** — `e2e/public.spec.ts` and `e2e/password-login.spec.ts` (no OTP session; password flow registers fresh users against the same DB).
 
-Without those env vars, only **`public`** runs (smoke on `/` and `/login`).
+Without those env vars, only **`public`** runs (`public.spec.ts` + **`password-login.spec.ts`** — smoke on `/`, `/login`, register API errors, and email/username sign-up against local DB).
 
 ## Writing new tests
 
 1. **Stable selectors**: prefer `data-testid` on interactive UI (see `login` and score recompute). Use `getByRole` for headings and links when accessible names are stable.
 2. **Authenticated flows**: add files under `e2e/authenticated/`. They automatically use `storageState` from setup when E2E auth env is enabled.
 3. **API-only checks**: use `request` from Playwright; cookies from `storageState` apply to same-origin requests to the app under test.
-4. **No `any`**: keep fixtures typed; parse JSON as unknown then narrow.
-5. **Money / time**: UI assertions should match formatted copy (IST, DD/MM) only when you intentionally test the view layer; otherwise assert on structure (headings, buttons).
+4. **Layout**: `e2e/authenticated/` holds session specs (`member.spec`, `api-routes.spec`, `member-interactions`, `rbac-redirects`, `challenges-flow`). Shared JSON helpers live in `e2e/helpers/`.
+5. **No `any`**: keep fixtures typed; parse JSON as unknown then narrow.
+6. **Money / time**: UI assertions should match formatted copy (IST, DD/MM) only when you intentionally test the view layer; otherwise assert on structure (headings, buttons).
 
 ## CI suggestion
 

@@ -52,3 +52,15 @@ export const credentialsLoginSchema = z.object({
 });
 
 export type CredentialsLoginInput = z.infer<typeof credentialsLoginSchema>;
+
+/** Magic link (email provider) sign-in. */
+export const magicLinkEmailSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email required")
+    .email("Enter a valid email address")
+    .transform((s) => s.toLowerCase()),
+});
+
+export type MagicLinkEmailInput = z.infer<typeof magicLinkEmailSchema>;
