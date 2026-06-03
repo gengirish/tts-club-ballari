@@ -1,17 +1,34 @@
-/** @type {import('next').NextConfig} */
+import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import withSerwistInit from "@serwist/next";
+
 const isVercel = !!process.env.VERCEL;
-// Standalone output is flaky on some Windows builds (trace copy ENOENT). Enable only when
-// explicitly requested (Fly Dockerfile sets NEXT_STANDALONE_OUTPUT=1 for Linux builder).
 const useStandalone = !isVercel && process.env.NEXT_STANDALONE_OUTPUT === "1";
 
+function getRevision() {
+  const result = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf-8" });
+  const stdout = result.stdout?.trim();
+  return stdout ? stdout.slice(0, 12) : randomUUID();
+}
+
+const revision = getRevision();
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+  cacheOnNavigation: true,
+  reloadOnOnline: true,
+  additionalPrecacheEntries: [{ url: "/~offline", revision }],
+});
+
+/** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   experimental: { serverActions: { bodySizeLimit: "2mb" } },
-  // Fly/Docker: standalone bundle. Vercel uses its own builder (omit standalone).
   ...(useStandalone && {
     output: "standalone",
   }),
-  // Vercel UI only: forward /api to Fly (set PROXY_API_TO in Vercel env). Omit locally & on Fly.
   async rewrites() {
     const base = process.env.PROXY_API_TO?.replace(/\/$/, "");
     if (!base) return [];
@@ -21,4 +38,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

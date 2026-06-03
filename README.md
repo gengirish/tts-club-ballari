@@ -4,6 +4,10 @@ Women-first fitness ecosystem. Next.js 14 (App Router) · Prisma/Postgres · **A
 
 This is a **Cursor scaffold**: the foundation, conventions, and integrations are wired and complete. Feature modules are built from the sequential Composer prompts below.
 
+**Pitch & investor narrative:** [docs/pitch-deck.md](./docs/pitch-deck.md) · [docs/YC_NARRATIVE.md](./docs/YC_NARRATIVE.md) (YC-style one-pager — wedge, metric, expansion, risks).
+
+**PWA:** [docs/PWA.md](./docs/PWA.md) — installable app (manifest + Serwist service worker; icons in `public/icons/`).
+
 ---
 
 ## 1. Setup

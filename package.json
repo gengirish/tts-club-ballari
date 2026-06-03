@@ -18,11 +18,13 @@
     "test:e2e:prod": "playwright test e2e/public.spec.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:seed": "tsx e2e/seed-onboarded-user.ts",
-    "aisensy": "tsx scripts/aisensy-cli.ts"
+    "aisensy": "tsx scripts/aisensy-cli.ts",
+    "gen:pwa-icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@prisma/client": "^6.2.1",
+    "@serwist/next": "^9.5.11",
     "@x402/fetch": "^2.12.0",
     "agentmail": "^0.5.1",
     "bcryptjs": "^3.0.3",
@@ -48,6 +50,8 @@
     "eslint-config-next": "^14.2.21",
     "postcss": "^8.4.49",
     "prisma": "^6.2.1",
+    "serwist": "^9.5.11",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"

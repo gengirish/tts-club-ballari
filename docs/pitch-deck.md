@@ -248,6 +248,12 @@ We productise what strong women’s clubs already do in chats — and make it **
 
 ---
 
+## Related — accelerator / seed narrative
+
+- **[YC_NARRATIVE.md](./YC_NARRATIVE.md)** — Partner-style one-pager: wedge, north-star metric, expansion thesis, risks. Update alongside Slide 9 traction.
+
+---
+
 ## One-minute pitch (script)
 
 “Millions of women want to get fitter but do not trust generic apps or mixed gyms. They already coordinate in WhatsApp — but that breaks for payments, progress, and structured programs. We go to market as **Sister Stride** — the women-first club OS from **Steel Sisters & Striders**: phone login, challenges, coach-led programs like Couch to 5K, and events, with WhatsApp and email where she already is. We are proving retention and paid cohorts in **Ballari**, then replicating the playbook in similar Indian cities. We are raising **[amount]** to **[hire / run cohorts / complete core product]** and reach **[milestone]** in **[timeframe].**”
@@ -262,4 +268,4 @@ We productise what strong women’s clubs already do in chats — and make it **
 
 ---
 
-*Document version: 1.1 · Sister Stride consumer naming on Slide 1, Solution, and one-minute script. Aligned with repo README product scope and India-first stack (paise, IST, E.164, Razorpay, Auth.js RBAC).*
+*Document version: 1.2 · Sister Stride consumer naming on Slide 1, Solution, and one-minute script. YC_NARRATIVE cross-link. Aligned with repo README product scope and India-first stack (paise, IST, E.164, Razorpay, Auth.js RBAC).*
