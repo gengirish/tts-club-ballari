@@ -1,8 +1,11 @@
 import { ok, fail, validationError } from "@/lib/api-response";
 import {
+  getPrismaErrorMessageSnippet,
   getPrismaInitializationErrorCode,
   getPrismaKnownRequestCode,
   isPrismaInitializationError,
+  isPrismaUnknownRequestError,
+  isPrismaValidationError,
 } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation/auth";
@@ -70,6 +73,24 @@ export async function POST(req: Request) {
         "Could not save your account (database issue). Try again in a moment or contact support if it continues.",
         503,
         { prismaCode }
+      );
+    }
+
+    if (isPrismaUnknownRequestError(e)) {
+      return fail(
+        "DATABASE_ERROR",
+        "Could not save your account (database issue). Try again in a moment or contact support if it continues.",
+        503,
+        { prismaMessage: getPrismaErrorMessageSnippet(e) }
+      );
+    }
+
+    if (isPrismaValidationError(e)) {
+      return fail(
+        "REGISTRATION_INVALID",
+        "Your sign-up data could not be applied. Check the fields and try again.",
+        400,
+        { prismaMessage: getPrismaErrorMessageSnippet(e) }
       );
     }
 

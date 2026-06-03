@@ -31,3 +31,24 @@ export function isPrismaInitializationError(error: unknown): boolean {
   if (typeof error !== "object" || error === null) return false;
   return Object.getPrototypeOf(error)?.constructor?.name === "PrismaClientInitializationError";
 }
+
+export function isPrismaUnknownRequestError(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientUnknownRequestError) return true;
+  if (typeof error !== "object" || error === null) return false;
+  return Object.getPrototypeOf(error)?.constructor?.name === "PrismaClientUnknownRequestError";
+}
+
+export function isPrismaValidationError(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientValidationError) return true;
+  if (typeof error !== "object" || error === null) return false;
+  return Object.getPrototypeOf(error)?.constructor?.name === "PrismaClientValidationError";
+}
+
+/** Safe snippet for logs / `error.details` (never trust length for secrets). */
+export function getPrismaErrorMessageSnippet(error: unknown, maxLen = 220): string | undefined {
+  if (typeof error !== "object" || error === null || !("message" in error)) return undefined;
+  const m = (error as { message: unknown }).message;
+  if (typeof m !== "string" || !m.trim()) return undefined;
+  const t = m.trim();
+  return t.length > maxLen ? `${t.slice(0, maxLen)}…` : t;
+}

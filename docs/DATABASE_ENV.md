@@ -61,6 +61,8 @@ Remove-Item $env:USERPROFILE\neon-database-url-pooled.txt, $env:USERPROFILE\neon
 
 If **`POST /api/auth/register`** returns **`503`** with code **`DATABASE_UNAVAILABLE`**, the server cannot open a Prisma connection (missing or wrong **`DATABASE_URL` / `DIRECT_URL`** on Vercel, network, or Neon paused). Fix env vars and redeploy.
 
+Neon’s copied URL may include **`channel_binding=require`**. The app **strips `channel_binding` at runtime** when building `PrismaClient` (`src/lib/prisma.ts`) so Prisma + Neon pooler stay compatible; you can also remove it from **`DATABASE_URL` / `DIRECT_URL`** in Vercel for consistency.
+
 ---
 
 ## 5. CI / Playwright
