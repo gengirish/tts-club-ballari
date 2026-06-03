@@ -3,7 +3,13 @@ import { getSessionUser } from "@/lib/rbac";
 import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { formatPaiseShort } from "@/lib/utils/money";
+import { clampWeek } from "@/lib/programs/c25k-curriculum";
 import { C25kPaySection } from "./c25k-pay-section";
+import { C25kHeroAndOverview } from "./c25k-hero-and-overview";
+import { C25kWeekStack } from "./c25k-week-stack";
+import { C25kSessionBlocks } from "./c25k-session-blocks";
+import { C25kStrengthReference } from "./c25k-strength-reference";
+import { C25kSafetyAndGraduation } from "./c25k-safety-and-graduation";
 
 export default async function CouchTo5kPage() {
   const user = await getSessionUser();
@@ -18,46 +24,34 @@ export default async function CouchTo5kPage() {
     include: { coach: { include: { user: { select: { name: true } } } } },
   });
 
-  const weeks = Array.from({ length: program.weeks }, (_, i) => i + 1);
+  const maxWeeks = program.weeks;
+  const isEnrolled = !!enrollment;
+  const displayWeekNo = clampWeek(enrollment?.weekNo ?? 1, maxWeeks);
+  const coachName = enrollment?.coach?.user?.name ?? null;
 
   return (
-    <main className="min-h-screen bg-paper px-4 py-10">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <header>
-          <p className="text-xs font-bold uppercase tracking-widest text-magenta">Flagship program</p>
-          <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">{program.title}</h1>
-          <p className="text-ink/65 mt-2">{program.description}</p>
-          <p className="mt-3 text-lg font-bold text-violet">{formatPaiseShort(program.pricePaise)} premium</p>
-        </header>
+    <main className="min-h-screen bg-paper pb-12" data-testid="c25k-page">
+      <C25kHeroAndOverview
+        title={program.title}
+        description={program.description}
+        priceLabel={`${formatPaiseShort(program.pricePaise)} · premium`}
+        maxWeeks={maxWeeks}
+        displayWeekNo={displayWeekNo}
+        isEnrolled={isEnrolled}
+      />
 
-        <section className="rounded-card border border-paper-deep bg-white p-6">
-          <h2 className="font-display text-xl uppercase text-violet mb-3">12-week arc</h2>
-          <ol className="grid grid-cols-3 sm:grid-cols-4 gap-2 text-xs font-semibold text-center">
-            {weeks.map((w) => (
-              <li
-                key={w}
-                className={`rounded-lg py-2 ${enrollment && w <= enrollment.weekNo ? "bg-progress text-white" : "bg-paper-deep text-ink/60"}`}
-              >
-                W{w}
-              </li>
-            ))}
-          </ol>
-        </section>
+      <div className="relative z-10 mx-auto max-w-2xl space-y-8 px-4 sm:px-6">
+        {isEnrolled && (
+          <C25kWeekStack weekNo={displayWeekNo} coachName={coachName} />
+        )}
 
-        <section className="rounded-card border border-paper-deep bg-white p-6">
-          <h2 className="font-display text-xl uppercase text-violet mb-2">Today&apos;s session</h2>
-          <p className="text-sm text-ink/70">
-            Week {enrollment?.weekNo ?? 1}: follow your plan in the app; WhatsApp reminders fire weekly after
-            enrollment.
-          </p>
-          {enrollment?.coach && (
-            <p className="mt-3 text-sm font-semibold text-ink">
-              Coach: <span className="text-magenta">{enrollment.coach.user.name ?? "Assigned coach"}</span>
-            </p>
-          )}
-        </section>
+        <C25kSessionBlocks weekNo={displayWeekNo} />
 
-        <C25kPaySection amountPaise={program.pricePaise} hasEnrollment={!!enrollment} />
+        <C25kStrengthReference weekNo={displayWeekNo} />
+
+        <C25kSafetyAndGraduation weekNo={displayWeekNo} maxWeeks={maxWeeks} isEnrolled={isEnrolled} />
+
+        <C25kPaySection amountPaise={program.pricePaise} hasEnrollment={isEnrolled} />
       </div>
     </main>
   );

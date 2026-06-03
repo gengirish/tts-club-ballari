@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { formatPaiseShort } from "@/lib/utils/money";
 
 declare global {
   interface Window {
@@ -87,85 +88,124 @@ export function C25kPaySection({
 
   if (hasEnrollment) {
     return (
-      <p className="rounded-card border border-progress/40 bg-white p-4 text-progress font-bold">
-        You are enrolled — your weekly reminders are scheduled.
-      </p>
+      <div
+        className="overflow-hidden rounded-card border border-progress/35 bg-white shadow-lg shadow-progress/10"
+        data-testid="c25k-enrolled-banner"
+      >
+        <div className="bg-energy px-5 py-4 text-center">
+          <span className="inline-flex rounded-full bg-white/25 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white">
+            Enrolled
+          </span>
+          <p className="mt-2 font-display text-lg uppercase text-white">You are in the arc</p>
+        </div>
+        <p className="px-5 py-4 text-center text-sm font-semibold leading-relaxed text-ink/80">
+          Weekly WhatsApp reminders are scheduled. Show up for your solo sessions and Sunday group — we will see you
+          at the graduation run.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="rounded-card border border-paper-deep bg-white p-6 space-y-4">
-      <h2 className="font-display text-xl uppercase text-violet">Assessment & checkout</h2>
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <label className="col-span-2 md:col-span-1">
-          Current weight (kg)
-          <input
-            className="mt-1 w-full border rounded-card px-3 py-2"
-            type="number"
-            value={assessment.currentWeightKg ?? ""}
-            onChange={(e) =>
-              setAssessment((a) => ({
-                ...a,
-                currentWeightKg: e.target.value === "" ? undefined : Number(e.target.value),
-              }))
-            }
-          />
-        </label>
-        <label className="col-span-2 md:col-span-1">
-          Age
-          <input
-            className="mt-1 w-full border rounded-card px-3 py-2"
-            type="number"
-            value={assessment.age ?? ""}
-            onChange={(e) =>
-              setAssessment((a) => ({ ...a, age: e.target.value === "" ? undefined : Number(e.target.value) }))
-            }
-          />
-        </label>
-        <label className="col-span-2">
-          Activity today (short note)
-          <input
-            className="mt-1 w-full border rounded-card px-3 py-2"
-            value={assessment.activityLevel ?? ""}
-            onChange={(e) => setAssessment((a) => ({ ...a, activityLevel: e.target.value }))}
-          />
-        </label>
-        <label className="col-span-2 md:col-span-1">
-          Daily steps (avg)
-          <input
-            className="mt-1 w-full border rounded-card px-3 py-2"
-            type="number"
-            value={assessment.dailySteps ?? ""}
-            onChange={(e) =>
-              setAssessment((a) => ({
-                ...a,
-                dailySteps: e.target.value === "" ? undefined : Number(e.target.value),
-              }))
-            }
-          />
-        </label>
-        <label className="flex items-center gap-2 col-span-2 md:col-span-1 mt-6">
-          <input
-            type="checkbox"
-            checked={!!assessment.prevRunning}
-            onChange={(e) => setAssessment((a) => ({ ...a, prevRunning: e.target.checked }))}
-          />
-          <span>Ran before</span>
-        </label>
+    <div
+      className="overflow-hidden rounded-card border border-paper-deep bg-white/90 shadow-xl shadow-violet/10 backdrop-blur-sm"
+      data-testid="c25k-pay-section"
+    >
+      <div className="border-b border-paper-deep bg-gradient-to-r from-violet/8 via-paper to-magenta/8 px-5 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-xl uppercase text-violet">Assessment & checkout</h2>
+          <span className="rounded-full border border-white/40 bg-white/70 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-violet shadow-sm backdrop-blur-sm">
+            Premium · {formatPaiseShort(amountPaise)}
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-ink/55">Coach intake + Razorpay — enrollment activates after webhook.</p>
       </div>
-      <p className="text-xs text-ink/50">
-        Test mode: use Razorpay test cards in the Razorpay dashboard docs. Webhook must reach this deployment for
-        enrollment to activate.
-      </p>
-      <button
-        type="button"
-        onClick={pay}
-        disabled={loading}
-        className="w-full rounded-full bg-energy py-3 text-sm font-extrabold text-white disabled:opacity-60"
-      >
-        {loading ? "Preparing…" : `Pay ₹${(amountPaise / 100).toLocaleString("en-IN")}`}
-      </button>
-      {err && <p className="text-sm text-magenta font-semibold">{err}</p>}
+
+      <div className="space-y-4 p-5 sm:p-6">
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <label className="col-span-2 md:col-span-1">
+            <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Current weight (kg)</span>
+            <input
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              type="number"
+              value={assessment.currentWeightKg ?? ""}
+              onChange={(e) =>
+                setAssessment((a) => ({
+                  ...a,
+                  currentWeightKg: e.target.value === "" ? undefined : Number(e.target.value),
+                }))
+              }
+            />
+          </label>
+          <label className="col-span-2 md:col-span-1">
+            <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Age</span>
+            <input
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              type="number"
+              value={assessment.age ?? ""}
+              onChange={(e) =>
+                setAssessment((a) => ({ ...a, age: e.target.value === "" ? undefined : Number(e.target.value) }))
+              }
+            />
+          </label>
+          <label className="col-span-2">
+            <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Activity today (short note)</span>
+            <input
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              value={assessment.activityLevel ?? ""}
+              onChange={(e) => setAssessment((a) => ({ ...a, activityLevel: e.target.value }))}
+            />
+          </label>
+          <label className="col-span-2 md:col-span-1">
+            <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Daily steps (avg)</span>
+            <input
+              className="mt-1.5 w-full rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              type="number"
+              value={assessment.dailySteps ?? ""}
+              onChange={(e) =>
+                setAssessment((a) => ({
+                  ...a,
+                  dailySteps: e.target.value === "" ? undefined : Number(e.target.value),
+                }))
+              }
+            />
+          </label>
+          <label className="col-span-2">
+            <span className="text-xs font-extrabold uppercase tracking-wide text-ink/50">Injury history (optional)</span>
+            <textarea
+              className="mt-1.5 min-h-[72px] w-full resize-y rounded-card border border-paper-deep bg-paper px-3 py-2.5 text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
+              value={assessment.injuryHistory ?? ""}
+              onChange={(e) => setAssessment((a) => ({ ...a, injuryHistory: e.target.value }))}
+              rows={2}
+            />
+          </label>
+          <label className="col-span-2 flex min-h-[44px] items-center gap-3 rounded-card border border-dashed border-paper-deep bg-paper/50 px-3 py-2">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-paper-deep text-violet focus:ring-violet"
+              checked={!!assessment.prevRunning}
+              onChange={(e) => setAssessment((a) => ({ ...a, prevRunning: e.target.checked }))}
+            />
+            <span className="text-sm font-semibold text-ink">I have run before (even casually)</span>
+          </label>
+        </div>
+
+        <p className="text-[11px] leading-relaxed text-ink/50">
+          Test mode: use Razorpay test cards from the Razorpay dashboard. The webhook must reach this deployment for
+          enrollment to activate.
+        </p>
+
+        <button
+          type="button"
+          onClick={pay}
+          disabled={loading}
+          data-testid="c25k-pay-cta"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-full bg-energy px-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg shadow-magenta/25 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60"
+        >
+          {loading ? "Preparing…" : `Pay ${formatPaiseShort(amountPaise)}`}
+        </button>
+        {err && <p className="text-center text-sm font-semibold text-magenta">{err}</p>}
+      </div>
     </div>
   );
 }
