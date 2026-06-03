@@ -178,7 +178,7 @@ Use this checklist before calling the BR WI C25K 2026 integration **complete** f
 **2026-06-03**
 
 - **Wave 1 (parallel subagents):** `c25k-weeks-data.ts` created; this workflow doc created.
-- **Wave 2–3 (main agent, same session):** `c25k-curriculum.ts` imports `C25K_WEEKS`, exports `getC25kWeek`, `sessionCardsForWeek` backed by data; `c25k-week-stack.tsx`, `c25k-session-blocks.tsx`, `c25k-safety-and-graduation.tsx`, `c25k-race-pack.tsx`, `page.tsx` updated. `npm run build` passing.
+- **Wave 2–3 (2026-06-03 then rebuild):** Curriculum + UI wired; then **`c25k-weeks-data.ts` rebuilt** interval-for-interval from `docs/DOC-20260511-WA0002..pdf` (weeks 1–12). **`STRENGTH_PHASES`** in `c25k-curriculum.ts` aligned to PDF exercise reference (P1–P3 + taper mobility). Race pack “first km” line matches PDF wording.
 - **Wave 4:** Not started (BullMQ copy per week / Sunday events link).
 
-**Note:** If the PDF is absent from a clone, align interval lines in `c25k-weeks-data.ts` against `docs/DOC-20260511-WA0002..pdf` when available.
+**Note:** Week table in `c25k-weeks-data.ts` is traced to **`docs/DOC-20260511-WA0002..pdf`** (programme pages). Re-diff after any PDF revision.
