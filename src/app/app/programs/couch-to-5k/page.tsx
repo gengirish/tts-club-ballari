@@ -10,6 +10,7 @@ import { C25kWeekStack } from "./c25k-week-stack";
 import { C25kSessionBlocks } from "./c25k-session-blocks";
 import { C25kStrengthReference } from "./c25k-strength-reference";
 import { C25kSafetyAndGraduation } from "./c25k-safety-and-graduation";
+import { C25kRacePack } from "./c25k-race-pack";
 
 export default async function CouchTo5kPage() {
   const user = await getSessionUser();
@@ -46,6 +47,8 @@ export default async function CouchTo5kPage() {
         )}
 
         <C25kSessionBlocks weekNo={displayWeekNo} />
+
+        <C25kRacePack weekNo={displayWeekNo} />
 
         <C25kStrengthReference weekNo={displayWeekNo} />
 

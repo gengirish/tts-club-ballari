@@ -50,7 +50,20 @@ export function C25kSafetyAndGraduation({ weekNo, maxWeeks, isEnrolled }: Props)
             <p className="text-sm font-extrabold text-ink">Monsoon advisory · Jun–Aug</p>
             <p className="mt-1 text-[11.5px] leading-relaxed text-ink/65">
               Prefer early morning before heat builds; treadmill counts on heavy rain. Watch for slippery paths —
-              sprains spike in wet season.
+              sprains spike in wet season. Humidity drives sweat — hydrate even when it feels mild.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 flex gap-3 rounded-xl border border-paper-deep bg-paper p-4">
+          <span className="text-xl" aria-hidden>
+            🗓️
+          </span>
+          <div>
+            <p className="text-sm font-extrabold text-ink">Missed a session?</p>
+            <p className="mt-1 text-[11.5px] leading-relaxed text-ink/65">
+              Carry on with the next one. Missed a full week? Repeat that week — don&apos;t skip ahead. Walk intervals
+              are part of the plan, not a step backward.
             </p>
           </div>
         </div>

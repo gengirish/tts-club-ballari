@@ -17,7 +17,7 @@ export function C25kStrengthReference({ weekNo }: { weekNo: number }) {
   return (
     <section className="rounded-card border border-paper-deep bg-white p-4 sm:p-6" data-testid="c25k-strength">
       <h2 className="font-display text-xl uppercase text-violet">Strength & mobility</h2>
-      <p className="mt-1 text-xs text-ink/55">Bodyweight reference — evolves every few weeks (design reference).</p>
+      <p className="mt-1 text-xs text-ink/55">Bodyweight only — phases follow the Steel Sisters 12-week reference (weeks 1–3, 4–6, 7–11, taper).</p>
 
       <div className="mt-4 flex flex-wrap gap-1 rounded-xl bg-paper-deep p-1 sm:flex-nowrap">
         {STRENGTH_PHASES.map((p) => (

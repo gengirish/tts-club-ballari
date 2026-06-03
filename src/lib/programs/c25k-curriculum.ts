@@ -1,5 +1,10 @@
 /** Static curriculum copy aligned with `sss-couch-to-5k-design.html` (design reference, not a legal promise). */
 
+import { C25K_WEEKS, type C25kWeek, type C25kWeekSession } from "./c25k-weeks-data";
+
+export type { C25kWeek, C25kWeekSession, C25kMilestone, C25kSessionTag } from "./c25k-weeks-data";
+export { C25K_WEEKS } from "./c25k-weeks-data";
+
 export type C25kPhase = {
   weekStart: number;
   weekEnd: number;
@@ -74,82 +79,105 @@ export function phaseTimelineState(
   });
 }
 
-/** Three session slots per week — copy tone from design; not personalised to GPS. */
-export function sessionCardsForWeek(weekNo: number): {
+const MAX_CURRICULUM_WEEKS = 12;
+
+/** Per-week plan from `c25k-weeks-data` (solo A / solo B / Sunday group). */
+export function getC25kWeek(weekNo: number): C25kWeek {
+  const w = Math.min(Math.max(Math.floor(weekNo), 1), MAX_CURRICULUM_WEEKS);
+  return C25K_WEEKS[w - 1]!;
+}
+
+function sessionMetaLine(s: C25kWeekSession): string {
+  const parts: string[] = [];
+  if (s.durationMin != null) parts.push(`~${s.durationMin} min`);
+  if (s.focus) parts.push(s.focus);
+  return parts.length > 0 ? parts.join(" · ") : "Easy conversational effort · walk breaks as prescribed";
+}
+
+export type C25kSessionCard = {
   tag: string;
   pill: string;
   pillClass: string;
   title: string;
   meta: string;
   highlight?: boolean;
-}[] {
-  const w = Math.max(1, weekNo);
-  const phase = phaseForWeek(w);
+};
+
+/** Three session slots per week — driven by week table + design pills. */
+export function sessionCardsForWeek(weekNo: number): C25kSessionCard[] {
+  const week = getC25kWeek(weekNo);
   return [
     {
       tag: "Solo A",
       pill: "Mon / Wed",
       pillClass: "bg-violet/10 text-violet",
-      title: `Intervals — ${phase.title.toLowerCase()} focus`,
-      meta: "~20–25 min · easy effort, walk breaks as needed",
+      title: week.soloA.runBlock,
+      meta: sessionMetaLine(week.soloA),
+      highlight: false,
     },
     {
       tag: "Solo B",
       pill: "Tue / Thu",
       pillClass: "bg-violet/10 text-violet",
-      title: "Progressive run blocks",
-      meta: "~20–28 min · slightly longer run segments than Solo A",
+      title: week.soloB.runBlock,
+      meta: sessionMetaLine(week.soloB),
       highlight: false,
     },
     {
       tag: "Sunday · group",
-      pill: "Milestone",
+      pill: "Coach-led",
       pillClass: "bg-magenta/15 text-magenta",
-      title: "Coach-led group session",
-      meta: "~28–35 min · conversational pace · celebrate the week",
+      title: week.group.runBlock,
+      meta: sessionMetaLine(week.group),
       highlight: true,
     },
   ];
 }
 
+/** Matches exercise reference in `docs/DOC-20260511-WA0002..pdf` (bodyweight, phase bands). */
 export const STRENGTH_PHASES = [
   {
     id: "p1" as const,
-    label: "P1 · Glute",
+    label: "P1 · Glute & ankle",
     weeks: "Weeks 1–3",
     exercises: [
-      { name: "Glute bridge", cue: "Squeeze at the top, ribs down — no arching.", reps: "3×12" },
-      { name: "Clamshell", cue: "Heels stacked; lift the top knee only.", reps: "2×15/side" },
-      { name: "Side plank (knee down)", cue: "Hip stacked; breathe steady.", reps: "2×20s/side" },
+      { name: "Glute bridge", cue: "Drive through heels; squeeze at top; lower back neutral — not arched.", reps: "2×12" },
+      { name: "Clamshell", cue: "Pelvis still — if the hip rocks back, reduce range.", reps: "2×12/side" },
+      { name: "Standing calf raise", cue: "2s up, 2s down; slow lowers build tendon resilience.", reps: "2×15" },
+      { name: "Single-leg balance", cue: "Gaze on a fixed point; wobbling is normal.", reps: "1×30s/leg" },
     ],
   },
   {
     id: "p2" as const,
-    label: "P2 · Core",
+    label: "P2 · Core & hips",
     weeks: "Weeks 4–6",
     exercises: [
-      { name: "Dead bug", cue: "Lower back pressed to the floor; slow limbs.", reps: "2×6/side" },
-      { name: "Bird dog", cue: "Hips level — no rotation as you reach.", reps: "2×8/side" },
-      { name: "Hip flexor stretch", cue: "Low lunge, tuck pelvis gently.", reps: "1×45s/side" },
+      { name: "Dead bug", cue: "Low back glued to floor; slow, full control.", reps: "2×6/side" },
+      { name: "Bird dog", cue: "Opposite arm and leg; hips level — no rotation.", reps: "2×8/side" },
+      { name: "Donkey kick", cue: "Heel to ceiling; squeeze glute at top; no lower-back arch.", reps: "2×12/side" },
+      { name: "Hip flexor stretch", cue: "Low lunge, back knee down; tuck pelvis gently.", reps: "1×45s/side" },
     ],
   },
   {
     id: "p3" as const,
-    label: "P3 · Power",
-    weeks: "Weeks 7–9",
+    label: "P3 · Lower body & core",
+    weeks: "Weeks 7–11",
     exercises: [
-      { name: "Squat to calf raise", cue: "Controlled down; tall through the crown.", reps: "3×10" },
-      { name: "Split squat", cue: "Front knee tracks over ankle.", reps: "2×8/side" },
-      { name: "Jump rope or pogo hops", cue: "Soft knees; stop if joints complain.", reps: "3×30s" },
+      { name: "Bodyweight squat", cue: "Knees track over toes; sit back and down.", reps: "2×12" },
+      { name: "Reverse lunge", cue: "Step back; front shin stays vertical.", reps: "2×8/side" },
+      { name: "Side plank hold", cue: "Stack or stagger feet; lift hip — do not sag.", reps: "2×20s/side" },
+      { name: "Hip circle", cue: "Hands on hips; large slow circles each way.", reps: "1×10 each" },
+      { name: "Inchworm", cue: "Walk to plank, walk feet in; slow and controlled.", reps: "1×5" },
     ],
   },
   {
     id: "taper" as const,
-    label: "Taper",
+    label: "Taper · Mobility only",
     weeks: "Week 12",
     exercises: [
-      { name: "Easy mobility flow", cue: "Hips, calves, thoracic spine — keep it light.", reps: "10 min" },
-      { name: "Strides (optional)", cue: "4–6 × 15s smooth, full recovery walk.", reps: "Optional" },
+      { name: "Hip flexor stretch", cue: "Hold gently — no pushing.", reps: "1×45s/side" },
+      { name: "Hip circle", cue: "Slow, full range.", reps: "1×10 each" },
+      { name: "Inchworm", cue: "Gentle — the hard work is already banked.", reps: "1×5" },
     ],
   },
 ];

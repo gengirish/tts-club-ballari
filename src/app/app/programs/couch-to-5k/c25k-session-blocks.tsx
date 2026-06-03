@@ -1,30 +1,45 @@
-import { phaseForWeek } from "@/lib/programs/c25k-curriculum";
-
-const STEPS = [
-  { icon: "🤸", title: "Warm-up", sub: "Dynamic drills + easy walk", dur: "~5 min" },
-  { icon: "🏃‍♀️", title: "Run block", sub: "Intervals from your week plan — stay easy", dur: "~20–30 min", active: true },
-  { icon: "💪", title: "Strength block", sub: "See strength reference below — mobility first", dur: "~8 min" },
-  { icon: "🧘‍♀️", title: "Cool-down", sub: "Walk + light stretch", dur: "~5 min" },
-] as const;
+import { getC25kWeek, phaseForWeek } from "@/lib/programs/c25k-curriculum";
 
 type Props = { weekNo: number };
 
 export function C25kSessionBlocks({ weekNo }: Props) {
   const phase = phaseForWeek(weekNo);
+  const week = getC25kWeek(weekNo);
+  const runDur =
+    week.soloA.durationMin != null && week.group.durationMin != null
+      ? `~${Math.min(week.soloA.durationMin, week.group.durationMin)}–${Math.max(week.soloA.durationMin, week.group.durationMin)} min`
+      : "~20–35 min";
+  const strengthSub = week.isTaper
+    ? "Mobility only this week — see strength reference (taper)."
+    : "See strength reference below — follow the phase that matches your week.";
+
+  const steps = [
+    { icon: "🤸", title: "Warm-up", sub: "Dynamic drills + easy walk", dur: "~5 min", active: false },
+    {
+      icon: "🏃‍♀️",
+      title: "Run block",
+      sub: `Solo A: ${week.soloA.runBlock} · Group: ${week.group.runBlock}`,
+      dur: runDur,
+      active: true,
+    },
+    { icon: "💪", title: "Strength block", sub: strengthSub, dur: week.isTaper ? "~10 min" : "~8 min", active: false },
+    { icon: "🧘‍♀️", title: "Cool-down", sub: "Walk + light stretch", dur: "~5 min", active: false },
+  ] as const;
+
   return (
     <section className="rounded-card border border-paper-deep bg-white p-4 sm:p-6" data-testid="c25k-session-blocks">
       <span className="inline-flex rounded-full bg-magenta/15 px-3 py-1 text-[11px] font-extrabold text-magenta">
         Week {weekNo} · {phase.title}
       </span>
       <h2 className="font-display mt-3 text-2xl uppercase text-ink">Session structure</h2>
-      <p className="mt-1 text-xs text-ink/55">Warm-up → main set → strength → cool-down (design reference).</p>
+      <p className="mt-1 text-xs text-ink/55">Warm-up → main set → strength → cool-down — same flow for Solo A, Solo B, and Sunday group.</p>
 
       <div className="mt-4 divide-y divide-paper-deep rounded-card border border-paper-deep bg-paper/40 px-3 py-1 sm:px-4">
-        {STEPS.map((row) => (
+        {steps.map((row) => (
           <div key={row.title} className="flex items-center gap-3 py-3">
             <div
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg ${
-                "active" in row && row.active ? "bg-energy text-white shadow-md" : "bg-paper-deep text-ink/80"
+                row.active ? "bg-energy text-white shadow-md" : "bg-paper-deep text-ink/80"
               }`}
               aria-hidden
             >
