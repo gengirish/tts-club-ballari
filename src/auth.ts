@@ -5,6 +5,7 @@ import type { User } from "next-auth";
 import { z } from "zod";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { isPrismaInitializationError } from "@/lib/prisma-errors";
 import { authConfig } from "@/auth.config";
 import { verifyOtp } from "@/server/auth/otp";
 import { isOtpVerifyBlocked, recordOtpVerifyFailure } from "@/server/auth/otp-rate-limit";
@@ -22,11 +23,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const { user } = params;
       let nextUser = user;
       if (user?.id && (user as { role?: unknown }).role === undefined) {
-        const row = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { role: true },
-        });
-        if (row) nextUser = { ...user, role: row.role };
+        try {
+          const row = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true },
+          });
+          if (row) nextUser = { ...user, role: row.role };
+        } catch (e) {
+          console.error("[auth] jwt role lookup", e);
+        }
       }
       return (await authConfig.callbacks?.jwt?.({ ...params, user: nextUser })) ?? params.token;
     },
@@ -62,37 +67,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "Phone OTP",
       credentials: { phone: {}, code: {} },
       async authorize(creds) {
-        const parsed = verifyOtpSchema.safeParse({
-          phone: String(creds?.phone ?? ""),
-          code: String(creds?.code ?? ""),
-        });
-        if (!parsed.success) return null;
+        try {
+          const parsed = verifyOtpSchema.safeParse({
+            phone: String(creds?.phone ?? ""),
+            code: String(creds?.code ?? ""),
+          });
+          if (!parsed.success) return null;
 
-        const phone = toE164(parsed.data.phone);
-        const code = parsed.data.code;
-        if (!phone) return null;
+          const phone = toE164(parsed.data.phone);
+          const code = parsed.data.code;
+          if (!phone) return null;
 
-        if (await isOtpVerifyBlocked(phone)) return null;
+          if (await isOtpVerifyBlocked(phone)) return null;
 
-        const valid = await verifyOtp(phone, code);
-        if (!valid) {
-          await recordOtpVerifyFailure(phone);
+          const valid = await verifyOtp(phone, code);
+          if (!valid) {
+            await recordOtpVerifyFailure(phone);
+            return null;
+          }
+
+          const user = await prisma.user.upsert({
+            where: { phone },
+            update: {},
+            create: { phone, role: "MEMBER", city: "Ballari" },
+          });
+
+          return {
+            id: user.id,
+            name: user.name ?? undefined,
+            email: user.email ?? undefined,
+            role: user.role,
+          } as User;
+        } catch (e) {
+          console.error("[auth] phone-otp authorize", e);
           return null;
         }
-
-        // Upsert member on first successful login.
-        const user = await prisma.user.upsert({
-          where: { phone },
-          update: {},
-          create: { phone, role: "MEMBER", city: "Ballari" },
-        });
-
-        return {
-          id: user.id,
-          name: user.name ?? undefined,
-          email: user.email ?? undefined,
-          role: user.role,
-        } as User;
       },
     }),
     Credentials({
@@ -100,33 +109,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "Email or username",
       credentials: { identifier: {}, password: {} },
       async authorize(creds) {
-        const identifier = String(creds?.identifier ?? "").trim();
-        const password = String(creds?.password ?? "");
-        if (!identifier || !password) return null;
+        try {
+          const identifier = String(creds?.identifier ?? "").trim();
+          const password = String(creds?.password ?? "");
+          if (!identifier || !password) return null;
 
-        const asEmail = z.string().email().safeParse(identifier);
-        const user = await prisma.user.findFirst({
-          where: asEmail.success
-            ? { email: identifier.toLowerCase() }
-            : { username: identifier.toLowerCase() },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            passwordHash: true,
-          },
-        });
-        if (!user?.passwordHash) return null;
-        const valid = await verifyPassword(password, user.passwordHash);
-        if (!valid) return null;
+          const asEmail = z.string().email().safeParse(identifier);
+          const user = await prisma.user.findFirst({
+            where: asEmail.success
+              ? { email: identifier.toLowerCase() }
+              : { username: identifier.toLowerCase() },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              passwordHash: true,
+            },
+          });
+          if (!user?.passwordHash) return null;
+          const valid = await verifyPassword(password, user.passwordHash);
+          if (!valid) return null;
 
-        return {
-          id: user.id,
-          name: user.name ?? undefined,
-          email: user.email ?? undefined,
-          role: user.role,
-        } as User;
+          return {
+            id: user.id,
+            name: user.name ?? undefined,
+            email: user.email ?? undefined,
+            role: user.role,
+          } as User;
+        } catch (e) {
+          if (isPrismaInitializationError(e)) {
+            console.error("[auth] email-password database unavailable", e);
+          } else {
+            console.error("[auth] email-password authorize", e);
+          }
+          return null;
+        }
       },
     }),
   ],

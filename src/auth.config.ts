@@ -3,7 +3,11 @@ import type { Role } from "@prisma/client";
 
 // Edge-safe config (no Prisma / Node APIs here) — used by middleware.
 export const authConfig: NextAuthConfig = {
-  pages: { signIn: "/login", verifyRequest: "/login/verify-request" },
+  pages: {
+    signIn: "/login",
+    verifyRequest: "/login/verify-request",
+    error: "/login",
+  },
   session: { strategy: "jwt" },
   trustHost: true,
   providers: [], // declared in auth.ts (Node runtime)

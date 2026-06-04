@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { signIn } from "next-auth/react";
 import { magicLinkEmailSchema } from "@/lib/validation/auth";
 import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-password";
@@ -34,6 +34,19 @@ function IconMail({ className }: { className?: string }) {
       <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+}
+
+function friendlyAuthCallbackError(code: string | undefined): string {
+  switch (code) {
+    case "Configuration":
+    case "CallbackRouteError":
+    case "AccessDenied":
+      return "Sign-in is temporarily unavailable. Please try again shortly or use password sign-in.";
+    case "CredentialsSignin":
+      return "Invalid email/username or password.";
+    default:
+      return "Sign-in failed. Try again or use password sign-in.";
+  }
 }
 
 function friendlyMagicLinkError(code: string | undefined): string {
@@ -72,6 +85,12 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    if (err) setError(friendlyAuthCallbackError(err));
+  }, []);
+
   async function passwordLogin() {
     setLoading(true);
     setError(null);
@@ -82,7 +101,11 @@ export default function LoginPage() {
         router.refresh();
         return;
       }
-      setError("Invalid email/username or password");
+      setError(
+        res?.error
+          ? friendlyAuthCallbackError(res.error)
+          : "Invalid email/username or password"
+      );
     } catch (e) {
       setError(
         e instanceof Error && e.message === "SIGN_IN_TIMEOUT"
