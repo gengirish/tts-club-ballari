@@ -7,6 +7,8 @@ If you fork the repo or use different Fly app names, update this file (and **`AU
 
 **Use this as the production site and for `AUTH_URL` / webhooks:** [https://sister-stride.intelliforge.tech/](https://sister-stride.intelliforge.tech/)
 
+If **`AUTH_URL`** in Vercel is still **`http://localhost:3000`**, Auth.js can emit absolute URLs that point browsers at localhost (sign-in/out, magic links). The member **Log out** control now always navigates using the **current tab origin**, but you should still set **`AUTH_URL`** to this canonical HTTPS URL so server-generated links and emails stay correct.
+
 All other hosts (e.g. `sister-stride.vercel.app`, branch previews) are secondary unless you are deliberately testing them.
 
 ## Production

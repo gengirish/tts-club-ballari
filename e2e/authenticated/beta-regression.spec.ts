@@ -8,9 +8,15 @@ test.describe("beta regression (authenticated UI)", () => {
   test("member app shows log out and signing out reaches login", async ({ page }) => {
     await page.goto("/app");
     await expect(page.getByTestId("app-logout")).toBeVisible();
+    const signOutPost = page.waitForResponse(
+      (res) =>
+        res.url().includes("/api/auth/signout") && res.request().method() === "POST" && res.ok(),
+      { timeout: 30_000 }
+    );
     await page.getByTestId("app-logout").click();
-    await page.waitForURL(/\/login/, { timeout: 30_000 });
-    await expect(page.getByText(/Welcome, sister/i)).toBeVisible();
+    await signOutPost;
+    await expect(page).toHaveURL(/\/login/, { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /Welcome, sister/i })).toBeVisible();
   });
 
   test("community composer rejects whitespace-only post", async ({ page }) => {
