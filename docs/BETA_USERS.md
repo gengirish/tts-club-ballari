@@ -40,6 +40,16 @@ npm run db:seed
 
 Re-running **`db:seed`** is **safe**: beta users are **upserted** by email; passwords reset to the value above; goals are reset to one `WALKING_HABIT` row.
 
+## Set password for a real email (no `passwordHash` yet)
+
+If someone has a `User` row (e.g. created manually or via a flow that did not set a password) but **Password** login always fails with “Invalid email/username or password”, their `passwordHash` may be null. From a machine with `DATABASE_URL` pointing at the right database:
+
+```bash
+npm run db:set-password -- gen.girish@gmail.com 'TheirNewSecurePass123!'
+```
+
+This runs `scripts/set-password-for-email.ts` (same bcrypt as registration). For production, only run this from a trusted environment with the production connection string.
+
 ## If “sign up” still fails for real testers
 
 - Prefer **Password** tab with a seeded account above, or register with a **new** email not in this table.  
