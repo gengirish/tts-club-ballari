@@ -9,7 +9,7 @@ Prisma requires **`DATABASE_URL`** and **`DIRECT_URL`** (`prisma/schema.prisma`,
 1. Copy **`.env.example`** → **`.env`** in the project root (`.env` is gitignored).
 2. Set both variables for your provider (see [§2 Neon](#2-neon-pooled-vs-direct) or your host’s docs for two connection modes).
 3. **`npx prisma db push`** — the Prisma CLI loads `.env` from the project root automatically.
-4. **`npm run db:seed`** — runs `tsx prisma/seed.ts`, which loads `.env` via **`import "dotenv/config"`** (see `prisma/seed.ts` and the `dotenv` devDependency). You do **not** need to `export` URLs in the shell for seeding.
+4. **`npm run db:seed`** — runs `tsx prisma/seed.ts`, which loads `.env` via **`import "dotenv/config"`** (see `prisma/seed.ts` and the `dotenv` devDependency). You do **not** need to `export` URLs in the shell for seeding. **`npm run db:seed:reset`** runs the same script with **`--reset`** to tear down canonical beta users and re-seed (see [BETA_USERS.md](./BETA_USERS.md)).
 
 **Supabase** or other managed Postgres: use whatever pair your provider documents for “pooler / transaction” vs “direct / session” URLs so both `DATABASE_URL` and `DIRECT_URL` are valid for that product.
 

@@ -26,7 +26,7 @@ This document is for **QA leads and beta testers**. Use it to run a structured p
 |------|--------|
 | **App URL** | **Primary:** [https://sister-stride.intelliforge.tech/](https://sister-stride.intelliforge.tech/) — confirm the build under test (see [DEPLOYED_URLS.md](./DEPLOYED_URLS.md)). Secondary: Vercel alias or preview URL only when intentionally testing those hosts. |
 | **Optional env** | **`INTELLIFORGE_API_KEY`** — only for **E10** (signed entry ticket mint). See [README.md](../README.md) phase 7 and `.env.example`. |
-| **Database** | Beta DB must be **seeded** so shared accounts exist: `npm run db:seed` (after `db:push` if needed). Requires **`DATABASE_URL`** + **`DIRECT_URL`** in `.env` (see [DATABASE_ENV.md](./DATABASE_ENV.md)). Accounts: [BETA_USERS.md](./BETA_USERS.md). |
+| **Database** | Beta DB must be **seeded** so shared accounts exist: `npm run db:seed` (after `db:push` if needed). For a **clean slate** between rounds on a staging DB, run **`npm run db:seed:reset`** (see [BETA_USERS.md](./BETA_USERS.md)). Requires **`DATABASE_URL`** + **`DIRECT_URL`** in `.env` (see [DATABASE_ENV.md](./DATABASE_ENV.md)). Accounts: [BETA_USERS.md](./BETA_USERS.md). |
 | **Devices** | At least **one Android Chrome** and **one iPhone Safari** (or two real phones). Include **one desktop** for admin/coach/host. |
 | **Network** | Real 4G/5G/Wi‑Fi in India where possible; note if testing only on Wi‑Fi. |
 

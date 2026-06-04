@@ -40,6 +40,32 @@ npm run db:seed
 
 Re-running **`db:seed`** is **safe**: beta users are **upserted** by email; passwords reset to the value above; goals are reset to one `WALKING_HABIT` row.
 
+## Fresh beta round (recommended before each test pass)
+
+Use a **dedicated beta / staging database** (not production with real members). This removes every user whose email ends with **`@sss-club.example.com`**, deletes events they host, clears the sample **10,000 Steps** challenge (so leaderboard joins start clean), and clears **magic-link tokens**, **OTP rows**, and **notification logs** app-wide. Then it re-seeds programs, badges, the challenge, and beta accounts.
+
+```bash
+npm run db:seed:reset
+```
+
+PowerShell alternative:
+
+```powershell
+$env:SEED_RESET="1"; npm run db:seed
+```
+
+**Optional — wipe the entire community feed** (all posts; likes and comments cascade). Only for a DB where you are happy to delete every `CommunityPost`:
+
+```bash
+# argv
+npx tsx prisma/seed.ts --reset --wipe-community
+
+# or env
+$env:SEED_WIPE_COMMUNITY="1"; $env:SEED_RESET="1"; npm run db:seed
+```
+
+**Not removed:** other users (e.g. real Gmail sign-ups), `Program` / `Badge` rows, enrollments or data owned only by non-beta users. For a full database wipe use your provider’s branch reset or `prisma migrate reset` on a throwaway DB.
+
 ## Set password for a real email (no `passwordHash` yet)
 
 If someone has a `User` row (e.g. created manually or via a flow that did not set a password) but **Password** login always fails with “Invalid email/username or password”, their `passwordHash` may be null. From a machine with `DATABASE_URL` pointing at the right database:
