@@ -56,3 +56,65 @@ export const walkingTo5kEnrollSchema = z.object({
 });
 
 export type WalkingTo5kEnrollInput = z.infer<typeof walkingTo5kEnrollSchema>;
+
+export const walkingTo5kStep1Schema = walkingTo5kEnrollSchema.pick({
+  fullName: true,
+  dateOfBirth: true,
+  mobile: true,
+  email: true,
+});
+
+export const walkingTo5kStep2Schema = walkingTo5kEnrollSchema.pick({
+  emergencyContactName: true,
+  emergencyContactPhone: true,
+  emergencyRelationship: true,
+});
+
+export const walkingTo5kStep3Schema = walkingTo5kEnrollSchema.pick({
+  parqHeartCondition: true,
+  parqChestPainDuringActivity: true,
+  parqRecentSurgery: true,
+  parqRegularMedication: true,
+  parqOtherConcerns: true,
+});
+
+export const walkingTo5kStep4Schema = walkingTo5kEnrollSchema.pick({
+  consentVoluntary: true,
+  consentWithinLimits: true,
+  orientationMedicalSubmitted: true,
+  orientationWhatsAppJoined: true,
+});
+
+const stepSchemas = {
+  1: walkingTo5kStep1Schema,
+  2: walkingTo5kStep2Schema,
+  3: walkingTo5kStep3Schema,
+  4: walkingTo5kStep4Schema,
+} as const;
+
+export type WalkingTo5kWizardStep = keyof typeof stepSchemas;
+
+/** Validate a single wizard step from the full enrolment payload. */
+export function validateWalkingTo5kStep(
+  step: WalkingTo5kWizardStep,
+  data: WalkingTo5kEnrollInput
+): { ok: true } | { ok: false; fieldErrors: Record<string, string>; message: string } {
+  const parsed = stepSchemas[step].safeParse(data);
+  if (parsed.success) return { ok: true };
+  const fieldErrors: Record<string, string> = {};
+  for (const [key, messages] of Object.entries(parsed.error.flatten().fieldErrors)) {
+    const msg = messages?.[0];
+    if (msg) fieldErrors[key] = msg;
+  }
+  const message =
+    Object.values(fieldErrors)[0] ?? "Please complete the required fields on this step.";
+  return { ok: false, fieldErrors, message };
+}
+
+/** First wizard step (1–4) that fails validation, or null if all pass. */
+export function firstInvalidWalkingTo5kStep(data: WalkingTo5kEnrollInput): WalkingTo5kWizardStep | null {
+  for (const s of [1, 2, 3, 4] as const) {
+    if (!validateWalkingTo5kStep(s, data).ok) return s;
+  }
+  return null;
+}

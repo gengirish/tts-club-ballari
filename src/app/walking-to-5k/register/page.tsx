@@ -6,7 +6,13 @@ import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-passw
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
 import { registerSchema } from "@/lib/validation/auth";
-import type { WalkingTo5kEnrollInput } from "@/lib/validation/walking-to-5k";
+import {
+  firstInvalidWalkingTo5kStep,
+  validateWalkingTo5kStep,
+  walkingTo5kEnrollSchema,
+  type WalkingTo5kEnrollInput,
+  type WalkingTo5kWizardStep,
+} from "@/lib/validation/walking-to-5k";
 
 type WizardStep = 1 | 2 | 3 | 4;
 
@@ -14,6 +20,17 @@ const inputClass =
   "w-full rounded-card border border-paper-deep bg-paper-muted px-4 py-3 text-ink shadow-sm placeholder:text-ink/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
 
 const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55";
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="mt-1 text-xs font-semibold text-magenta" role="alert">
+      {message}
+    </p>
+  );
+}
+
+const ENROLL_FETCH_MS = 30_000;
 
 function ParqRow({
   id,
@@ -65,7 +82,9 @@ export default function WalkingTo5kRegisterPage() {
   const { data: session, status } = useSession();
 
   const [step, setStep] = useState<WizardStep>(1);
+  const [maxStepReached, setMaxStepReached] = useState<WizardStep>(1);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   // Account creation (signed-out)
@@ -176,23 +195,81 @@ export default function WalkingTo5kRegisterPage() {
     };
   }
 
-  async function submitEnrolment() {
-    setLoading(true);
+  function validateStep(target: WalkingTo5kWizardStep): boolean {
+    const result = validateWalkingTo5kStep(target, buildPayload());
+    if (result.ok) {
+      setFieldErrors({});
+      setError(null);
+      return true;
+    }
+    setFieldErrors(result.fieldErrors);
+    setError(result.message);
+    return false;
+  }
+
+  function goToStep(target: WizardStep) {
+    if (target > maxStepReached) return;
+    setStep(target);
     setError(null);
-    const res = await fetch("/api/programs/walking-to-5k/enroll", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildPayload()),
-    });
-    const body = await res.json();
-    setLoading(false);
-    if (!body.ok) {
-      setError(body.error?.message ?? "Registration failed");
+    setFieldErrors({});
+  }
+
+  function advanceFromStep(current: WizardStep) {
+    if (!validateStep(current)) return;
+    const next = (current + 1) as WizardStep;
+    setMaxStepReached((m) => (next > m ? next : m));
+    setStep(next);
+    setError(null);
+    setFieldErrors({});
+  }
+
+  async function submitEnrolment() {
+    const payload = buildPayload();
+    const invalidStep = firstInvalidWalkingTo5kStep(payload);
+    if (invalidStep !== null) {
+      const result = validateWalkingTo5kStep(invalidStep, payload);
+      if (!result.ok) {
+        setStep(invalidStep);
+        setFieldErrors(result.fieldErrors);
+        setError(result.message);
+      }
       return;
     }
-    const to = body.data?.redirectTo as string | undefined;
-    if (to) router.push(to);
-    else router.push("/app/programs/couch-to-5k");
+    if (!walkingTo5kEnrollSchema.safeParse(payload).success) {
+      setError("Please review each step and fix any missing fields.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setFieldErrors({});
+    try {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), ENROLL_FETCH_MS);
+      const res = await fetch("/api/programs/walking-to-5k/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      window.clearTimeout(timer);
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) {
+        setError(body?.error?.message ?? "Registration failed. Please try again.");
+        return;
+      }
+      const to = body.data?.redirectTo as string | undefined;
+      if (to) router.push(to);
+      else router.push("/app/programs/couch-to-5k");
+    } catch (e) {
+      setError(
+        e instanceof DOMException && e.name === "AbortError"
+          ? "Saving took too long. Please try again — your answers may already be saved."
+          : "Could not reach the server. Check your connection and try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (status === "loading") {
@@ -308,16 +385,29 @@ export default function WalkingTo5kRegisterPage() {
         </p>
 
         <ol className="mt-6 flex gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/45">
-          {([1, 2, 3, 4] as const).map((s) => (
-            <li
-              key={s}
-              className={`flex-1 rounded-full py-2 text-center ${
-                step === s ? "bg-energy text-white" : s < step ? "bg-violet/30 text-ink/80" : "bg-paper-muted"
-              }`}
-            >
-              {s}. {s === 1 ? "You" : s === 2 ? "Emergency" : s === 3 ? "PAR-Q" : "Consent"}
-            </li>
-          ))}
+          {([1, 2, 3, 4] as const).map((s) => {
+            const reachable = s <= maxStepReached;
+            const active = step === s;
+            return (
+              <li key={s} className="flex-1">
+                <button
+                  type="button"
+                  aria-current={active ? "step" : undefined}
+                  disabled={!reachable}
+                  onClick={() => goToStep(s)}
+                  className={`w-full rounded-full py-2 text-center transition ${
+                    active
+                      ? "bg-energy text-white"
+                      : reachable
+                        ? "bg-violet/30 text-ink/80 hover:bg-violet/45"
+                        : "cursor-not-allowed bg-paper-muted text-ink/35"
+                  }`}
+                >
+                  {s}. {s === 1 ? "You" : s === 2 ? "Emergency" : s === 3 ? "PAR-Q" : "Consent"}
+                </button>
+              </li>
+            );
+          })}
         </ol>
 
         <div className="mt-6 rounded-screen border border-steel/35 bg-paper-raised/95 p-6 shadow-xl">
@@ -329,6 +419,7 @@ export default function WalkingTo5kRegisterPage() {
                   Full name
                 </label>
                 <input id={`${baseId}-fn`} className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <FieldError message={fieldErrors.fullName} />
               </div>
               <div>
                 <label htmlFor={`${baseId}-dob`} className={labelClass}>
@@ -341,6 +432,7 @@ export default function WalkingTo5kRegisterPage() {
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
                 />
+                <FieldError message={fieldErrors.dateOfBirth} />
               </div>
               <div>
                 <label htmlFor={`${baseId}-mob`} className={labelClass}>
@@ -355,6 +447,7 @@ export default function WalkingTo5kRegisterPage() {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                 />
+                <FieldError message={fieldErrors.mobile} />
               </div>
               <div>
                 <label htmlFor={`${baseId}-em`} className={labelClass}>
@@ -368,14 +461,12 @@ export default function WalkingTo5kRegisterPage() {
                   onChange={(e) => setEmailExtra(e.target.value)}
                   placeholder={sessionEmail || "you@example.com"}
                 />
+                <FieldError message={fieldErrors.email} />
               </div>
               <button
                 type="button"
                 className="w-full rounded-full bg-energy py-3 font-extrabold text-white hover:brightness-105"
-                onClick={() => {
-                  setError(null);
-                  setStep(2);
-                }}
+                onClick={() => advanceFromStep(1)}
               >
                 Next
               </button>
@@ -395,6 +486,7 @@ export default function WalkingTo5kRegisterPage() {
                   value={emergencyContactName}
                   onChange={(e) => setEmergencyContactName(e.target.value)}
                 />
+                <FieldError message={fieldErrors.emergencyContactName} />
               </div>
               <div>
                 <label htmlFor={`${baseId}-ecp`} className={labelClass}>
@@ -407,6 +499,7 @@ export default function WalkingTo5kRegisterPage() {
                   value={emergencyContactPhone}
                   onChange={(e) => setEmergencyContactPhone(e.target.value)}
                 />
+                <FieldError message={fieldErrors.emergencyContactPhone} />
               </div>
               <div>
                 <label htmlFor={`${baseId}-rel`} className={labelClass}>
@@ -419,12 +512,13 @@ export default function WalkingTo5kRegisterPage() {
                   value={emergencyRelationship}
                   onChange={(e) => setEmergencyRelationship(e.target.value)}
                 />
+                <FieldError message={fieldErrors.emergencyRelationship} />
               </div>
               <div className="flex gap-2">
-                <button type="button" className="flex-1 rounded-full border border-paper-deep py-3 font-bold" onClick={() => setStep(1)}>
+                <button type="button" className="flex-1 rounded-full border border-paper-deep py-3 font-bold" onClick={() => goToStep(1)}>
                   Back
                 </button>
-                <button type="button" className="flex-1 rounded-full bg-energy py-3 font-extrabold text-white" onClick={() => setStep(3)}>
+                <button type="button" className="flex-1 rounded-full bg-energy py-3 font-extrabold text-white" onClick={() => advanceFromStep(2)}>
                   Next
                 </button>
               </div>
@@ -478,10 +572,10 @@ export default function WalkingTo5kRegisterPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <button type="button" className="flex-1 rounded-full border border-paper-deep py-3 font-bold" onClick={() => setStep(2)}>
+                <button type="button" className="flex-1 rounded-full border border-paper-deep py-3 font-bold" onClick={() => goToStep(2)}>
                   Back
                 </button>
-                <button type="button" className="flex-1 rounded-full bg-energy py-3 font-extrabold text-white" onClick={() => setStep(4)}>
+                <button type="button" className="flex-1 rounded-full bg-energy py-3 font-extrabold text-white" onClick={() => advanceFromStep(3)}>
                   Next
                 </button>
               </div>
@@ -500,6 +594,7 @@ export default function WalkingTo5kRegisterPage() {
                 />
                 I understand participation is voluntary.
               </label>
+              <FieldError message={fieldErrors.consentVoluntary} />
               <label className="flex cursor-pointer gap-3 text-sm leading-relaxed">
                 <input
                   type="checkbox"
@@ -509,6 +604,7 @@ export default function WalkingTo5kRegisterPage() {
                 />
                 I accept responsibility for exercising within my limits.
               </label>
+              <FieldError message={fieldErrors.consentWithinLimits} />
               <label className="flex cursor-pointer gap-3 text-sm leading-relaxed">
                 <input
                   type="checkbox"
@@ -518,6 +614,7 @@ export default function WalkingTo5kRegisterPage() {
                 />
                 Medical declaration above is complete and accurate to the best of my knowledge.
               </label>
+              <FieldError message={fieldErrors.orientationMedicalSubmitted} />
               <label className="flex cursor-pointer gap-3 text-sm leading-relaxed">
                 <input
                   type="checkbox"
@@ -528,7 +625,7 @@ export default function WalkingTo5kRegisterPage() {
                 I have joined (or will join) the programme WhatsApp group when the host shares the link.
               </label>
               <div className="flex gap-2">
-                <button type="button" className="flex-1 rounded-full border border-paper-deep py-3 font-bold" onClick={() => setStep(3)}>
+                <button type="button" className="flex-1 rounded-full border border-paper-deep py-3 font-bold" onClick={() => goToStep(3)}>
                   Back
                 </button>
                 <button

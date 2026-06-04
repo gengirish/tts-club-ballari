@@ -156,11 +156,9 @@ export async function POST(req: Request) {
     select: { id: true },
   });
   if (enrollment?.id) {
-    try {
-      await scheduleC25kSessionReminders(enrollment.id);
-    } catch (err) {
+    void scheduleC25kSessionReminders(enrollment.id).catch((err) => {
       console.warn("[walking-to-5k enroll] scheduleC25kSessionReminders:", err);
-    }
+    });
   }
 
   return ok({ redirectTo: "/app/programs/couch-to-5k" as const });
