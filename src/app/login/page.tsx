@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { magicLinkEmailSchema } from "@/lib/validation/auth";
 import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-password";
 
@@ -52,7 +52,7 @@ function friendlyAuthCallbackError(code: string | undefined): string {
 function friendlyMagicLinkError(code: string | undefined): string {
   switch (code) {
     case "EmailSignin":
-      return "We could not send the email. Check the address and try again, or wait a few minutes and retry.";
+      return "We couldn't send a sign-in link. If you don't have an account yet, use Sign up first. Otherwise check the email address or try password sign-in.";
     case "Configuration":
       return "Sign-in is temporarily unavailable. Please try again later or use another method.";
     case "AccessDenied":
@@ -82,7 +82,9 @@ export default function LoginPage() {
   const [regName, setRegName] = useState("");
   const [magicEmail, setMagicEmail] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [magicLinkSentTo, setMagicLinkSentTo] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -94,17 +96,28 @@ export default function LoginPage() {
   async function passwordLogin() {
     setLoading(true);
     setError(null);
+    setSuccess(null);
+    if (!identifier.trim() || !password) {
+      setError("Enter your email or username and password.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await signInEmailPasswordWithTimeout(identifier, password);
       if (res?.ok) {
-        router.replace("/app");
-        router.refresh();
+        const session = await getSession();
+        if (session?.user) {
+          router.replace("/app");
+          router.refresh();
+          return;
+        }
+        setError(
+          "Sign-in could not start a session on this device. Try again, or clear cookies for this site and retry."
+        );
         return;
       }
       setError(
-        res?.error
-          ? friendlyAuthCallbackError(res.error)
-          : "Invalid email/username or password"
+        "Incorrect email/username or password. If you just signed up, use the same details on the Password tab."
       );
     } catch (e) {
       setError(
@@ -120,7 +133,9 @@ export default function LoginPage() {
   async function sendMagicLink() {
     setLoading(true);
     setError(null);
+    setSuccess(null);
     setMagicLinkSent(false);
+    setMagicLinkSentTo("");
     const parsed = magicLinkEmailSchema.safeParse({ email: magicEmail });
     if (!parsed.success) {
       const msg = parsed.error.flatten().fieldErrors.email?.[0] ?? "Enter a valid email address.";
@@ -138,6 +153,7 @@ export default function LoginPage() {
     const verifyUrl = typeof res?.url === "string" && res.url.includes("/login/verify-request");
     if (res?.ok || verifyUrl) {
       setMagicLinkSent(true);
+      setMagicLinkSentTo(normalizedEmail);
       return;
     }
     setError(friendlyMagicLinkError(res?.error ?? undefined));
@@ -146,6 +162,7 @@ export default function LoginPage() {
   async function register() {
     setLoading(true);
     setError(null);
+    setSuccess(null);
     const payload: Record<string, string> = {
       password: regPassword,
     };
@@ -167,13 +184,21 @@ export default function LoginPage() {
       const loginId = regEmail.trim()
         ? regEmail.trim().toLowerCase()
         : regUsername.trim().toLowerCase();
+      setSuccess("Account created successfully! Signing you in…");
       const sign = await signInEmailPasswordWithTimeout(loginId, regPassword);
       if (sign?.ok) {
-        router.replace("/app");
-        router.refresh();
-        return;
+        const session = await getSession();
+        if (session?.user) {
+          router.replace("/app");
+          router.refresh();
+          return;
+        }
       }
-      setError("Account created but sign-in failed. Try logging in with Password.");
+      setSuccess("Account created successfully! Use the Password tab to sign in with your email or username.");
+      setTab("password");
+      setIdentifier(loginId);
+      setPassword("");
+      setError(null);
     } catch (e) {
       setError(
         e instanceof Error && e.message === "SIGN_IN_TIMEOUT"
@@ -201,7 +226,11 @@ export default function LoginPage() {
       onClick={() => {
         setTab(t);
         setError(null);
-        if (t !== "magic") setMagicLinkSent(false);
+        setSuccess(null);
+        if (t !== "magic") {
+          setMagicLinkSent(false);
+          setMagicLinkSentTo("");
+        }
       }}
       className={`flex min-h-[44px] w-full min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full py-2.5 text-[0.7rem] font-bold leading-tight transition-colors duration-200 sm:gap-1.5 sm:text-xs ${
         tab === t
@@ -308,8 +337,13 @@ export default function LoginPage() {
                       Check your email
                     </p>
                     <p className="mt-2">
-                      We sent a sign-in link to your inbox. Open it on this device to continue. If you do not see it,
-                      check spam or promotions.
+                      We sent a sign-in link to{" "}
+                      <strong className="font-semibold text-ink">{magicLinkSentTo || magicEmail}</strong>. Open it on
+                      this device to continue. If you do not see it, check spam or promotions.
+                    </p>
+                    <p className="mt-2 text-xs text-ink/60">
+                      Email links only work for accounts registered with that address. Use Password sign-in if you
+                      signed up with a username only.
                     </p>
                     <button
                       type="button"
@@ -431,6 +465,16 @@ export default function LoginPage() {
               </>
             )}
           </div>
+
+          {success ? (
+            <p
+              className="mt-4 rounded-card border border-progress/35 bg-progress/10 px-3 py-2 text-sm font-semibold text-progress"
+              role="status"
+              data-testid="login-form-success"
+            >
+              {success}
+            </p>
+          ) : null}
 
           {error ? (
             <p
