@@ -42,7 +42,7 @@ This document is for **QA leads and beta testers**. Use it to run a structured p
 | **Member B** | `beta.member2@…` / `beta_ballari_2` | Community interactions with Member A, second-device checks |
 | **Coach** | `beta.coach@…` / `beta_coach` | `/coach` — enrolments / desk views |
 | **Host** | `beta.host@…` / `beta_host` | `/host` — create/list events; **`/host/events/[id]/settings`** (public reg toggle, payment copy, WhatsApp link); **`/host/event-registrations`** (incoming applications for their events) |
-| **Admin** | `beta.admin@…` / `beta_admin` | `/admin` — aggregates; **`/admin/event-registrations`** (all applications: approve, reject, mark pass sent, payment proof); confirm non-admin cannot access |
+| **Admin** | `beta.admin@…` / `beta_admin` | `/admin` — aggregates; **`/admin/members`** (member directory table); **`/admin/event-registrations`** (all applications: approve, reject, mark pass sent, payment proof); confirm non-admin cannot access |
 
 Shared password for seeded users: documented in **BETA_USERS.md** (rotate after beta).
 
@@ -126,7 +126,7 @@ Prerequisites: host creates a **future** event; in **`/host/events/[id]/settings
 | R1 | Coach desk | Login as coach → `/coach` | Scoped data; no other members’ private data leaked. |
 | R2 | Host — events | Login as host → `/host` | Create/list events per product spec; RBAC enforced. |
 | R3 | Host — settings & queue | `/host/events/[id]/settings`, `/host/event-registrations` | Saves toggles/copy; queue scoped to own events. |
-| R4 | Admin — dashboard | Login as admin → `/admin` | Metrics load; member cannot open `/admin` (redirect or error). |
+| R4 | Admin — dashboard | Login as admin → `/admin` | Metrics load; link to **member directory** works; member cannot open `/admin` (redirect or error). |
 | R5 | Admin — event applications | `/admin/event-registrations` | Board loads; actions in **§4.5** work. |
 
 ### 4.8 Non-functional

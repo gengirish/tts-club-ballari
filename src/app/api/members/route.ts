@@ -3,6 +3,7 @@ import { requireRole, requireAuth, AuthError } from "@/lib/rbac";
 import { onboardingSchema } from "@/lib/validation/member";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { listAdminMemberDirectory } from "@/server/admin/member-directory";
 
 // GET /api/members  -> ADMIN only: list members
 export async function GET() {
@@ -13,12 +14,7 @@ export async function GET() {
     throw e;
   }
 
-  const members = await prisma.user.findMany({
-    where: { role: "MEMBER" },
-    select: { id: true, name: true, phone: true, city: true, createdAt: true },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const members = await listAdminMemberDirectory();
   return ok(members);
 }
 

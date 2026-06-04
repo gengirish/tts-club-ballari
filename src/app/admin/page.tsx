@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAisensyOtpCampaignName } from "@/integrations/aisensy/templates";
 import { getSessionUser } from "@/lib/rbac";
@@ -138,6 +139,14 @@ export default async function AdminDashboardPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="font-display text-4xl uppercase text-violet">Admin</h1>
         <p className="text-sm text-ink/60 mt-2 mb-8">Operational snapshot — efficient counts, no N+1 loops.</p>
+        <p className="-mt-6 mb-8 text-sm">
+          <Link
+            href="/admin/members"
+            className="font-bold text-violet-soft underline-offset-2 hover:underline"
+          >
+            View member directory (table)
+          </Link>
+        </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {statCards.map((card) => (
             <div key={card.label} className="rounded-card border border-paper-deep bg-paper-raised p-4">

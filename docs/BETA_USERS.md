@@ -17,7 +17,7 @@ They have **password login** (email or username), **`passwordHash`**, a **Health
 |------|-----------------|------------------------------|--------|
 | **MEMBER** | `beta.member1@sss-club.example.com` | `beta_ballari_1` | Member app, challenges, progress |
 | **MEMBER** | `beta.member2@sss-club.example.com` | `beta_ballari_2` | Second member (community, etc.) |
-| **ADMIN** | `beta.admin@sss-club.example.com` | `beta_admin` | `/admin` dashboard |
+| **ADMIN** | `beta.admin@sss-club.example.com` | `beta_admin` | `/admin` dashboard; **`/admin/members`** directory |
 | **COACH** | `beta.coach@sss-club.example.com` | `beta_coach` | `/coach` desk (seeded `Coach` row) |
 | **HOST** | `beta.host@sss-club.example.com` | `beta_host` | `/host` flows |
 
