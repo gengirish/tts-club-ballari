@@ -57,7 +57,7 @@ Requires: **PostgreSQL** with both **`DATABASE_URL`** and **`DIRECT_URL`** set (
 | **4 — Challenges** | `/app/challenges`, join `POST /api/challenges/[id]/join` (Zod), leaderboard UI; worker repeatable `challenge_nudge_scan` → enqueues `challenge_nudge`. |
 | **5 — C25K + Razorpay** | `/app/programs/couch-to-5k`, `POST /api/programs/couch-to-5k/order`, `POST /api/webhooks/razorpay` (signature + idempotent pay capture), `scheduleC25kSessionReminders`. |
 | **6 — Member dashboard** | `/app` live widgets (steps, score, weight, challenge, next event). |
-| **7 — Events + host** | `GET/POST /api/events`, `POST /api/events/[id]/register`, `POST /api/events/[id]/check-in`, `/host`; `scheduleEventReminderForRegistrant` (~12h). |
+| **7 — Events + host** | `GET/POST /api/events`, `GET/PATCH /api/events/[id]`, `POST /api/events/[id]/register`, `POST /api/events/[id]/check-in`, `POST /api/events/[id]/guest-check-in`, `/host`, `/register/[eventId]` (public paid registration), `/e/pass/[token]` (QR pass), `/host/event-registrations` & `/admin/event-registrations` (review queue); `scheduleEventReminderForRegistrant` (~12h). |
 | **8 — Coaches** | `/app/coaches`, `POST /api/coaches/[id]/book`, `/coach` desk (scoped enrollments). |
 | **9 — Community + SOS** | `GET/POST /api/community/posts`, like + comments routes, `/app/community` + wellness list, `POST /api/sos` + optional email enqueue. |
 | **10 — Admin** | `/admin` aggregates (members, activity, challenges, events, wellness, growth, coach leaderboard) + **WhatsApp OTP failure** feed for the AISensy login campaign. |

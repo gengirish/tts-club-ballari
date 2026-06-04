@@ -73,6 +73,12 @@ enum EventType {
   TREKKING
 }
 
+enum EventApplicationStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
 enum ChallengeType {
   STEPS
   WALKING
@@ -150,6 +156,7 @@ model User {
   communityComments CommunityComment[]
   payments          Payment[]
   coachBookingRequests CoachBookingRequest[]
+  eventApplicationsApproved EventApplication[] @relation("EventApplicationApprover")
 }
 
 model Account {
@@ -325,7 +332,48 @@ model Event {
   capacity  Int?
   createdAt DateTime  @default(now())
 
+  /** When true, public `/register/[id]` + apply API accept submissions for this event. */
+  publicRegistrationsOpen Boolean @default(false)
+  /** Shown on public form: UPI ID, amount, payee name, etc. */
+  paymentInstructions     String? @db.Text
+  /** Invite link copied / opened after approval (WhatsApp group). */
+  whatsappGroupInviteUrl  String? @db.Text
+
   registrations EventRegistration[]
+  applications  EventApplication[]
+}
+
+/** Paid / verified guest registration for an event (web portal flow; replaces Google Form rows). */
+model EventApplication {
+  id                    String                 @id @default(cuid())
+  eventId               String
+  event                 Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  applicantName         String
+  phone                 String // E.164
+  age                   Int
+  gender                Gender
+  city                  String
+  paymentScreenshot     Bytes
+  paymentScreenshotMime String
+  status                EventApplicationStatus @default(PENDING_REVIEW)
+  /** Opaque token embedded in QR / pass URL after approval. */
+  passToken             String?                @unique
+  approvedAt            DateTime?
+  approvedById          String?
+  approvedBy            User?                  @relation("EventApplicationApprover", fields: [approvedById], references: [id])
+  rejectedReason        String?
+  /** Admin/host marks that the pass + group link were sent (e.g. via WhatsApp). */
+  passDispatchedAt      DateTime?
+  checkedInAt           DateTime?
+  /** IntelliForge signed entry ticket (receipt) — see INTELLIFORGE_* env vars. */
+  intelliforgeReceiptId          String?
+  intelliforgeTicketUrl          String? @db.Text
+  intelliforgeTicketDownloadUrl  String? @db.Text
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([eventId, status])
+  @@index([phone])
 }
 
 model EventRegistration {

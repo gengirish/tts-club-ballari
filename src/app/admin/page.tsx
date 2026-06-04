@@ -149,6 +149,20 @@ export default async function AdminDashboardPage() {
         </div>
 
         <section className="mt-10 rounded-card border border-paper-deep bg-paper-raised p-6">
+          <h2 className="font-display text-xl uppercase text-violet mb-2">Event paid registrations</h2>
+          <p className="text-sm text-ink/60 mb-4">
+            Web form, payment proof, approvals, QR passes, and WhatsApp handoff — all in-product (no Google Form /
+            Sheet).
+          </p>
+          <a
+            href="/admin/event-registrations"
+            className="inline-flex rounded-full bg-energy px-5 py-2 text-sm font-extrabold text-white"
+          >
+            Open registration desk
+          </a>
+        </section>
+
+        <section className="mt-10 rounded-card border border-paper-deep bg-paper-raised p-6">
           <h2 className="font-display text-xl uppercase text-violet mb-2">WhatsApp OTP (AISensy)</h2>
           <p className="text-xs text-ink/55 mb-4">
             Failed sends for campaign <span className="font-mono">{otpCampaignName}</span> in the last 7 days (login

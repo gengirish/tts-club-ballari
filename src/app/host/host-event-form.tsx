@@ -9,6 +9,9 @@ export function HostEventForm() {
   const [location, setLocation] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [type, setType] = useState("WALK");
+  const [publicRegistrationsOpen, setPublicRegistrationsOpen] = useState(false);
+  const [paymentInstructions, setPaymentInstructions] = useState("");
+  const [whatsappGroupInviteUrl, setWhatsappGroupInviteUrl] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,6 +27,9 @@ export function HostEventForm() {
         title,
         location,
         startsAt: new Date(startsAt).toISOString(),
+        publicRegistrationsOpen,
+        paymentInstructions: paymentInstructions.trim() || null,
+        whatsappGroupInviteUrl: whatsappGroupInviteUrl.trim() || null,
       }),
     });
     const body = await res.json();
@@ -35,6 +41,9 @@ export function HostEventForm() {
     setTitle("");
     setLocation("");
     setStartsAt("");
+    setPublicRegistrationsOpen(false);
+    setPaymentInstructions("");
+    setWhatsappGroupInviteUrl("");
     router.refresh();
   }
 
@@ -70,6 +79,31 @@ export function HostEventForm() {
         <option value="CYCLING">Cycling</option>
         <option value="TREKKING">Trekking</option>
       </select>
+      <details className="rounded-lg border border-paper-deep p-3 bg-paper/50">
+        <summary className="text-sm font-bold text-violet cursor-pointer">Web registration (optional)</summary>
+        <div className="mt-3 space-y-3">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={publicRegistrationsOpen}
+              onChange={(e) => setPublicRegistrationsOpen(e.target.checked)}
+            />
+            Open public registration immediately
+          </label>
+          <textarea
+            className="w-full border rounded-card px-3 py-2 text-sm min-h-[80px]"
+            placeholder="Payment instructions (UPI, amount…)"
+            value={paymentInstructions}
+            onChange={(e) => setPaymentInstructions(e.target.value)}
+          />
+          <input
+            className="w-full border rounded-card px-3 py-2 text-xs font-mono"
+            placeholder="WhatsApp group invite URL (https://chat.whatsapp.com/…)"
+            value={whatsappGroupInviteUrl}
+            onChange={(e) => setWhatsappGroupInviteUrl(e.target.value)}
+          />
+        </div>
+      </details>
       <button
         type="submit"
         disabled={loading}

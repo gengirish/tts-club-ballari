@@ -36,8 +36,20 @@ export async function POST(req: Request) {
   const parsed = eventCreateSchema.safeParse(json);
   if (!parsed.success) return validationError(parsed.error.flatten());
 
-  const { type, title, location, startsAt, capacity, lat, lng } = parsed.data;
+  const {
+    type,
+    title,
+    location,
+    startsAt,
+    capacity,
+    lat,
+    lng,
+    publicRegistrationsOpen,
+    paymentInstructions,
+    whatsappGroupInviteUrl,
+  } = parsed.data;
 
+  const wa = whatsappGroupInviteUrl?.trim();
   const event = await prisma.event.create({
     data: {
       hostId: user.id,
@@ -48,6 +60,9 @@ export async function POST(req: Request) {
       capacity: capacity ?? null,
       lat: lat ?? null,
       lng: lng ?? null,
+      publicRegistrationsOpen: publicRegistrationsOpen ?? false,
+      paymentInstructions: paymentInstructions?.trim() || null,
+      whatsappGroupInviteUrl: wa && wa.length > 0 ? wa : null,
     },
   });
 

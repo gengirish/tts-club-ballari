@@ -28,12 +28,20 @@ export default function Home() {
         <p className="max-w-md text-sm font-semibold leading-relaxed text-steel sm:text-base">
           Your women-first fitness home in Ballari — progress, challenges, Couch to 5K, coaches, and the sister circle.
         </p>
-        <Link
-          href="/login"
-          className="mt-10 inline-flex min-h-[52px] cursor-pointer items-center justify-center rounded-full bg-energy px-10 py-3.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white shadow-brand transition-[transform,filter] duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-soft/50 focus-visible:ring-offset-4 focus-visible:ring-offset-paper motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none"
-        >
-          Enter app
-        </Link>
+        <div className="mt-10 flex w-full max-w-md flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            href="/walking-to-5k"
+            className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border border-steel/45 bg-paper-raised/90 px-8 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] text-ink shadow-md backdrop-blur-sm transition-[transform,colors] duration-200 hover:border-violet/40 hover:bg-paper-muted/80 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-soft/40 focus-visible:ring-offset-4 focus-visible:ring-offset-paper sm:w-auto sm:min-w-[11rem]"
+          >
+            Walking to 5K
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full bg-energy px-10 py-3.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white shadow-brand transition-[transform,filter] duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-soft/50 focus-visible:ring-offset-4 focus-visible:ring-offset-paper motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none sm:w-auto"
+          >
+            Enter app
+          </Link>
+        </div>
         <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.28em] text-violet-soft/90">Sister Stride</p>
       </div>
     </main>
