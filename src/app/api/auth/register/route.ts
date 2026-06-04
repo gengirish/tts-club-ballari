@@ -7,7 +7,7 @@ import {
   isPrismaUnknownRequestError,
   isPrismaValidationError,
 } from "@/lib/prisma-errors";
-import { prisma } from "@/lib/prisma";
+import { prisma, ensurePrismaConnected } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation/auth";
 import { hashPassword } from "@/server/auth/password";
 
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
   const name = parsed.data.name?.trim();
 
   try {
+    await ensurePrismaConnected();
     const user = await prisma.user.create({
       data: {
         ...(email ? { email } : {}),
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
     if (isPrismaInitializationError(e)) {
       return fail(
         "DATABASE_UNAVAILABLE",
-        "We could not connect to the database. Check deployment configuration (DATABASE_URL / DIRECT_URL) or try again shortly.",
+        "We couldn't create your account right now. Please try again in a few minutes.",
         503,
         { prismaCode: getPrismaInitializationErrorCode(e) }
       );
