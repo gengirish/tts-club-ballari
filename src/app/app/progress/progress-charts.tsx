@@ -64,6 +64,10 @@ function BarChart({
   );
 }
 
+const logLabelClass = "block text-xs font-extrabold uppercase tracking-wide text-ink/70";
+const logInputClass =
+  "mt-1.5 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition placeholder:text-ink/40 focus:border-violet focus:ring-2 focus:ring-violet/20";
+
 export function ProgressLogForm() {
   const [weightKg, setWeightKg] = useState("");
   const [steps, setSteps] = useState("");
@@ -110,41 +114,45 @@ export function ProgressLogForm() {
   return (
     <div className="rounded-card border border-paper-deep bg-paper-raised p-6 mb-8">
       <h2 className="font-display text-xl uppercase text-violet mb-4">Log today</h2>
-      <div className="grid grid-cols-2 gap-3">
-        <label className="text-sm font-semibold">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className={logLabelClass}>
           Weight (kg)
           <input
-            className="mt-1 w-full border border-paper-deep rounded-card px-3 py-2"
+            className={logInputClass}
             value={weightKg}
             onChange={(e) => setWeightKg(e.target.value)}
             inputMode="decimal"
+            placeholder="e.g. 62.5"
           />
         </label>
-        <label className="text-sm font-semibold">
+        <label className={logLabelClass}>
           Steps
           <input
-            className="mt-1 w-full border border-paper-deep rounded-card px-3 py-2"
+            className={logInputClass}
             value={steps}
             onChange={(e) => setSteps(e.target.value)}
             inputMode="numeric"
+            placeholder="e.g. 8000"
           />
         </label>
-        <label className="text-sm font-semibold">
+        <label className={logLabelClass}>
           Water (ml)
           <input
-            className="mt-1 w-full border border-paper-deep rounded-card px-3 py-2"
+            className={logInputClass}
             value={waterMl}
             onChange={(e) => setWaterMl(e.target.value)}
             inputMode="numeric"
+            placeholder="e.g. 2000"
           />
         </label>
-        <label className="text-sm font-semibold">
+        <label className={logLabelClass}>
           Sleep (hrs)
           <input
-            className="mt-1 w-full border border-paper-deep rounded-card px-3 py-2"
+            className={logInputClass}
             value={sleepHrs}
             onChange={(e) => setSleepHrs(e.target.value)}
             inputMode="decimal"
+            placeholder="e.g. 7.5"
           />
         </label>
       </div>

@@ -22,7 +22,12 @@ const serwist = new Serwist({
       {
         url: "/~offline",
         matcher({ request }) {
-          return request.destination === "document";
+          if (request.destination !== "document") return false;
+          const path = new URL(request.url).pathname;
+          // Auth routes must hit the network — never serve the offline shell on /login.
+          if (path === "/login" || path.startsWith("/login/")) return false;
+          if (path.startsWith("/api/auth")) return false;
+          return true;
         },
       },
     ],
