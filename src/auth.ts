@@ -42,11 +42,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       server: { host: "localhost", port: 587, auth: { user: "", pass: "" } },
       from: process.env.AUTH_EMAIL_FROM ?? "SSS Club <alerts@intelliforge.tech>",
       async sendVerificationRequest({ identifier, url, theme }) {
+        if (!process.env.AGENTMAIL_API_KEY?.trim()) {
+          throw new Error("Configuration");
+        }
+
         const existing = await prisma.user.findFirst({
           where: { email: { equals: identifier, mode: "insensitive" } },
           select: { id: true },
         });
-        if (!existing) return;
+        if (!existing) {
+          throw new Error("EmailSignin");
+        }
 
         const host = new URL(url).host;
         const bodyHtml = magicLinkHtmlBody(url, host, theme);
