@@ -1,4 +1,5 @@
-# IntelliForge / HRMS-style quality gate — every push & PR (no local Docker required).
+# Quality gate on every push & PR; optional Playwright smoke after green build.
+# CD: Vercel (Next.js) via GitHub integration; BullMQ worker via deploy-fly-worker.yml.
 name: CI
 
 on:
@@ -6,6 +7,11 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write # upload-artifact on Playwright failure
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -65,3 +71,61 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e-smoke:
+    name: Playwright (public)
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: sss_club
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d sss_club"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma generate + db push
+        run: npx prisma db push
+
+      - name: Install Playwright (Chromium + system deps)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run public E2E suite
+        run: npm run test:e2e -- --project=public
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

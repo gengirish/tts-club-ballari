@@ -19,7 +19,7 @@ npx auth secret             # writes AUTH_SECRET
 npm run db:push             # push schema to Postgres (Neon, Supabase, etc.)
 npm run db:seed             # program + badges + sample challenge + **beta test users** (loads .env via dotenv; see [docs/BETA_USERS.md](./docs/BETA_USERS.md))
 npm run db:seed:reset       # same as db:seed after wiping @sss-club.example.com users + sample challenge + auth/OTP/notify logs (staging / beta DB only)
-npm run lint && npm run typecheck   # same checks as GitHub CI
+npm run lint && npm run typecheck   # same checks as GitHub CI (see [docs/CI_CD.md](./docs/CI_CD.md))
 npm run dev                 # web (Vercel target)
 npm run worker              # BullMQ worker (Fly.io target) — separate terminal
 ```
