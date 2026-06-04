@@ -7,28 +7,22 @@ test.describe("public shell", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
-  test("login page shows phone step", async ({ page }) => {
+  test("login page shows password sign-in by default", async ({ page }) => {
     await page.goto("/login");
     await expect(page.getByText(/Welcome, sister/i)).toBeVisible();
-    await expect(page.getByTestId("login-phone")).toBeVisible();
-    await expect(page.getByTestId("login-send-otp")).toBeVisible();
-  });
-
-  test("login phone OTP shows validation for invalid short number", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByTestId("login-phone").fill("123");
-    await page.getByTestId("login-send-otp").click();
-    await expect(page.getByTestId("login-form-error")).toContainText(/10-digit|Indian mobile|valid/i, {
-      timeout: 10_000,
-    });
-  });
-
-  test("login password tab shows identifier + password fields", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByTestId("login-tab-password").click();
     await expect(page.getByTestId("login-identifier")).toBeVisible();
     await expect(page.getByTestId("login-password")).toBeVisible();
     await expect(page.getByTestId("login-password-submit")).toBeVisible();
+  });
+
+  test("login password shows error for invalid credentials", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByTestId("login-identifier").fill("not-a-real-user@example.com");
+    await page.getByTestId("login-password").fill("wrong-pass-xyz");
+    await page.getByTestId("login-password-submit").click();
+    await expect(page.getByTestId("login-form-error")).toContainText(/invalid|password|timed out/i, {
+      timeout: 35_000,
+    });
   });
 
   test("login register tab shows sign-up fields", async ({ page }) => {

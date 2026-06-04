@@ -67,7 +67,7 @@ Neon’s copied URL may include **`channel_binding=require`**. The app **strips 
 
 ## 5. CI / Playwright
 
-GitHub Actions and **`npm run test:e2e:seed`** need **`DATABASE_URL`** and **`DIRECT_URL`** in the environment (or in a loaded `.env`) because Prisma reads both from the schema. See [E2E_PLAYWRIGHT.md](./E2E_PLAYWRIGHT.md) for Playwright-specific variables (`E2E_TEST_PHONE`, etc.).
+GitHub Actions and **`npm run test:e2e:seed`** need **`DATABASE_URL`** and **`DIRECT_URL`** in the environment (or in a loaded `.env`) because Prisma reads both from the schema. See [E2E_PLAYWRIGHT.md](./E2E_PLAYWRIGHT.md) for Playwright variables (`E2E_PASSWORD_EMAIL`, `E2E_PASSWORD`, optional `E2E_TEST_PHONE` for seed-only).
 
 ---
 

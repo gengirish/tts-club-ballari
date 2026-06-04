@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-password";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
 import { registerSchema } from "@/lib/validation/auth";
@@ -123,31 +123,36 @@ export default function WalkingTo5kRegisterPage() {
       return;
     }
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const body = await res.json();
-    if (!body.ok) {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
+      if (!body.ok) {
+        setError(body.error?.message ?? "Could not create account");
+        return;
+      }
+      const loginId = regEmail.trim()
+        ? regEmail.trim().toLowerCase()
+        : regUsername.trim().toLowerCase();
+      const sign = await signInEmailPasswordWithTimeout(loginId, regPassword);
+      if (sign?.ok) {
+        router.replace("/walking-to-5k/register");
+        router.refresh();
+        return;
+      }
+      setError("Account created but sign-in failed. Open Sign in below.");
+    } catch (e) {
+      setError(
+        e instanceof Error && e.message === "SIGN_IN_TIMEOUT"
+          ? "Account may exist, but sign-in timed out. Use Sign in with your password."
+          : "Could not finish sign-up. Try again."
+      );
+    } finally {
       setLoading(false);
-      setError(body.error?.message ?? "Could not create account");
-      return;
     }
-    const loginId = regEmail.trim()
-      ? regEmail.trim().toLowerCase()
-      : regUsername.trim().toLowerCase();
-    const sign = await signIn("email-password", {
-      identifier: loginId,
-      password: regPassword,
-      redirect: false,
-    });
-    setLoading(false);
-    if (sign?.ok) {
-      window.location.assign("/walking-to-5k/register");
-      return;
-    }
-    setError("Account created but sign-in failed. Open Sign in or use login.");
   }
 
   function buildPayload(): WalkingTo5kEnrollInput {
@@ -273,7 +278,7 @@ export default function WalkingTo5kRegisterPage() {
                 href="/login?callbackUrl=/walking-to-5k/register"
                 className="font-bold text-violet-soft underline-offset-2 hover:underline"
               >
-                Sign in with password or WhatsApp OTP
+                Sign in with password
               </Link>
             </p>
             {error ? (

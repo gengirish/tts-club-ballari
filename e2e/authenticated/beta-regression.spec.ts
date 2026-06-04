@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 /**
  * Covers Sister Stride beta bug fixes (logout, community UX, coaches, C25K assessment).
- * Requires E2E_TEST_PHONE + E2E_TEST_OTP and `npm run test:e2e:seed`.
+ * Requires E2E_PASSWORD_EMAIL + E2E_PASSWORD (see docs/E2E_PLAYWRIGHT.md). Run `npm run db:seed` so the beta member exists.
  */
 test.describe("beta regression (authenticated UI)", () => {
   test("member app shows log out and signing out reaches login", async ({ page }) => {

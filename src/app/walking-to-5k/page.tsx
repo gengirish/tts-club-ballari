@@ -149,7 +149,7 @@ export default function WalkingTo5kLandingPage() {
         <div className="rounded-screen border border-violet/25 bg-gradient-to-br from-violet/10 via-paper-raised/95 to-paper-muted/80 p-8 sm:p-10">
           <h2 className="font-display text-xl font-bold uppercase text-violet sm:text-2xl">Ready to join?</h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/75">
-            Create your secure account (email or username + password, or sign in with phone OTP from the login page), then
+            Create your secure account (email or username + password, or sign in from the login page), then
             complete the Walking to 5K form digitally. You will land in the Couch to 5K programme area with your enrolment on
             file.
           </p>

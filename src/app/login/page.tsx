@@ -1,23 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { signIn } from "next-auth/react";
-import { magicLinkEmailSchema, requestOtpSchema, verifyOtpSchema } from "@/lib/validation/auth";
+import { magicLinkEmailSchema } from "@/lib/validation/auth";
+import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-password";
 
-type Tab = "phone" | "password" | "magic" | "register";
-
-function IconPhone({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6.6 3h3.2c.3 0 .6.2.7.5l1 2.7c.1.3 0 .6-.2.8l-1.9 1.9c.9 1.8 2.4 3.3 4.2 4.2l1.9-1.9c.2-.2.5-.3.8-.2l2.7 1c.3.1.5.4.5.7v3.2c0 1.2-1 2.2-2.2 2.2C9.4 21 3 14.6 3 6.6 3 5.4 4 4.4 5.2 4.4H6.6z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+type Tab = "password" | "magic" | "register";
 
 function IconLock({ className }: { className?: string }) {
   return (
@@ -56,9 +45,9 @@ function friendlyMagicLinkError(code: string | undefined): string {
     case "AccessDenied":
       return "This email cannot be used for a magic link right now. Try another method or contact support.";
     case "OAuthAccountNotLinked":
-      return "This email is linked to another sign-in method. Use password or phone OTP instead.";
+      return "This email is linked to another sign-in method. Use password sign-in instead.";
     default:
-      return "Something went wrong sending the link. Please try again or use phone or password sign-in.";
+      return "Something went wrong sending the link. Please try again or use password sign-in.";
   }
 }
 
@@ -69,11 +58,9 @@ const inputNoIconClass =
   "w-full rounded-card border border-paper-deep bg-paper-muted px-4 py-3.5 text-ink shadow-sm placeholder:text-ink/45 transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:opacity-60";
 
 export default function LoginPage() {
+  const router = useRouter();
   const baseId = useId();
-  const [tab, setTab] = useState<Tab>("phone");
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [stage, setStage] = useState<"phone" | "otp">("phone");
+  const [tab, setTab] = useState<Tab>("password");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [regEmail, setRegEmail] = useState("");
@@ -85,70 +72,26 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function requestOtp() {
-    setLoading(true);
-    setError(null);
-    const parsed = requestOtpSchema.safeParse({ phone });
-    if (!parsed.success) {
-      const msg =
-        parsed.error.flatten().fieldErrors.phone?.[0] ?? "Enter a valid mobile number.";
-      setError(msg);
-      setLoading(false);
-      return;
-    }
-    const res = await fetch("/api/auth/otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: parsed.data.phone }),
-    });
-    const body = await res.json();
-    setLoading(false);
-    if (body.ok) {
-      setStage("otp");
-      setCode("");
-      return;
-    }
-    if (body.error?.code === "RATE_LIMITED") {
-      setError(body.error?.message ?? "Too many attempts. Please try again later.");
-      return;
-    }
-    setError(body.error?.message ?? "Could not send OTP");
-  }
-
-  async function verifyOtpLogin() {
-    setLoading(true);
-    setError(null);
-    const parsed = verifyOtpSchema.safeParse({ phone, code });
-    if (!parsed.success) {
-      const flat = parsed.error.flatten().fieldErrors;
-      setError(flat.code?.[0] ?? flat.phone?.[0] ?? "Enter the 6-digit code from WhatsApp.");
-      setLoading(false);
-      return;
-    }
-    const res = await signIn("phone-otp", {
-      phone: parsed.data.phone,
-      code: parsed.data.code,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.ok) window.location.href = "/app";
-    else
-      setError(
-        "Invalid or expired code, or too many tries for this number. Wait a few minutes and request a new code if needed."
-      );
-  }
-
   async function passwordLogin() {
     setLoading(true);
     setError(null);
-    const res = await signIn("email-password", {
-      identifier,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.ok) window.location.href = "/app";
-    else setError("Invalid email/username or password");
+    try {
+      const res = await signInEmailPasswordWithTimeout(identifier, password);
+      if (res?.ok) {
+        router.replace("/app");
+        router.refresh();
+        return;
+      }
+      setError("Invalid email/username or password");
+    } catch (e) {
+      setError(
+        e instanceof Error && e.message === "SIGN_IN_TIMEOUT"
+          ? "Sign-in timed out. Check your connection and try again."
+          : "Sign-in failed. Try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function sendMagicLink() {
@@ -187,31 +130,44 @@ export default function LoginPage() {
     if (regUsername.trim()) payload.username = regUsername.trim();
     if (regName.trim()) payload.name = regName.trim();
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const body = await res.json();
-    if (!body.ok) {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
+      if (!body.ok) {
+        setError(body.error?.message ?? "Could not create account");
+        return;
+      }
+      const loginId = regEmail.trim()
+        ? regEmail.trim().toLowerCase()
+        : regUsername.trim().toLowerCase();
+      const sign = await signInEmailPasswordWithTimeout(loginId, regPassword);
+      if (sign?.ok) {
+        router.replace("/app");
+        router.refresh();
+        return;
+      }
+      setError("Account created but sign-in failed. Try logging in with Password.");
+    } catch (e) {
+      setError(
+        e instanceof Error && e.message === "SIGN_IN_TIMEOUT"
+          ? "Account may have been created, but sign-in timed out. Open Password and try logging in."
+          : "Could not finish sign-up. Try again."
+      );
+    } finally {
       setLoading(false);
-      setError(body.error?.message ?? "Could not create account");
-      return;
     }
-    const loginId = regEmail.trim()
-      ? regEmail.trim().toLowerCase()
-      : regUsername.trim().toLowerCase();
-    const sign = await signIn("email-password", {
-      identifier: loginId,
-      password: regPassword,
-      redirect: false,
-    });
-    setLoading(false);
-    if (sign?.ok) window.location.href = "/app";
-    else setError("Account created but sign-in failed. Try logging in.");
   }
 
-  const tabBtn = (t: Tab, label: string, testId: string, Icon: typeof IconPhone) => (
+  const tabBtn = (
+    t: Tab,
+    label: string,
+    testId: string,
+    Icon: typeof IconLock
+  ) => (
     <button
       type="button"
       data-testid={testId}
@@ -251,111 +207,26 @@ export default function LoginPage() {
             Welcome, sister
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">
-            Log in with your mobile (WhatsApp OTP), a one-time email link, or email or username with a password.
+            Sign in with a one-time email link, or email or username with a password. New here? Use <strong className="font-semibold text-ink/85">Sign up</strong>.
           </p>
 
           <div
-            className="mt-6 grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap"
+            className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:flex sm:flex-nowrap"
             role="tablist"
             aria-label="Sign in method"
           >
-            {tabBtn("phone", "Phone OTP", "login-tab-phone", IconPhone)}
             {tabBtn("password", "Password", "login-tab-password", IconLock)}
             {tabBtn("magic", "Email link", "login-tab-magic", IconMail)}
             {tabBtn("register", "Sign up", "login-tab-register", IconUserPlus)}
           </div>
 
-          <div id={`${baseId}-panel`} role="tabpanel" aria-labelledby={`${baseId}-tab-${tab}`} aria-busy={loading} className="mt-6">
-            {tab === "phone" && (
-              <>
-                {stage === "phone" ? (
-                  <>
-                    <label htmlFor="login-phone" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
-                      Mobile number
-                    </label>
-                    <div className="relative mb-4">
-                      <IconPhone className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-violet/70" />
-                      <input
-                        id="login-phone"
-                        data-testid="login-phone"
-                        className={inputClass}
-                        placeholder="+91 9XXXXXXXXX"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        autoComplete="tel"
-                        inputMode="tel"
-                        disabled={loading}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      data-testid="login-send-otp"
-                      onClick={() => void requestOtp()}
-                      disabled={loading}
-                      className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-extrabold text-white shadow-md shadow-violet/25 transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:active:scale-[0.99]"
-                    >
-                      {loading ? "Sending…" : "Send OTP"}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="mb-3 text-xs leading-relaxed text-ink/65">
-                      Code arrives on WhatsApp. If you tap &quot;Send again&quot;, your previous code stops working —
-                      use only the newest 6 digits.
-                    </p>
-                    <label htmlFor="login-otp" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
-                      One-time code
-                    </label>
-                    <input
-                      id="login-otp"
-                      data-testid="login-otp"
-                      className={`${inputNoIconClass} mb-4 text-center tracking-[0.35em]`}
-                      placeholder="••••••"
-                      maxLength={6}
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      disabled={loading}
-                    />
-                    <button
-                      type="button"
-                      data-testid="login-verify"
-                      onClick={() => void verifyOtpLogin()}
-                      disabled={loading}
-                      className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-extrabold text-white shadow-md shadow-violet/25 transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:active:scale-[0.99]"
-                    >
-                      {loading ? "Verifying…" : "Verify & continue"}
-                    </button>
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        data-testid="login-resend-otp"
-                        onClick={() => void requestOtp()}
-                        disabled={loading}
-                        className="min-h-[44px] flex-1 cursor-pointer rounded-full border border-paper-deep bg-paper-raised py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Send again
-                      </button>
-                      <button
-                        type="button"
-                        data-testid="login-change-number"
-                        onClick={() => {
-                          setStage("phone");
-                          setCode("");
-                          setError(null);
-                        }}
-                        disabled={loading}
-                        className="min-h-[44px] flex-1 cursor-pointer rounded-full border border-paper-deep bg-paper-raised py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Change number
-                      </button>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-
+          <div
+            id={`${baseId}-panel`}
+            role="tabpanel"
+            aria-labelledby={`${baseId}-tab-${tab}`}
+            aria-busy={loading}
+            className="mt-6"
+          >
             {tab === "password" && (
               <>
                 <label htmlFor="login-identifier" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
@@ -468,10 +339,10 @@ export default function LoginPage() {
 
             {tab === "register" && (
               <>
-            <p className="mb-3 text-xs leading-relaxed text-ink/65">
-              Use at least one of email or username (you can set both). Username: letters, numbers,{" "}
-              <strong className="font-semibold text-ink/80">dot</strong>, or underscore — no spaces.
-            </p>
+                <p className="mb-3 text-xs leading-relaxed text-ink/65">
+                  Use at least one of email or username (you can set both). Username: letters, numbers,{" "}
+                  <strong className="font-semibold text-ink/80">dot</strong>, or underscore — no spaces.
+                </p>
                 <label htmlFor="register-email" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
                   Email
                 </label>

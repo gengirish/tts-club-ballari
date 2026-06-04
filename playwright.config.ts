@@ -13,7 +13,9 @@ function shouldStartLocalWebServer(url: string): boolean {
 }
 
 const startLocalWebServer = shouldStartLocalWebServer(baseURL);
-const e2eAuth = Boolean(process.env.E2E_TEST_PHONE?.trim() && process.env.E2E_TEST_OTP?.trim());
+const e2eAuth = Boolean(
+  process.env.E2E_PASSWORD_EMAIL?.trim() && process.env.E2E_PASSWORD?.trim()
+);
 
 export default defineConfig({
   testDir: "e2e",
@@ -38,8 +40,8 @@ export default defineConfig({
           timeout: 120_000,
           env: {
             ...process.env,
-            E2E_TEST_PHONE: process.env.E2E_TEST_PHONE ?? "",
-            E2E_TEST_OTP: process.env.E2E_TEST_OTP ?? "",
+            E2E_PASSWORD_EMAIL: process.env.E2E_PASSWORD_EMAIL ?? "",
+            E2E_PASSWORD: process.env.E2E_PASSWORD ?? "",
           },
         },
       }

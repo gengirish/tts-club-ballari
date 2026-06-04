@@ -3,6 +3,12 @@
 Single place for **public** deployment endpoints used by IntelliForge / this scaffold.  
 If you fork the repo or use different Fly app names, update this file (and **`AUTH_URL`** / `PROXY_API_TO` in Vercel) to match your own hosts.
 
+## Canonical primary URL
+
+**Use this as the production site and for `AUTH_URL` / webhooks:** [https://sister-stride.intelliforge.tech/](https://sister-stride.intelliforge.tech/)
+
+All other hosts (e.g. `sister-stride.vercel.app`, branch previews) are secondary unless you are deliberately testing them.
+
 ## Production
 
 | Surface | URL | Notes |

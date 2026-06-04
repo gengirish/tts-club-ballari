@@ -3,6 +3,9 @@
 
 You are working on a production Next.js 14 (App Router) app for a women's fitness community in Ballari, India. Follow these rules WITHOUT being asked. No TODOs, no placeholders — ship complete files.
 
+## Production domain (canonical)
+- **Primary URL:** https://sister-stride.intelliforge.tech/ — default for user-facing production, `AUTH_URL`, and inbound webhooks. Vercel `*.vercel.app` hosts are secondary unless explicitly testing them. Details: `docs/DEPLOYED_URLS.md`.
+
 ## Stack (non-negotiable)
 - Next.js 14 App Router + TypeScript (strict)
 - Prisma + PostgreSQL (managed: Neon, Supabase, or compatible)

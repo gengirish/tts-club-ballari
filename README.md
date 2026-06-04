@@ -72,9 +72,9 @@ See [docs/E2E_PLAYWRIGHT.md](./docs/E2E_PLAYWRIGHT.md). Quick start:
 
 ```bash
 npx playwright install chromium
-# Prefer a filled .env (DATABASE_URL + DIRECT_URL + AUTH_SECRET); seed script loads it via dotenv.
-$env:E2E_TEST_PHONE="+919999999999"; $env:E2E_TEST_OTP="999000"
-npm run test:e2e:seed
+# Prefer a filled .env (DATABASE_URL + DIRECT_URL + AUTH_SECRET); run db:seed for beta users (see docs/BETA_USERS.md).
+npm run db:seed
+$env:E2E_PASSWORD_EMAIL="beta.member1@sss-club.example.com"; $env:E2E_PASSWORD="BetaTest@2026!"
 npm run test:e2e
 ```
 
