@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   if (!keyId || !keySecret) {
     return fail(
       "PAYMENTS_DISABLED",
-      "Razorpay is not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET (test keys from the Razorpay dashboard) to your environment. For a local-only test enrollment without checkout, set NODE_ENV=development and C25K_DEV_CHECKOUT=1 — see .env.example.",
+      "Online payment is not available right now. Please try again later or contact the club for help enrolling.",
       503
     );
   }

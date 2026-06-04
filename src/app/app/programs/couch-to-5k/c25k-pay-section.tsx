@@ -64,7 +64,13 @@ export function C25kPaySection({
       });
       const body = await res.json();
       if (!res.ok || !body.ok) {
-        setErr(body.error?.message ?? "Could not start checkout");
+        const code = body.error?.code as string | undefined;
+        const msg = body.error?.message as string | undefined;
+        setErr(
+          code === "PAYMENTS_DISABLED"
+            ? msg ?? "Online payment is not available right now. Please try again later or contact the club."
+            : msg ?? "Could not start checkout. Please try again."
+        );
         setLoading(false);
         return;
       }

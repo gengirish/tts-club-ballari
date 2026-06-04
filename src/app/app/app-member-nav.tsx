@@ -20,7 +20,7 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
         <button
           type="button"
           data-testid="app-logout"
-          onClick={() => void signOut({ callbackUrl: "/login" })}
+          onClick={() => void signOut({ callbackUrl: "/login", redirect: true })}
           className="shrink-0 rounded-full border border-steel/25 bg-paper-muted px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-ink transition hover:border-magenta/50 hover:text-magenta-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
           Log out

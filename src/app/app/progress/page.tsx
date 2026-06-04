@@ -25,7 +25,7 @@ export default async function ProgressPage() {
   }));
 
   return (
-    <main className="min-h-screen bg-paper px-4 py-10">
+    <main className="min-h-screen bg-paper px-4 py-10 text-ink">
       <div className="max-w-3xl mx-auto">
         <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">
           Progress
