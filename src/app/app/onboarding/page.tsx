@@ -12,7 +12,7 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="relative min-h-screen px-4 py-10 md:py-14 bg-paper overflow-hidden">
+    <main className="relative min-h-screen px-4 py-10 md:py-14 bg-paper text-ink overflow-hidden">
       <div className="absolute inset-0 bg-energy-soft opacity-[0.12] pointer-events-none" aria-hidden />
       <div className="relative max-w-2xl mx-auto text-center mb-10">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-magenta mb-2">Steel Sisters & Striders</p>

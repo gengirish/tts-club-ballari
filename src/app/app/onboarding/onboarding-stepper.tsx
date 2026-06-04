@@ -7,6 +7,13 @@ import { onboardingSchema } from "@/lib/validation/member";
 
 const STEPS = ["You", "Health", "Movement", "Goals"] as const;
 
+const inputClass =
+  "mt-1 w-full rounded-card border border-paper-deep bg-paper-muted px-4 py-3 text-ink shadow-sm placeholder:text-ink/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
+
+const selectClass = `${inputClass} cursor-pointer`;
+
+const textareaClass = `${inputClass} resize-y`;
+
 const ACTIVITY_IDS = ["SEDENTARY", "WALKING", "RUNNING", "GYM", "YOGA", "SPORTS"] as const;
 
 const ACTIVITY_LABEL: Record<(typeof ACTIVITY_IDS)[number], string> = {
@@ -212,7 +219,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Name <span className="text-magenta">*</span>
               <input
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                className={inputClass}
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 autoComplete="name"
@@ -222,7 +229,7 @@ export function OnboardingStepper() {
               Email <span className="text-ink/40 font-normal">(optional)</span>
               <input
                 type="email"
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                className={inputClass}
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 autoComplete="email"
@@ -232,7 +239,7 @@ export function OnboardingStepper() {
               Date of birth <span className="text-ink/40 font-normal">(optional)</span>
               <input
                 type="date"
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                className={inputClass}
                 value={form.dob}
                 onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
               />
@@ -240,7 +247,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Gender
               <select
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 bg-paper-raised"
+                className={selectClass}
                 value={form.gender}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, gender: e.target.value as FormState["gender"] }))
@@ -255,7 +262,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Occupation <span className="text-ink/40 font-normal">(optional)</span>
               <input
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                className={inputClass}
                 value={form.occupation}
                 onChange={(e) => setForm((f) => ({ ...f, occupation: e.target.value }))}
               />
@@ -263,7 +270,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               City
               <input
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                className={inputClass}
                 value={form.city}
                 onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
               />
@@ -284,7 +291,7 @@ export function OnboardingStepper() {
                 Height (cm)
                 <input
                   inputMode="numeric"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.heightCm}
                   onChange={(e) => setForm((f) => ({ ...f, heightCm: e.target.value }))}
                 />
@@ -293,7 +300,7 @@ export function OnboardingStepper() {
                 Weight (kg)
                 <input
                   inputMode="decimal"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.weightKg}
                   onChange={(e) => setForm((f) => ({ ...f, weightKg: e.target.value }))}
                 />
@@ -302,7 +309,7 @@ export function OnboardingStepper() {
                 Waist (cm) <span className="text-ink/40 font-normal">(optional)</span>
                 <input
                   inputMode="numeric"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.waistCm}
                   onChange={(e) => setForm((f) => ({ ...f, waistCm: e.target.value }))}
                 />
@@ -313,7 +320,7 @@ export function OnboardingStepper() {
                 BP systolic
                 <input
                   inputMode="numeric"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.bpSystolic}
                   onChange={(e) => setForm((f) => ({ ...f, bpSystolic: e.target.value }))}
                 />
@@ -322,7 +329,7 @@ export function OnboardingStepper() {
                 BP diastolic
                 <input
                   inputMode="numeric"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.bpDiastolic}
                   onChange={(e) => setForm((f) => ({ ...f, bpDiastolic: e.target.value }))}
                 />
@@ -331,7 +338,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Conditions or notes <span className="text-ink/40 font-normal">(optional)</span>
               <textarea
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 min-h-[88px]"
+                className={`${textareaClass} min-h-[88px]`}
                 value={form.conditions}
                 onChange={(e) => setForm((f) => ({ ...f, conditions: e.target.value }))}
               />
@@ -359,7 +366,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Injury history <span className="text-ink/40 font-normal">(optional)</span>
               <textarea
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 min-h-[72px]"
+                className={`${textareaClass} min-h-[72px]`}
                 value={form.injuryHistory}
                 onChange={(e) => setForm((f) => ({ ...f, injuryHistory: e.target.value }))}
               />
@@ -376,7 +383,7 @@ export function OnboardingStepper() {
             <label className="block text-sm font-semibold text-ink">
               Fitness level
               <select
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3 bg-paper-raised"
+                className={selectClass}
                 value={form.level}
                 onChange={(e) =>
                   setForm((f) => ({
@@ -416,7 +423,7 @@ export function OnboardingStepper() {
               Average daily steps <span className="text-ink/40 font-normal">(optional)</span>
               <input
                 inputMode="numeric"
-                className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                className={inputClass}
                 value={form.avgDailySteps}
                 onChange={(e) => setForm((f) => ({ ...f, avgDailySteps: e.target.value }))}
               />
@@ -426,7 +433,7 @@ export function OnboardingStepper() {
                 Comfortable run (km)
                 <input
                   inputMode="decimal"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.runningAbilityKm}
                   onChange={(e) => setForm((f) => ({ ...f, runningAbilityKm: e.target.value }))}
                 />
@@ -435,7 +442,7 @@ export function OnboardingStepper() {
                 Typical walk (km)
                 <input
                   inputMode="decimal"
-                  className="mt-1 w-full border border-paper-deep rounded-card px-4 py-3"
+                  className={inputClass}
                   value={form.walkingDistanceKm}
                   onChange={(e) => setForm((f) => ({ ...f, walkingDistanceKm: e.target.value }))}
                 />
