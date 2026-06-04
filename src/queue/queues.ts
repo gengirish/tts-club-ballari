@@ -10,6 +10,21 @@ export type NotificationJob =
 
 let notificationsQueue: Queue<NotificationJob> | null = null;
 
+/** Skip BullMQ when Redis is unset or still pointing at localhost on Vercel (avoids hanging requests). */
+export function isRedisAvailable(): boolean {
+  const url = process.env.REDIS_URL?.trim();
+  if (!url) return false;
+  try {
+    const host = new URL(url).hostname;
+    if (process.env.VERCEL && (host === "localhost" || host === "127.0.0.1")) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+  return true;
+}
+
 /** Lazy so `next build` does not require a live Redis when route modules import this file. */
 export function getNotificationsQueue(): Queue<NotificationJob> {
   if (!notificationsQueue) {
@@ -27,5 +42,6 @@ export function getNotificationsQueue(): Queue<NotificationJob> {
 }
 
 export async function enqueueNotification(job: NotificationJob, opts?: { delayMs?: number }) {
+  if (!isRedisAvailable()) return null;
   return getNotificationsQueue().add(job.kind, job, { delay: opts?.delayMs });
 }
