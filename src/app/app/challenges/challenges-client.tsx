@@ -105,7 +105,7 @@ export function ChallengesClient({
                   }`}
                 >
                   <span className="font-semibold text-ink">
-                    {i + 1}. {p.user.name ?? "Sister"}
+                    {i + 1}. {p.user.name ?? "Strider"}
                     {p.userId === userId ? " · you" : ""}
                   </span>
                   <span className="text-violet font-bold">

@@ -15,7 +15,7 @@ const features = [
   },
   {
     title: "Group rhythm — Tue · Thu · Sun",
-    body: "Train with the sister circle on fixed session days so accountability and energy stay high all season.",
+    body: "Train with the strider circle on fixed session days so accountability and energy stay high all season.",
   },
   {
     title: "Attendance & progress",

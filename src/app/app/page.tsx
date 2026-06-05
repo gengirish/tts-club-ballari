@@ -64,7 +64,7 @@ export default async function AppHome() {
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">
-              Namaste, {user.name ?? "sister"}
+              Namaste, {user.name ?? "strider"}
             </h1>
             <p className="text-sm text-ink/60 mt-1">Ballari · today in IST</p>
             <Link

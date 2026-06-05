@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     });
     label = row?.phone ?? "";
   }
-  if (!label) label = "Sister";
+  if (!label) label = "Strider";
 
   return (
     <div className="min-h-screen">

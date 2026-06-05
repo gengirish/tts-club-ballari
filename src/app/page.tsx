@@ -26,7 +26,7 @@ export default function Home() {
           />
         </div>
         <p className="max-w-md text-sm font-semibold leading-relaxed text-steel sm:text-base">
-          Your women-first fitness home in Ballari — progress, challenges, Couch to 5K, coaches, and the sister circle.
+          Your women-first fitness home in Ballari — progress, challenges, Couch to 5K, coaches, and the strider circle.
         </p>
         <div className="mt-10 flex w-full max-w-md flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link

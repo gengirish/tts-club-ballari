@@ -186,7 +186,7 @@ export function CommunityPostCard({ post }: { post: Post }) {
   return (
     <article className="rounded-card border border-paper-deep bg-paper-raised p-4 overflow-hidden">
       <header className="flex justify-between text-xs text-ink/50 gap-2">
-        <span className="font-bold text-violet shrink-0">{post.author.name ?? "Sister"}</span>
+        <span className="font-bold text-violet shrink-0">{post.author.name ?? "Strider"}</span>
         <time className="shrink-0" dateTime={post.createdAt}>
           {new Date(post.createdAt).toLocaleString("en-IN")}
         </time>
@@ -247,7 +247,7 @@ export function CommunityPostCard({ post }: { post: Post }) {
           <ul className="space-y-2 max-h-64 overflow-y-auto">
             {localComments.map((c) => (
               <li key={c.id} className="rounded-lg bg-paper px-3 py-2 text-sm">
-                <span className="font-bold text-violet text-xs">{c.author.name ?? "Sister"}</span>
+                <span className="font-bold text-violet text-xs">{c.author.name ?? "Strider"}</span>
                 <p className="text-ink/90 mt-0.5 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{c.body}</p>
               </li>
             ))}

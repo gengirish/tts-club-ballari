@@ -60,7 +60,7 @@ export default async function CommunityPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-xl uppercase text-violet mb-3">Sister feed</h2>
+          <h2 className="font-display text-xl uppercase text-violet mb-3">Strider feed</h2>
           <CommunityComposer />
           <div className="space-y-4">
             {serialPosts.map((p) => (

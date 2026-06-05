@@ -257,7 +257,7 @@ export default function LoginPage() {
       <div className="relative mx-auto w-full max-w-md">
         <div className="rounded-screen border border-steel/35 bg-paper-raised/92 p-6 shadow-xl shadow-violet/10 backdrop-blur-md sm:p-8">
           <h1 className="font-display text-3xl uppercase leading-tight text-violet sm:text-4xl">
-            Welcome, sister
+            Welcome, strider
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">
             Sign in with a one-time email link, or email or username with a password. New here? Use <strong className="font-semibold text-ink/85">Sign up</strong>.
