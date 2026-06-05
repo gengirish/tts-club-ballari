@@ -110,8 +110,29 @@ export default function WalkingTo5kRegisterPage() {
   const [consentWithinLimits, setConsentWithinLimits] = useState(false);
   const [orientationWhatsAppJoined, setOrientationWhatsAppJoined] = useState(false);
   const [orientationMedicalSubmitted, setOrientationMedicalSubmitted] = useState(false);
+  const [alreadyEnrolled, setAlreadyEnrolled] = useState(false);
 
   const sessionEmail = session?.user?.email ?? "";
+
+  const applySavedForm = useCallback((form: WalkingTo5kEnrollInput) => {
+    setFullName(form.fullName);
+    setDateOfBirth(form.dateOfBirth);
+    setMobile(form.mobile);
+    setEmailExtra(form.email ?? "");
+    setEmergencyContactName(form.emergencyContactName);
+    setEmergencyContactPhone(form.emergencyContactPhone);
+    setEmergencyRelationship(form.emergencyRelationship);
+    setParqHeartCondition(form.parqHeartCondition);
+    setParqChestPainDuringActivity(form.parqChestPainDuringActivity);
+    setParqRecentSurgery(form.parqRecentSurgery);
+    setParqRegularMedication(form.parqRegularMedication);
+    setParqOtherConcerns(form.parqOtherConcerns ?? "");
+    setConsentVoluntary(form.consentVoluntary);
+    setConsentWithinLimits(form.consentWithinLimits);
+    setOrientationWhatsAppJoined(form.orientationWhatsAppJoined ?? false);
+    setOrientationMedicalSubmitted(form.orientationMedicalSubmitted);
+    setMaxStepReached(4);
+  }, []);
 
   const hydrateFromSession = useCallback(() => {
     if (session?.user?.name) setFullName((n) => n || session.user?.name || "");
@@ -119,8 +140,23 @@ export default function WalkingTo5kRegisterPage() {
   }, [session?.user?.name, sessionEmail]);
 
   useEffect(() => {
-    if (status === "authenticated") hydrateFromSession();
-  }, [status, hydrateFromSession]);
+    if (status !== "authenticated") return;
+    hydrateFromSession();
+    let cancelled = false;
+    void (async () => {
+      const res = await fetch("/api/programs/walking-to-5k/enroll");
+      const body = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        data?: { enrolled?: boolean; form?: WalkingTo5kEnrollInput | null };
+      };
+      if (cancelled || !body?.ok) return;
+      if (body.data?.enrolled) setAlreadyEnrolled(true);
+      if (body.data?.form) applySavedForm(body.data.form);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [status, hydrateFromSession, applySavedForm]);
 
   async function createAccount() {
     setLoading(true);
@@ -383,6 +419,12 @@ export default function WalkingTo5kRegisterPage() {
         <p className="mt-2 text-sm text-ink/70">
           Signed in as <span className="font-semibold text-ink">{session?.user?.email ?? session?.user?.name ?? "member"}</span>
         </p>
+        {alreadyEnrolled ? (
+          <p className="mt-3 rounded-card border border-violet/30 bg-violet/10 px-4 py-3 text-sm text-ink/80" role="status">
+            You are already registered. Update any details below and submit — changes save to your existing account
+            (no duplicate registration).
+          </p>
+        ) : null}
 
         <ol className="mt-6 flex gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/45">
           {([1, 2, 3, 4] as const).map((s) => {
@@ -634,7 +676,7 @@ export default function WalkingTo5kRegisterPage() {
                   className="flex-1 rounded-full bg-energy py-3 font-extrabold text-white disabled:opacity-60"
                   onClick={() => void submitEnrolment()}
                 >
-                  {loading ? "Saving…" : "Submit & enter programme"}
+                  {loading ? "Saving…" : alreadyEnrolled ? "Save changes" : "Submit & enter programme"}
                 </button>
               </div>
             </div>
