@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/rbac";
 import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { formatDateIST } from "@/lib/utils/datetime";
+import { AppBackToHome } from "../app-back-to-home";
 import { ProgressCharts, ProgressLogForm, type ProgressRow } from "./progress-charts";
 
 export default async function ProgressPage() {
@@ -27,6 +28,7 @@ export default async function ProgressPage() {
   return (
     <main className="min-h-screen bg-paper px-4 py-10 text-ink">
       <div className="max-w-3xl mx-auto">
+        <AppBackToHome />
         <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">
           Progress
         </h1>

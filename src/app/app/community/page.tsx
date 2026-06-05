@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/rbac";
 import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
+import { AppBackToHome } from "../app-back-to-home";
 import { CommunityComposer, CommunityPostCard } from "./community-feed";
 import { SosClientButton } from "./sos-client-button";
 
@@ -46,6 +47,7 @@ export default async function CommunityPage() {
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-2xl mx-auto space-y-10">
         <header>
+          <AppBackToHome />
           <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">Community</h1>
           <p className="text-sm text-ink/60 mt-2">Feed, wellness picks, and safety.</p>
         </header>

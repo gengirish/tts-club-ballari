@@ -4,6 +4,7 @@ import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { formatPaiseShort } from "@/lib/utils/money";
 import { clampWeek } from "@/lib/programs/c25k-curriculum";
+import { AppBackToHome } from "../../app-back-to-home";
 import { C25kPaySection } from "./c25k-pay-section";
 import { C25kHeroAndOverview } from "./c25k-hero-and-overview";
 import { C25kWeekStack } from "./c25k-week-stack";
@@ -32,6 +33,11 @@ export default async function CouchTo5kPage() {
 
   return (
     <main className="min-h-screen bg-paper pb-12" data-testid="c25k-page">
+      <div className="px-4 pt-6 sm:px-6">
+        <div className="mx-auto max-w-2xl">
+          <AppBackToHome />
+        </div>
+      </div>
       <C25kHeroAndOverview
         title={program.title}
         description={program.description}
