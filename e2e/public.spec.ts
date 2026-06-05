@@ -7,6 +7,47 @@ test.describe("public shell", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
+  test("public theme toggle persists after reload", async ({ page }) => {
+    await page.goto("/");
+
+    const themeToggle = page.getByRole("button", { name: /switch to (light|dark) mode/i });
+    await expect(themeToggle).toBeVisible();
+
+    const initialTheme = await page.evaluate(() => document.documentElement.dataset.theme);
+    expect(initialTheme === "light" || initialTheme === "dark").toBeTruthy();
+    if (initialTheme !== "light" && initialTheme !== "dark") {
+      throw new Error(`Unexpected initial theme: ${String(initialTheme)}`);
+    }
+
+    const expectedTheme = initialTheme === "dark" ? "light" : "dark";
+
+    await themeToggle.click();
+
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe(expectedTheme);
+    await expect
+      .poll(async () =>
+        page.evaluate((theme) => document.documentElement.classList.contains(theme), expectedTheme)
+      )
+      .toBe(true);
+    await expect.poll(async () => page.evaluate(() => window.localStorage.getItem("sss-theme"))).toBe(expectedTheme);
+    await expect(themeToggle).toHaveAccessibleName(new RegExp(`switch to ${initialTheme} mode`, "i"));
+
+    await page.reload();
+
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
+      .toBe(expectedTheme);
+    await expect
+      .poll(async () =>
+        page.evaluate((theme) => document.documentElement.classList.contains(theme), expectedTheme)
+      )
+      .toBe(true);
+    await expect.poll(async () => page.evaluate(() => window.localStorage.getItem("sss-theme"))).toBe(expectedTheme);
+    await expect(themeToggle).toHaveAccessibleName(new RegExp(`switch to ${initialTheme} mode`, "i"));
+  });
+
   test("login page shows password sign-in by default", async ({ page }) => {
     await page.goto("/login");
     await expect(page.getByText(/Welcome, sister/i)).toBeVisible();

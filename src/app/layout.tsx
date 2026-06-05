@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { PublicThemeToggle } from "@/components/public-theme-toggle";
 
 const APP_NAME = "Sister Stride";
 const APP_DEFAULT_TITLE = "Steel Sisters & Striders — SSS Club Ballari";
@@ -82,7 +83,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <PublicThemeToggle />
+      </body>
     </html>
   );
 }
