@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSessionUser } from "@/lib/rbac";
 import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
@@ -42,6 +43,17 @@ export default async function CouchTo5kPage() {
       />
 
       <div className="relative z-10 mx-auto max-w-2xl space-y-8 px-4 sm:px-6">
+        {isEnrolled && (
+          <p className="text-sm text-ink/70">
+            <Link href="/walking-to-5k/register" className="font-bold text-violet-soft hover:underline">
+              Update programme registration
+            </Link>
+            {" · "}
+            <Link href="/app/profile" className="font-bold text-violet-soft hover:underline">
+              Edit profile & fitness level
+            </Link>
+          </p>
+        )}
         {isEnrolled && (
           <C25kWeekStack weekNo={displayWeekNo} coachName={coachName} />
         )}

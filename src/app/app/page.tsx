@@ -67,6 +67,13 @@ export default async function AppHome() {
               Namaste, {user.name ?? "sister"}
             </h1>
             <p className="text-sm text-ink/60 mt-1">Ballari · today in IST</p>
+            <Link
+              href="/app/profile"
+              className="inline-block mt-2 text-xs font-bold uppercase tracking-wide text-violet-soft hover:underline"
+              data-testid="app-edit-profile"
+            >
+              Edit profile
+            </Link>
           </div>
           <nav className="flex flex-wrap gap-2 text-xs font-bold">
             {[

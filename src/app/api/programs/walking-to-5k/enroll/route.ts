@@ -8,6 +8,7 @@ import {
 } from "@/lib/validation/walking-to-5k";
 import { toE164 } from "@/lib/utils/phone";
 import { scheduleC25kSessionReminders } from "@/server/programs/schedule-c25k-reminders";
+import { walkingTo5kFormFromEnrollment } from "@/server/programs/walking-to-5k-enrollment-form";
 
 export const runtime = "nodejs";
 
@@ -20,6 +21,38 @@ function parqSummary(data: WalkingTo5kEnrollInput): string {
   ];
   if (data.parqOtherConcerns?.trim()) lines.push(`Other concerns: ${data.parqOtherConcerns.trim()}`);
   return lines.join("\n");
+}
+
+/** GET — load saved Walking to 5K registration for editing (same account, no duplicate rows). */
+export async function GET() {
+  let user;
+  try {
+    user = await requireAuth();
+  } catch (e) {
+    if (e instanceof AuthError) return unauthorized();
+    throw e;
+  }
+
+  const program = await prisma.program.findUnique({ where: { slug: "couch-to-5k" } });
+  if (!program) return ok({ enrolled: false, form: null });
+
+  const enrollment = await prisma.programEnrollment.findUnique({
+    where: { programId_memberId: { programId: program.id, memberId: user.id } },
+    select: { assessment: true },
+  });
+
+  if (!enrollment) {
+    return ok({ enrolled: false, form: null });
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { name: true, email: true, phone: true, dob: true },
+  });
+  if (!dbUser) return unauthorized();
+
+  const form = walkingTo5kFormFromEnrollment(dbUser, enrollment.assessment);
+  return ok({ enrolled: true, form });
 }
 
 /** POST — authenticated Walking to 5K registration; enrolls in flagship Couch to 5K programme. */

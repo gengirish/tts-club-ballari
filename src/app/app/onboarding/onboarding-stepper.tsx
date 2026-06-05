@@ -4,6 +4,11 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { OnboardingInput } from "@/lib/validation/member";
 import { onboardingSchema } from "@/lib/validation/member";
+import {
+  emptyOnboardingForm,
+  onboardingFormToPayload,
+  type OnboardingFormState,
+} from "@/lib/member/onboarding-form";
 
 const STEPS = ["You", "Health", "Movement", "Goals"] as const;
 
@@ -39,99 +44,24 @@ const GOAL_OPTIONS: { value: OnboardingInput["goals"][number]; label: string }[]
   { value: "HEALTHY_LIFESTYLE", label: "Healthy lifestyle" },
 ];
 
-type FormState = {
-  name: string;
-  email: string;
-  dob: string;
-  gender: OnboardingInput["gender"];
-  occupation: string;
-  city: string;
-  heightCm: string;
-  weightKg: string;
-  waistCm: string;
-  bpSystolic: string;
-  bpDiastolic: string;
-  conditions: string;
-  hasDiabetes: boolean;
-  hasThyroid: boolean;
-  injuryHistory: string;
-  level: OnboardingInput["health"]["level"];
-  currentActivity: string[];
-  avgDailySteps: string;
-  runningAbilityKm: string;
-  walkingDistanceKm: string;
-  goals: OnboardingInput["goals"];
-};
+type FormState = OnboardingFormState;
 
-const emptyForm = (): FormState => ({
-  name: "",
-  email: "",
-  dob: "",
-  gender: "FEMALE",
-  occupation: "",
-  city: "Ballari",
-  heightCm: "",
-  weightKg: "",
-  waistCm: "",
-  bpSystolic: "",
-  bpDiastolic: "",
-  conditions: "",
-  hasDiabetes: false,
-  hasThyroid: false,
-  injuryHistory: "",
-  level: "BEGINNER",
-  currentActivity: [],
-  avgDailySteps: "",
-  runningAbilityKm: "",
-  walkingDistanceKm: "",
-  goals: [],
-});
-
-function numOrUndef(s: string): number | undefined {
-  const t = s.trim();
-  if (t === "") return undefined;
-  const n = Number(t);
-  return Number.isFinite(n) ? n : undefined;
-}
-
-function intOrUndef(s: string): number | undefined {
-  const n = numOrUndef(s);
-  if (n === undefined) return undefined;
-  return Math.round(n);
-}
+const emptyForm = emptyOnboardingForm;
 
 function buildPayload(form: FormState): unknown {
-  return {
-    name: form.name.trim(),
-    email: form.email.trim() === "" ? undefined : form.email.trim(),
-    dob: form.dob.trim() === "" ? undefined : form.dob,
-    gender: form.gender,
-    occupation: form.occupation.trim() || undefined,
-    city: form.city.trim() || "Ballari",
-    health: {
-      heightCm: intOrUndef(form.heightCm),
-      weightKg: numOrUndef(form.weightKg),
-      waistCm: intOrUndef(form.waistCm),
-      bpSystolic: intOrUndef(form.bpSystolic),
-      bpDiastolic: intOrUndef(form.bpDiastolic),
-      conditions: form.conditions.trim() || undefined,
-      hasDiabetes: form.hasDiabetes,
-      hasThyroid: form.hasThyroid,
-      injuryHistory: form.injuryHistory.trim() || undefined,
-      level: form.level,
-      currentActivity: form.currentActivity,
-      avgDailySteps: intOrUndef(form.avgDailySteps),
-      runningAbilityKm: numOrUndef(form.runningAbilityKm),
-      walkingDistanceKm: numOrUndef(form.walkingDistanceKm),
-    },
-    goals: form.goals,
-  };
+  return onboardingFormToPayload(form);
 }
 
-export function OnboardingStepper() {
+export function OnboardingStepper({
+  mode = "onboard",
+  initialForm,
+}: {
+  mode?: "onboard" | "edit";
+  initialForm?: OnboardingFormState;
+}) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [form, setForm] = useState<FormState>(() => initialForm ?? emptyForm());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -380,6 +310,11 @@ export function OnboardingStepper() {
               How you move today
             </h2>
             <p className="text-sm text-ink/60">No judgement — we meet you where you are.</p>
+            {mode === "edit" ? (
+              <p className="text-xs text-ink/55 rounded-card border border-paper-deep bg-paper-muted/60 px-3 py-2">
+                Picked the wrong fitness level? Change it here — no need to register again.
+              </p>
+            ) : null}
             <label className="block text-sm font-semibold text-ink">
               Fitness level
               <select
@@ -510,7 +445,7 @@ export function OnboardingStepper() {
               disabled={loading}
               className="rounded-full px-6 py-2.5 text-sm font-extrabold text-white bg-energy disabled:opacity-60"
             >
-              {loading ? "Saving…" : "Finish"}
+              {loading ? "Saving…" : mode === "edit" ? "Save changes" : "Finish"}
             </button>
           )}
         </div>

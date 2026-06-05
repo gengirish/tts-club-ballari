@@ -4,6 +4,7 @@ import { onboardingSchema } from "@/lib/validation/member";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { listAdminMemberDirectory } from "@/server/admin/member-directory";
+import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 
 // GET /api/members  -> ADMIN only: list members
 export async function GET() {
@@ -34,6 +35,7 @@ export async function POST(req: Request) {
 
   const { name, email, dob, gender, occupation, city, health, goals } = parsed.data;
   const uniqueGoals = [...new Set(goals)];
+  const wasOnboarded = await isMemberOnboarded(user.id);
 
   try {
     await prisma.$transaction([
@@ -58,5 +60,5 @@ export async function POST(req: Request) {
     throw e;
   }
 
-  return ok({ onboarded: true }, { status: 201 });
+  return ok({ onboarded: true }, { status: wasOnboarded ? 200 : 201 });
 }
