@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-password";
+import { isValidPhone } from "@/lib/utils/phone";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
 import { registerSchema } from "@/lib/validation/auth";
@@ -31,6 +32,13 @@ function FieldError({ message }: { message?: string }) {
 }
 
 const ENROLL_FETCH_MS = 30_000;
+const WALKING_TO_5K_DRAFT_STORAGE_KEY = "sss:walking-to-5k-register-draft:v1";
+
+type WalkingTo5kDraft = {
+  step: WizardStep;
+  maxStepReached: WizardStep;
+  form: WalkingTo5kEnrollInput;
+};
 
 function ParqRow({
   id,
@@ -86,6 +94,9 @@ export default function WalkingTo5kRegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftNotice, setDraftNotice] = useState<string | null>(null);
+  const [restoredDraft, setRestoredDraft] = useState(false);
 
   // Account creation (signed-out)
   const [regEmail, setRegEmail] = useState("");
@@ -114,7 +125,56 @@ export default function WalkingTo5kRegisterPage() {
 
   const sessionEmail = session?.user?.email ?? "";
 
-  const applySavedForm = useCallback((form: WalkingTo5kEnrollInput) => {
+  function setSingleFieldError(field: string, message?: string) {
+    setFieldErrors((prev) => {
+      if (!message) {
+        if (!(field in prev)) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      }
+      if (prev[field] === message) return prev;
+      return { ...prev, [field]: message };
+    });
+  }
+
+  function validateRequiredField(field: string, value: string, minLength: number, message: string) {
+    const ok = value.trim().length >= minLength;
+    setSingleFieldError(field, ok ? undefined : message);
+    return ok;
+  }
+
+  function validatePhoneField(
+    field: "mobile" | "emergencyContactPhone",
+    value: string,
+    emptyMessage: string,
+    invalidMessage: string
+  ) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setSingleFieldError(field, emptyMessage);
+      return false;
+    }
+    if (!isValidPhone(trimmed)) {
+      setSingleFieldError(field, invalidMessage);
+      return false;
+    }
+    setSingleFieldError(field);
+    return true;
+  }
+
+  function validateOptionalEmail(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setSingleFieldError("email");
+      return true;
+    }
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    setSingleFieldError("email", ok ? undefined : "Enter a valid email address.");
+    return ok;
+  }
+
+  const applySavedForm = useCallback((form: WalkingTo5kEnrollInput, reachedStep: WizardStep = 4) => {
     setFullName(form.fullName);
     setDateOfBirth(form.dateOfBirth);
     setMobile(form.mobile);
@@ -131,13 +191,47 @@ export default function WalkingTo5kRegisterPage() {
     setConsentWithinLimits(form.consentWithinLimits);
     setOrientationWhatsAppJoined(form.orientationWhatsAppJoined ?? false);
     setOrientationMedicalSubmitted(form.orientationMedicalSubmitted);
-    setMaxStepReached(4);
+    setMaxStepReached(reachedStep);
   }, []);
 
   const hydrateFromSession = useCallback(() => {
     if (session?.user?.name) setFullName((n) => n || session.user?.name || "");
     if (sessionEmail) setEmailExtra((e) => e || sessionEmail);
   }, [session?.user?.name, sessionEmail]);
+
+  useEffect(() => {
+    if (status !== "authenticated") {
+      setDraftReady(false);
+      setRestoredDraft(false);
+      setDraftNotice(null);
+      return;
+    }
+    let draftWasRestored = false;
+    try {
+      const raw = window.localStorage.getItem(WALKING_TO_5K_DRAFT_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<WalkingTo5kDraft>;
+        if (
+          parsed.form &&
+          typeof parsed.form === "object" &&
+          typeof parsed.step === "number" &&
+          typeof parsed.maxStepReached === "number"
+        ) {
+          const clampedMaxStep = Math.min(Math.max(Math.trunc(parsed.maxStepReached), 1), 4) as WizardStep;
+          const clampedStep = Math.min(Math.max(Math.trunc(parsed.step), 1), clampedMaxStep) as WizardStep;
+          applySavedForm(parsed.form as WalkingTo5kEnrollInput, clampedMaxStep);
+          setStep(clampedStep);
+          setDraftNotice("Draft restored on this device.");
+          draftWasRestored = true;
+        }
+      }
+    } catch {
+      // Ignore invalid draft payloads.
+    } finally {
+      setRestoredDraft(draftWasRestored);
+      setDraftReady(true);
+    }
+  }, [status, applySavedForm]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -151,12 +245,12 @@ export default function WalkingTo5kRegisterPage() {
       };
       if (cancelled || !body?.ok) return;
       if (body.data?.enrolled) setAlreadyEnrolled(true);
-      if (body.data?.form) applySavedForm(body.data.form);
+      if (body.data?.form && !restoredDraft) applySavedForm(body.data.form);
     })();
     return () => {
       cancelled = true;
     };
-  }, [status, hydrateFromSession, applySavedForm]);
+  }, [status, hydrateFromSession, applySavedForm, restoredDraft]);
 
   async function createAccount() {
     setLoading(true);
@@ -210,8 +304,8 @@ export default function WalkingTo5kRegisterPage() {
     }
   }
 
-  function buildPayload(): WalkingTo5kEnrollInput {
-    return {
+  const buildPayload = useCallback(
+    (): WalkingTo5kEnrollInput => ({
       fullName: fullName.trim(),
       dateOfBirth,
       mobile: mobile.trim(),
@@ -228,8 +322,40 @@ export default function WalkingTo5kRegisterPage() {
       consentWithinLimits,
       orientationWhatsAppJoined,
       orientationMedicalSubmitted,
+    }),
+    [
+      fullName,
+      dateOfBirth,
+      mobile,
+      emailExtra,
+      emergencyContactName,
+      emergencyContactPhone,
+      emergencyRelationship,
+      parqHeartCondition,
+      parqChestPainDuringActivity,
+      parqRecentSurgery,
+      parqRegularMedication,
+      parqOtherConcerns,
+      consentVoluntary,
+      consentWithinLimits,
+      orientationWhatsAppJoined,
+      orientationMedicalSubmitted,
+    ]
+  );
+
+  useEffect(() => {
+    if (status !== "authenticated" || !draftReady) return;
+    const draft: WalkingTo5kDraft = {
+      step,
+      maxStepReached,
+      form: buildPayload(),
     };
-  }
+    try {
+      window.localStorage.setItem(WALKING_TO_5K_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    } catch {
+      // Ignore quota/private mode failures.
+    }
+  }, [status, draftReady, step, maxStepReached, buildPayload]);
 
   function validateStep(target: WalkingTo5kWizardStep): boolean {
     const result = validateWalkingTo5kStep(target, buildPayload());
@@ -293,6 +419,11 @@ export default function WalkingTo5kRegisterPage() {
       if (!res.ok || !body?.ok) {
         setError(body?.error?.message ?? "Registration failed. Please try again.");
         return;
+      }
+      try {
+        window.localStorage.removeItem(WALKING_TO_5K_DRAFT_STORAGE_KEY);
+      } catch {
+        // Ignore storage cleanup failures.
       }
       const to = body.data?.redirectTo as string | undefined;
       if (to) router.push(to);
@@ -451,6 +582,9 @@ export default function WalkingTo5kRegisterPage() {
             );
           })}
         </ol>
+        <p className="mt-3 text-xs text-ink/55" role="status" aria-live="polite">
+          {draftNotice ?? (draftReady ? "Draft autosaves on this device while you complete this form." : "Preparing draft autosave…")}
+        </p>
 
         <div className="mt-6 rounded-screen border border-steel/35 bg-paper-raised/95 p-6 shadow-xl">
           {step === 1 && (
@@ -460,7 +594,19 @@ export default function WalkingTo5kRegisterPage() {
                 <label htmlFor={`${baseId}-fn`} className={labelClass}>
                   Full name
                 </label>
-                <input id={`${baseId}-fn`} className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <input
+                  id={`${baseId}-fn`}
+                  className={inputClass}
+                  value={fullName}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFullName(value);
+                    if (value.trim().length >= 2) setSingleFieldError("fullName");
+                  }}
+                  onBlur={() =>
+                    validateRequiredField("fullName", fullName, 2, "Enter your full name.")
+                  }
+                />
                 <FieldError message={fieldErrors.fullName} />
               </div>
               <div>
@@ -472,7 +618,14 @@ export default function WalkingTo5kRegisterPage() {
                   type="date"
                   className={inputClass}
                   value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setDateOfBirth(value);
+                    if (value) setSingleFieldError("dateOfBirth");
+                  }}
+                  onBlur={() =>
+                    setSingleFieldError("dateOfBirth", dateOfBirth ? undefined : "Choose a valid date of birth.")
+                  }
                 />
                 <FieldError message={fieldErrors.dateOfBirth} />
               </div>
@@ -487,8 +640,21 @@ export default function WalkingTo5kRegisterPage() {
                   autoComplete="tel"
                   placeholder="+91 9XXXXXXXXX"
                   value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setMobile(value);
+                    if (!value.trim() || isValidPhone(value.trim())) setSingleFieldError("mobile");
+                  }}
+                  onBlur={() =>
+                    validatePhoneField(
+                      "mobile",
+                      mobile,
+                      "Enter your mobile number.",
+                      "Enter a valid 10-digit Indian mobile number (you can include +91 or spaces)."
+                    )
+                  }
                 />
+                <p className="mt-1 text-[11px] text-ink/55">Use a 10-digit Indian mobile number (you can include +91 or spaces).</p>
                 <FieldError message={fieldErrors.mobile} />
               </div>
               <div>
@@ -500,7 +666,12 @@ export default function WalkingTo5kRegisterPage() {
                   type="email"
                   className={inputClass}
                   value={emailExtra}
-                  onChange={(e) => setEmailExtra(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEmailExtra(value);
+                    if (!value.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) setSingleFieldError("email");
+                  }}
+                  onBlur={() => validateOptionalEmail(emailExtra)}
                   placeholder={sessionEmail || "you@example.com"}
                 />
                 <FieldError message={fieldErrors.email} />
@@ -526,7 +697,19 @@ export default function WalkingTo5kRegisterPage() {
                   id={`${baseId}-ecn`}
                   className={inputClass}
                   value={emergencyContactName}
-                  onChange={(e) => setEmergencyContactName(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEmergencyContactName(value);
+                    if (value.trim().length >= 2) setSingleFieldError("emergencyContactName");
+                  }}
+                  onBlur={() =>
+                    validateRequiredField(
+                      "emergencyContactName",
+                      emergencyContactName,
+                      2,
+                      "Enter emergency contact name."
+                    )
+                  }
                 />
                 <FieldError message={fieldErrors.emergencyContactName} />
               </div>
@@ -539,8 +722,21 @@ export default function WalkingTo5kRegisterPage() {
                   className={inputClass}
                   inputMode="tel"
                   value={emergencyContactPhone}
-                  onChange={(e) => setEmergencyContactPhone(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEmergencyContactPhone(value);
+                    if (!value.trim() || isValidPhone(value.trim())) setSingleFieldError("emergencyContactPhone");
+                  }}
+                  onBlur={() =>
+                    validatePhoneField(
+                      "emergencyContactPhone",
+                      emergencyContactPhone,
+                      "Enter emergency contact phone.",
+                      "Enter a valid emergency contact number."
+                    )
+                  }
                 />
+                <p className="mt-1 text-[11px] text-ink/55">Use a reachable number in case coaches need to contact family quickly.</p>
                 <FieldError message={fieldErrors.emergencyContactPhone} />
               </div>
               <div>
@@ -552,7 +748,19 @@ export default function WalkingTo5kRegisterPage() {
                   className={inputClass}
                   placeholder="e.g. spouse, parent"
                   value={emergencyRelationship}
-                  onChange={(e) => setEmergencyRelationship(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEmergencyRelationship(value);
+                    if (value.trim()) setSingleFieldError("emergencyRelationship");
+                  }}
+                  onBlur={() =>
+                    validateRequiredField(
+                      "emergencyRelationship",
+                      emergencyRelationship,
+                      1,
+                      "Enter relationship (e.g. spouse, parent)."
+                    )
+                  }
                 />
                 <FieldError message={fieldErrors.emergencyRelationship} />
               </div>

@@ -14,6 +14,18 @@ import { verifyOtpSchema } from "@/lib/validation/auth";
 import { toE164 } from "@/lib/utils/phone";
 import { sendEmail } from "@/integrations/agentmail/client";
 
+const authUrlForGuard = process.env.AUTH_URL?.trim() ?? "";
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.VERCEL &&
+  authUrlForGuard &&
+  /localhost|127\.0\.0\.1/i.test(authUrlForGuard)
+) {
+  console.warn(
+    "[auth] AUTH_URL points at localhost/127.0.0.1 on a Vercel deployment. Auth.js may set authjs.callback-url and redirects incorrectly. Set AUTH_URL to your public https origin (see docs/TROUBLESHOOTING_AUTH_HOST.md).",
+  );
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),

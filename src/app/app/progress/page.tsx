@@ -4,7 +4,7 @@ import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { formatDateIST } from "@/lib/utils/datetime";
 import { AppBackToHome } from "../app-back-to-home";
-import { ProgressCharts, ProgressLogForm, type ProgressRow } from "./progress-charts";
+import { ProgressSection, type ProgressRow } from "./progress-charts";
 
 export default async function ProgressPage() {
   const user = await getSessionUser();
@@ -36,8 +36,7 @@ export default async function ProgressPage() {
           Each log is stored against your IST day bucket. Weight down is framed as a win when you are chasing
           weight-loss goals.
         </p>
-        <ProgressLogForm />
-        <ProgressCharts rows={rows} />
+        <ProgressSection initialRows={rows} />
       </div>
     </main>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type ProgressRow = {
   date: string;
@@ -9,6 +9,45 @@ export type ProgressRow = {
   waterMl: number | null;
   sleepHrs: number | null;
 };
+
+type ProgressApiRow = {
+  date: string;
+  weightKg: number | null;
+  steps: number | null;
+  waterMl: number | null;
+  sleepHrs: number | null;
+};
+
+type SaveProgressResponse =
+  | { ok: true; data: ProgressApiRow }
+  | { ok: false; error?: { code?: string; message?: string } };
+
+const IST_TIMEZONE = "Asia/Kolkata";
+
+function formatDateIST(d: Date | string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: IST_TIMEZONE,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(d));
+}
+
+function parseDateLabelToEpoch(label: string): number {
+  const [day, month, year] = label.split("/").map((part) => Number(part));
+  if (!day || !month || !year) return 0;
+  return new Date(year, month - 1, day).getTime();
+}
+
+function toProgressRow(row: ProgressApiRow): ProgressRow {
+  return {
+    date: formatDateIST(row.date),
+    weightKg: row.weightKg,
+    steps: row.steps,
+    waterMl: row.waterMl,
+    sleepHrs: row.sleepHrs,
+  };
+}
 
 function BarChart({
   title,
@@ -68,47 +107,103 @@ const logLabelClass = "block text-xs font-extrabold uppercase tracking-wide text
 const logInputClass =
   "mt-1.5 w-full rounded-card border border-paper-deep bg-paper-muted px-3 py-2.5 text-ink outline-none transition placeholder:text-ink/40 focus:border-violet focus:ring-2 focus:ring-violet/20";
 
-export function ProgressLogForm() {
+export function ProgressLogForm({ onSaved }: { onSaved?: (row: ProgressRow) => void }) {
   const [weightKg, setWeightKg] = useState("");
   const [steps, setSteps] = useState("");
   const [waterMl, setWaterMl] = useState("");
   const [sleepHrs, setSleepHrs] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "validation" | "error";
+    message: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function save() {
-    setMsg(null);
+    setFeedback(null);
     const body: Record<string, number> = {};
+    const invalidFields: string[] = [];
     const w = weightKg.trim();
     const s = steps.trim();
     const wa = waterMl.trim();
     const sl = sleepHrs.trim();
-    if (w) body.weightKg = Number(w);
-    if (s) body.steps = Number(s);
-    if (wa) body.waterMl = Number(wa);
-    if (sl) body.sleepHrs = Number(sl);
+
+    if (w) {
+      const parsed = Number(w);
+      if (Number.isFinite(parsed)) body.weightKg = parsed;
+      else invalidFields.push("weight");
+    }
+    if (s) {
+      const parsed = Number(s);
+      if (Number.isFinite(parsed)) body.steps = parsed;
+      else invalidFields.push("steps");
+    }
+    if (wa) {
+      const parsed = Number(wa);
+      if (Number.isFinite(parsed)) body.waterMl = parsed;
+      else invalidFields.push("water");
+    }
+    if (sl) {
+      const parsed = Number(sl);
+      if (Number.isFinite(parsed)) body.sleepHrs = parsed;
+      else invalidFields.push("sleep");
+    }
+
+    if (invalidFields.length > 0) {
+      setFeedback({
+        type: "validation",
+        message: `Please enter valid numbers for: ${invalidFields.join(", ")}.`,
+      });
+      return;
+    }
+
     if (Object.keys(body).length === 0) {
-      setMsg("Enter at least one value.");
+      setFeedback({ type: "validation", message: "Enter at least one value before saving." });
       return;
     }
+
     setLoading(true);
-    const res = await fetch("/api/progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok || !data.ok) {
-      setMsg(data.error?.message ?? "Save failed");
-      return;
+    try {
+      const res = await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      let data: SaveProgressResponse | null = null;
+      try {
+        data = (await res.json()) as SaveProgressResponse;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok || !data?.ok) {
+        const errorPayload = data && !data.ok ? data.error : undefined;
+        const isValidation = res.status === 422 || errorPayload?.code === "VALIDATION";
+        setFeedback({
+          type: isValidation ? "validation" : "error",
+          message:
+            errorPayload?.message ??
+            (isValidation
+              ? "Please review your values and try again."
+              : "Could not save progress right now. Please try again."),
+        });
+        return;
+      }
+
+      setWeightKg("");
+      setSteps("");
+      setWaterMl("");
+      setSleepHrs("");
+      onSaved?.(toProgressRow(data.data));
+      setFeedback({ type: "success", message: "Saved for today (IST). Charts updated." });
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Network error while saving. Check your connection and retry.",
+      });
+    } finally {
+      setLoading(false);
     }
-    setWeightKg("");
-    setSteps("");
-    setWaterMl("");
-    setSleepHrs("");
-    setMsg("Saved for today (IST).");
-    window.location.reload();
   }
 
   return (
@@ -164,7 +259,19 @@ export function ProgressLogForm() {
       >
         {loading ? "Saving…" : "Save progress"}
       </button>
-      {msg && <p className="mt-2 text-sm text-ink/70">{msg}</p>}
+      {feedback && (
+        <p
+          className={`mt-2 text-sm ${
+            feedback.type === "success"
+              ? "text-progress"
+              : feedback.type === "validation"
+                ? "text-magenta"
+                : "text-ink/70"
+          }`}
+        >
+          {feedback.message}
+        </p>
+      )}
     </div>
   );
 }
@@ -200,5 +307,27 @@ export function ProgressCharts({ rows }: { rows: ProgressRow[] }) {
         <BarChart title="Sleep (hrs)" rows={slice} accessor="sleepHrs" />
       </div>
     </div>
+  );
+}
+
+export function ProgressSection({ initialRows }: { initialRows: ProgressRow[] }) {
+  const [rows, setRows] = useState<ProgressRow[]>(() => initialRows);
+
+  const handleSaved = useCallback((savedRow: ProgressRow) => {
+    setRows((prev) => {
+      const next = [...prev];
+      const existingIdx = next.findIndex((row) => row.date === savedRow.date);
+      if (existingIdx >= 0) next[existingIdx] = savedRow;
+      else next.push(savedRow);
+      next.sort((a, b) => parseDateLabelToEpoch(a.date) - parseDateLabelToEpoch(b.date));
+      return next;
+    });
+  }, []);
+
+  return (
+    <>
+      <ProgressLogForm onSaved={handleSaved} />
+      <ProgressCharts rows={rows} />
+    </>
   );
 }

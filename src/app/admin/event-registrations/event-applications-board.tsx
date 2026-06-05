@@ -30,6 +30,11 @@ type ApiTotals = {
   listed: number;
 };
 
+type ActionNotice = {
+  tone: "success" | "error" | "info";
+  message: string;
+};
+
 function waDigits(phone: string): string {
   return phone.replace(/\D/g, "");
 }
@@ -40,6 +45,13 @@ export function EventApplicationsBoard() {
   const [eventIdFilter, setEventIdFilter] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null);
+  const [rowNoticeById, setRowNoticeById] = useState<Record<string, string>>({});
+  const [rejectDraft, setRejectDraft] = useState<{
+    id: string;
+    applicantName: string;
+    reason: string;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -58,74 +70,152 @@ export function EventApplicationsBoard() {
     void load();
   }, [load]);
 
+  function setRowNotice(id: string, message: string) {
+    setRowNoticeById((prev) => ({ ...prev, [id]: message }));
+  }
+
+  function clearRowNotice(id: string) {
+    setRowNoticeById((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }
+
   async function approve(id: string) {
     setBusy(id);
-    const res = await fetch(`/api/event-applications/${id}/approve`, {
-      method: "POST",
-      credentials: "include",
-    });
-    const body = await res.json();
-    setBusy(null);
-    if (!res.ok || !body.ok) {
-      alert(body.error?.message ?? "Approve failed");
-      return;
+    setActionNotice(null);
+    clearRowNotice(id);
+    try {
+      const res = await fetch(`/api/event-applications/${id}/approve`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        const message = body.error?.message ?? "Approve failed";
+        setActionNotice({ tone: "error", message });
+        setRowNotice(id, message);
+        return;
+      }
+      const ig = body.data?.intelliforge as { status: string; message?: string } | undefined;
+      if (ig?.status === "error") {
+        const message = `Approved, but IntelliForge ticket failed: ${ig.message ?? "unknown error"}. Use "Mint IntelliForge ticket" to retry (requires INTELLIFORGE_API_KEY).`;
+        setActionNotice({ tone: "info", message });
+        setRowNotice(id, "Approved; IntelliForge mint failed and can be retried.");
+      } else {
+        setActionNotice({ tone: "success", message: "Application approved." });
+        setRowNotice(id, "Approved successfully.");
+      }
+      await load();
+    } catch {
+      const message = "Approve failed";
+      setActionNotice({ tone: "error", message });
+      setRowNotice(id, message);
+    } finally {
+      setBusy(null);
     }
-    const ig = body.data?.intelliforge as { status: string; message?: string } | undefined;
-    if (ig?.status === "error") {
-      alert(
-        `Approved, but IntelliForge ticket failed: ${ig.message ?? "unknown error"}. Use "Mint IntelliForge ticket" to retry (requires INTELLIFORGE_API_KEY).`
-      );
-    }
-    await load();
   }
 
   async function mintIntelliforge(id: string) {
     setBusy(id);
-    const res = await fetch(`/api/event-applications/${id}/mint-intelliforge-ticket`, {
-      method: "POST",
-      credentials: "include",
-    });
-    const body = await res.json();
-    setBusy(null);
-    if (!res.ok || !body.ok) {
-      alert(body.error?.message ?? "Mint ticket failed");
-      return;
+    setActionNotice(null);
+    clearRowNotice(id);
+    try {
+      const res = await fetch(`/api/event-applications/${id}/mint-intelliforge-ticket`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        const message = body.error?.message ?? "Mint ticket failed";
+        setActionNotice({ tone: "error", message });
+        setRowNotice(id, message);
+        return;
+      }
+      setActionNotice({ tone: "success", message: "IntelliForge ticket minted." });
+      setRowNotice(id, "IntelliForge ticket minted.");
+      await load();
+    } catch {
+      const message = "Mint ticket failed";
+      setActionNotice({ tone: "error", message });
+      setRowNotice(id, message);
+    } finally {
+      setBusy(null);
     }
-    await load();
   }
 
-  async function reject(id: string) {
-    const reason = window.prompt("Optional note to store with rejection:", "");
-    if (reason === null) return;
+  function openRejectDialog(row: Row) {
+    setActionNotice(null);
+    clearRowNotice(row.id);
+    setRejectDraft({ id: row.id, applicantName: row.applicantName, reason: "" });
+  }
+
+  function closeRejectDialog() {
+    if (busy === rejectDraft?.id) return;
+    setRejectDraft(null);
+  }
+
+  async function confirmReject() {
+    if (!rejectDraft) return;
+    const { id, reason, applicantName } = rejectDraft;
     setBusy(id);
-    const res = await fetch(`/api/event-applications/${id}/reject`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ reason: reason.trim() || undefined }),
-    });
-    const body = await res.json();
-    setBusy(null);
-    if (!res.ok || !body.ok) {
-      alert(body.error?.message ?? "Reject failed");
-      return;
+    setActionNotice(null);
+    clearRowNotice(id);
+    try {
+      const res = await fetch(`/api/event-applications/${id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reason: reason.trim() || undefined }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        const message = body.error?.message ?? "Reject failed";
+        setActionNotice({ tone: "error", message });
+        setRowNotice(id, message);
+        return;
+      }
+      setActionNotice({ tone: "success", message: `Rejected ${applicantName}.` });
+      setRowNotice(id, "Rejected.");
+      setRejectDraft(null);
+      await load();
+    } catch {
+      const message = "Reject failed";
+      setActionNotice({ tone: "error", message });
+      setRowNotice(id, message);
+    } finally {
+      setBusy(null);
     }
-    await load();
   }
 
   async function markSent(id: string) {
     setBusy(id);
-    const res = await fetch(`/api/event-applications/${id}/mark-pass-sent`, {
-      method: "POST",
-      credentials: "include",
-    });
-    const body = await res.json();
-    setBusy(null);
-    if (!res.ok || !body.ok) {
-      alert(body.error?.message ?? "Update failed");
-      return;
+    setActionNotice(null);
+    clearRowNotice(id);
+    try {
+      const res = await fetch(`/api/event-applications/${id}/mark-pass-sent`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        const message = body.error?.message ?? "Update failed";
+        setActionNotice({ tone: "error", message });
+        setRowNotice(id, message);
+        return;
+      }
+      setActionNotice({ tone: "success", message: "Pass and invite marked as sent." });
+      setRowNotice(id, "Marked as sent.");
+      await load();
+    } catch {
+      const message = "Update failed";
+      setActionNotice({ tone: "error", message });
+      setRowNotice(id, message);
+    } finally {
+      setBusy(null);
     }
-    await load();
   }
 
   const [origin, setOrigin] = useState("");
@@ -177,6 +267,19 @@ export function EventApplicationsBoard() {
       ) : null}
 
       {err ? <p className="text-sm text-magenta font-semibold">{err}</p> : null}
+      {actionNotice ? (
+        <p
+          className={`rounded-card border px-3 py-2 text-sm font-semibold ${
+            actionNotice.tone === "error"
+              ? "border-magenta bg-magenta/10 text-magenta"
+              : actionNotice.tone === "success"
+                ? "border-violet bg-violet/10 text-violet"
+                : "border-paper-deep bg-paper-raised text-ink/80"
+          }`}
+        >
+          {actionNotice.message}
+        </p>
+      ) : null}
 
       <div className="overflow-x-auto rounded-card border border-paper-deep">
         <table className="min-w-full text-sm">
@@ -212,6 +315,7 @@ export function EventApplicationsBoard() {
                 r.status === "APPROVED" && passAbsolute
                   ? `https://wa.me/${waDigits(r.phone)}?text=${encodeURIComponent(msg)}`
                   : null;
+              const rowNotice = rowNoticeById[r.id];
 
               return (
                 <tr key={r.id} className="border-b border-paper-deep align-top">
@@ -309,7 +413,7 @@ export function EventApplicationsBoard() {
                         <button
                           type="button"
                           disabled={busy === r.id}
-                          onClick={() => void reject(r.id)}
+                          onClick={() => openRejectDialog(r)}
                           className="block w-full rounded border border-magenta text-magenta text-xs py-1 font-bold disabled:opacity-50"
                         >
                           Reject
@@ -337,6 +441,7 @@ export function EventApplicationsBoard() {
                         Mint IntelliForge ticket
                       </button>
                     ) : null}
+                    {rowNotice ? <p className="text-[10px] text-ink/65">{rowNotice}</p> : null}
                   </td>
                 </tr>
               );
@@ -345,6 +450,49 @@ export function EventApplicationsBoard() {
         </table>
         {rows.length === 0 ? <p className="p-4 text-sm text-ink/55">No applications in this view.</p> : null}
       </div>
+
+      {rejectDraft ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reject-dialog-title"
+            className="w-full max-w-md space-y-3 rounded-card border border-paper-deep bg-paper-raised p-4 shadow-lg"
+          >
+            <h3 id="reject-dialog-title" className="text-sm font-bold text-ink">
+              Reject {rejectDraft.applicantName}?
+            </h3>
+            <p className="text-xs text-ink/70">Add an optional note for this rejection.</p>
+            <textarea
+              value={rejectDraft.reason}
+              onChange={(e) =>
+                setRejectDraft((prev) => (prev ? { ...prev, reason: e.target.value } : prev))
+              }
+              rows={3}
+              className="w-full rounded-card border border-paper-deep bg-paper px-3 py-2 text-sm"
+              placeholder="Optional reason"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeRejectDialog}
+                disabled={busy === rejectDraft.id}
+                className="rounded-full border border-paper-deep px-4 py-2 text-xs font-bold text-ink/80 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmReject()}
+                disabled={busy === rejectDraft.id}
+                className="rounded-full bg-magenta px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+              >
+                {busy === rejectDraft.id ? "Rejecting…" : "Confirm reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { OnboardingInput } from "@/lib/validation/member";
 import { onboardingSchema } from "@/lib/validation/member";
@@ -47,6 +47,13 @@ const GOAL_OPTIONS: { value: OnboardingInput["goals"][number]; label: string }[]
 type FormState = OnboardingFormState;
 
 const emptyForm = emptyOnboardingForm;
+const ONBOARDING_DRAFT_STORAGE_KEY = "sss:onboarding-stepper-draft:v1";
+
+type OnboardingDraft = {
+  mode: "onboard" | "edit";
+  step: number;
+  form: FormState;
+};
 
 function buildPayload(form: FormState): unknown {
   return onboardingFormToPayload(form);
@@ -63,9 +70,72 @@ export function OnboardingStepper({
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(() => initialForm ?? emptyForm());
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftNotice, setDraftNotice] = useState<string | null>(null);
 
   const progressPct = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
+
+  function setFieldError(field: string, message?: string) {
+    setFieldErrors((prev) => {
+      if (!message) {
+        if (!(field in prev)) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      }
+      if (prev[field] === message) return prev;
+      return { ...prev, [field]: message };
+    });
+  }
+
+  function validateOptionalEmail(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setFieldError("email");
+      return;
+    }
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    setFieldError("email", ok ? undefined : "Enter a valid email address.");
+  }
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(ONBOARDING_DRAFT_STORAGE_KEY);
+      if (!raw) {
+        setDraftReady(true);
+        return;
+      }
+      const parsed = JSON.parse(raw) as Partial<OnboardingDraft>;
+      if (parsed.mode !== mode || typeof parsed.step !== "number" || !parsed.form || typeof parsed.form !== "object") {
+        setDraftReady(true);
+        return;
+      }
+      setForm((prev) => ({ ...prev, ...(parsed.form as Partial<FormState>) }));
+      const restoredStep = Math.min(Math.max(Math.trunc(parsed.step), 0), STEPS.length - 1);
+      setStep(restoredStep);
+      setDraftNotice("Draft restored on this device.");
+    } catch {
+      // Ignore invalid draft payloads.
+    } finally {
+      setDraftReady(true);
+    }
+  }, [mode]);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const draft: OnboardingDraft = { mode, step, form };
+    try {
+      window.localStorage.setItem(ONBOARDING_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    } catch {
+      // Ignore quota/private mode failures.
+    }
+  }, [draftReady, mode, step, form]);
+
+  useEffect(() => {
+    if (form.goals.length > 0) setFieldError("goals");
+  }, [form.goals.length]);
 
   function toggleActivity(id: string) {
     setForm((f) => ({
@@ -87,9 +157,11 @@ export function OnboardingStepper({
     setError(null);
     if (step === 0) {
       if (form.name.trim().length < 2) {
+        setFieldError("name", "Please add your name (at least 2 characters).");
         setError("Please add your name (at least 2 characters).");
         return;
       }
+      setFieldError("name");
     }
     if (step < STEPS.length - 1) setStep((s) => s + 1);
   }
@@ -104,7 +176,20 @@ export function OnboardingStepper({
     const raw = buildPayload(form);
     const parsed = onboardingSchema.safeParse(raw);
     if (!parsed.success) {
-      const msg = parsed.error.flatten().formErrors[0] ?? "Please check the form.";
+      const flattened = parsed.error.flatten();
+      const nextFieldErrors: Record<string, string> = {};
+      if (flattened.fieldErrors.name?.[0]) nextFieldErrors.name = flattened.fieldErrors.name[0];
+      if (flattened.fieldErrors.email?.[0]) nextFieldErrors.email = flattened.fieldErrors.email[0];
+      if (flattened.fieldErrors.goals?.[0]) nextFieldErrors.goals = flattened.fieldErrors.goals[0];
+      setFieldErrors(nextFieldErrors);
+      if (flattened.fieldErrors.name?.[0]) setStep(0);
+      else if (flattened.fieldErrors.goals?.[0]) setStep(3);
+      const msg =
+        flattened.fieldErrors.name?.[0] ??
+        flattened.fieldErrors.email?.[0] ??
+        flattened.fieldErrors.goals?.[0] ??
+        flattened.formErrors[0] ??
+        "Please check the form.";
       setError(msg);
       return;
     }
@@ -124,6 +209,12 @@ export function OnboardingStepper({
     if (!res.ok || !body.ok) {
       setError(body.error?.message ?? "Could not save. Try again.");
       return;
+    }
+
+    try {
+      window.localStorage.removeItem(ONBOARDING_DRAFT_STORAGE_KEY);
+    } catch {
+      // Ignore storage cleanup failures.
     }
 
     router.push("/app");
@@ -151,9 +242,24 @@ export function OnboardingStepper({
               <input
                 className={inputClass}
                 value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setForm((f) => ({ ...f, name: value }));
+                  if (value.trim().length >= 2) setFieldError("name");
+                }}
+                onBlur={() =>
+                  setFieldError(
+                    "name",
+                    form.name.trim().length >= 2 ? undefined : "Please add your name (at least 2 characters)."
+                  )
+                }
                 autoComplete="name"
               />
+              {fieldErrors.name ? (
+                <p className="mt-1 text-xs font-semibold text-magenta" role="alert">
+                  {fieldErrors.name}
+                </p>
+              ) : null}
             </label>
             <label className="block text-sm font-semibold text-ink">
               Email <span className="text-ink/40 font-normal">(optional)</span>
@@ -161,9 +267,19 @@ export function OnboardingStepper({
                 type="email"
                 className={inputClass}
                 value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setForm((f) => ({ ...f, email: value }));
+                  if (!value.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) setFieldError("email");
+                }}
+                onBlur={() => validateOptionalEmail(form.email)}
                 autoComplete="email"
               />
+              {fieldErrors.email ? (
+                <p className="mt-1 text-xs font-semibold text-magenta" role="alert">
+                  {fieldErrors.email}
+                </p>
+              ) : null}
             </label>
             <label className="block text-sm font-semibold text-ink">
               Date of birth <span className="text-ink/40 font-normal">(optional)</span>
@@ -411,6 +527,13 @@ export function OnboardingStepper({
                 );
               })}
             </div>
+            {fieldErrors.goals ? (
+              <p className="text-xs font-semibold text-magenta" role="alert">
+                {fieldErrors.goals}
+              </p>
+            ) : (
+              <p className="text-xs text-ink/50">Choose at least one goal before finishing.</p>
+            )}
           </section>
         )}
 
@@ -449,6 +572,9 @@ export function OnboardingStepper({
             </button>
           )}
         </div>
+        <p className="mt-3 text-xs text-ink/45" role="status" aria-live="polite">
+          {draftNotice ?? (draftReady ? "Draft autosaves on this device." : "Preparing draft autosave…")}
+        </p>
       </div>
 
       <p className="text-center text-xs text-ink/40 mt-6">

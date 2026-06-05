@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isValidPhone } from "@/lib/utils/phone";
 
 const GENDERS = [
   { v: "FEMALE", label: "Female" },
@@ -14,6 +15,23 @@ type Props = {
   paymentInstructions: string | null;
 };
 
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+const MAX_PAYMENT_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="mt-1 text-xs font-semibold text-magenta" role="alert">
+      {message}
+    </p>
+  );
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
 export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -24,20 +42,68 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
   const [msg, setMsg] = useState<string | null>(null);
   const [okId, setOkId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function setFieldError(field: string, message?: string) {
+    setFieldErrors((prev) => {
+      if (!message) {
+        if (!(field in prev)) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      }
+      if (prev[field] === message) return prev;
+      return { ...prev, [field]: message };
+    });
+  }
+
+  function validateFile(nextFile: File | null): string | undefined {
+    if (!nextFile) return "Please attach your payment screenshot.";
+    if (!ACCEPTED_IMAGE_TYPES.includes(nextFile.type as (typeof ACCEPTED_IMAGE_TYPES)[number])) {
+      return "Screenshot must be JPG, PNG, or WebP.";
+    }
+    if (nextFile.size > MAX_PAYMENT_IMAGE_BYTES) {
+      return `Screenshot must be ${formatFileSize(MAX_PAYMENT_IMAGE_BYTES)} or smaller.`;
+    }
+    return undefined;
+  }
+
+  function validateForm(): boolean {
+    const nextErrors: Record<string, string> = {};
+    if (name.trim().length < 2) nextErrors.name = "Enter your full name (at least 2 characters).";
+    if (!phone.trim()) nextErrors.phone = "Enter your mobile number.";
+    else if (!isValidPhone(phone.trim())) {
+      nextErrors.phone = "Enter a valid 10-digit Indian mobile number (you can include +91 or spaces).";
+    }
+
+    const ageNumber = Number.parseInt(age, 10);
+    if (!Number.isFinite(ageNumber)) nextErrors.age = "Enter your age.";
+    else if (ageNumber < 10 || ageNumber > 100) nextErrors.age = "Age must be between 10 and 100.";
+
+    if (!city.trim()) nextErrors.city = "Enter your city.";
+    const fileError = validateFile(file);
+    if (fileError) nextErrors.file = fileError;
+
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setMsg(Object.values(nextErrors)[0] ?? "Please correct the highlighted fields.");
+      return false;
+    }
+    return true;
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
     setOkId(null);
-    if (!file) {
+    if (!validateForm()) return;
+
+    const selectedFile = file;
+    if (!selectedFile) {
+      setFieldError("file", "Please attach your payment screenshot.");
       setMsg("Please attach your payment screenshot.");
       return;
     }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setMsg("Screenshot must be JPG, PNG, or WebP.");
-      return;
-    }
-
     setLoading(true);
     const base64 = await new Promise<string>((resolve, reject) => {
       const r = new FileReader();
@@ -51,11 +117,12 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
         resolve(i >= 0 ? res.slice(i + 1) : res);
       };
       r.onerror = () => reject(r.error);
-      r.readAsDataURL(file);
+      r.readAsDataURL(selectedFile);
     }).catch(() => "");
 
     if (!base64) {
       setLoading(false);
+      setFieldError("file", "Could not read the image file. Please reselect it and try again.");
       setMsg("Could not read the image file.");
       return;
     }
@@ -70,7 +137,7 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
         gender,
         city: city.trim(),
         paymentScreenshotBase64: base64,
-        paymentScreenshotMime: file.type,
+        paymentScreenshotMime: selectedFile.type,
       }),
     });
     const body = await res.json();
@@ -108,10 +175,21 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
         <input
           className="mt-1 w-full border rounded-card px-3 py-2 text-sm font-normal text-ink"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setName(value);
+            if (value.trim().length >= 2) setFieldError("name");
+          }}
+          onBlur={() =>
+            setFieldError(
+              "name",
+              name.trim().length >= 2 ? undefined : "Enter your full name (at least 2 characters)."
+            )
+          }
           required
           minLength={2}
         />
+        <FieldError message={fieldErrors.name} />
       </label>
 
       <label className="block text-xs font-bold uppercase text-magenta">
@@ -121,9 +199,27 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
           inputMode="tel"
           placeholder="9876543210 or +91..."
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setPhone(value);
+            if (!value.trim() || isValidPhone(value.trim())) setFieldError("phone");
+          }}
+          onBlur={() =>
+            setFieldError(
+              "phone",
+              !phone.trim()
+                ? "Enter your mobile number."
+                : isValidPhone(phone.trim())
+                  ? undefined
+                  : "Enter a valid 10-digit Indian mobile number (you can include +91 or spaces)."
+            )
+          }
           required
         />
+        <p className="mt-1 text-[11px] font-normal normal-case text-ink/55">
+          Use a 10-digit Indian number (you can include +91 or spaces).
+        </p>
+        <FieldError message={fieldErrors.phone} />
       </label>
 
       <div className="grid grid-cols-2 gap-3">
@@ -135,9 +231,27 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
             min={10}
             max={100}
             value={age}
-            onChange={(e) => setAge(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setAge(value);
+              const ageNumber = Number.parseInt(value, 10);
+              if (!value.trim()) return;
+              if (Number.isFinite(ageNumber) && ageNumber >= 10 && ageNumber <= 100) setFieldError("age");
+            }}
+            onBlur={() => {
+              const ageNumber = Number.parseInt(age, 10);
+              setFieldError(
+                "age",
+                !age.trim()
+                  ? "Enter your age."
+                  : Number.isFinite(ageNumber) && ageNumber >= 10 && ageNumber <= 100
+                    ? undefined
+                    : "Age must be between 10 and 100."
+              );
+            }}
             required
           />
+          <FieldError message={fieldErrors.age} />
         </label>
         <label className="block text-xs font-bold uppercase text-magenta">
           Gender
@@ -160,9 +274,15 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
         <input
           className="mt-1 w-full border rounded-card px-3 py-2 text-sm font-normal text-ink"
           value={city}
-          onChange={(e) => setCity(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setCity(value);
+            if (value.trim()) setFieldError("city");
+          }}
+          onBlur={() => setFieldError("city", city.trim() ? undefined : "Enter your city.")}
           required
         />
+        <FieldError message={fieldErrors.city} />
       </label>
 
       <label className="block text-xs font-bold uppercase text-magenta">
@@ -171,8 +291,22 @@ export function PublicEventRegisterForm({ eventId, paymentInstructions }: Props)
           type="file"
           accept="image/jpeg,image/png,image/webp"
           className="mt-1 w-full text-sm"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => {
+            const nextFile = e.target.files?.[0] ?? null;
+            setFile(nextFile);
+            setFieldError("file", validateFile(nextFile));
+          }}
         />
+        {file ? (
+          <p className="mt-1 text-[11px] font-normal normal-case text-ink/55">
+            Selected: {file.name} ({formatFileSize(file.size)})
+          </p>
+        ) : (
+          <p className="mt-1 text-[11px] font-normal normal-case text-ink/55">
+            Accepted: JPG, PNG, WebP up to {formatFileSize(MAX_PAYMENT_IMAGE_BYTES)}.
+          </p>
+        )}
+        <FieldError message={fieldErrors.file} />
       </label>
 
       <button

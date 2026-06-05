@@ -17,7 +17,6 @@ type Post = {
   author: { name: string | null };
   _count: { likes: number; comments: number };
   likes: { id: string }[];
-  comments: CommentRow[];
 };
 
 export function CommunityComposer() {
@@ -91,19 +90,53 @@ export function CommunityPostCard({ post }: { post: Post }) {
   const [liked, setLiked] = useState(post.likes.length > 0);
   const [likeCount, setLikeCount] = useState(post._count.likes);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsFetched, setCommentsFetched] = useState(false);
+  const [commentsFetchLoading, setCommentsFetchLoading] = useState(false);
+  const [commentsFetchError, setCommentsFetchError] = useState<string | null>(null);
   const [commentBody, setCommentBody] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
-  const [localComments, setLocalComments] = useState(post.comments);
+  const [localComments, setLocalComments] = useState<CommentRow[]>([]);
 
   const [commentCount, setCommentCount] = useState(post._count.comments);
 
   useEffect(() => {
     setLiked(post.likes.length > 0);
     setLikeCount(post._count.likes);
-    setLocalComments(post.comments);
+  }, [post.likes.length, post._count.likes]);
+
+  useEffect(() => {
     setCommentCount(post._count.comments);
-  }, [post.id, post.likes.length, post._count.likes, post._count.comments, post.comments]);
+  }, [post._count.comments]);
+
+  useEffect(() => {
+    setCommentsOpen(false);
+    setCommentsFetched(false);
+    setCommentsFetchLoading(false);
+    setCommentsFetchError(null);
+    setCommentBody("");
+    setCommentLoading(false);
+    setCommentError(null);
+    setLocalComments([]);
+  }, [post.id]);
+
+  async function fetchComments() {
+    if (commentsFetched || commentsFetchLoading) return;
+
+    setCommentsFetchError(null);
+    setCommentsFetchLoading(true);
+    const res = await fetch(`/api/community/posts/${post.id}/comments`);
+    const json = (await res.json().catch(() => null)) as
+      | { ok?: boolean; data?: CommentRow[]; error?: { message?: string } }
+      | null;
+    setCommentsFetchLoading(false);
+    if (res.ok && json?.ok && Array.isArray(json.data)) {
+      setLocalComments(json.data);
+      setCommentsFetched(true);
+      return;
+    }
+    setCommentsFetchError(json?.error?.message ?? "Could not load comments.");
+  }
 
   async function toggleLike() {
     const res = await fetch(`/api/community/posts/${post.id}/like`, {
@@ -142,6 +175,7 @@ export function CommunityPostCard({ post }: { post: Post }) {
     if (res.ok && json?.ok && json.data) {
       setCommentBody("");
       setLocalComments((prev) => [...prev, json.data!]);
+      setCommentsFetchError(null);
       setCommentCount((n) => n + 1);
       router.refresh();
       return;
@@ -175,8 +209,10 @@ export function CommunityPostCard({ post }: { post: Post }) {
           type="button"
           data-testid="community-post-comments-toggle"
           onClick={() => {
-            setCommentsOpen((o) => !o);
+            const nextOpen = !commentsOpen;
+            setCommentsOpen(nextOpen);
             setCommentError(null);
+            if (nextOpen) void fetchComments();
           }}
           className="text-ink/60 hover:text-violet focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet rounded"
           aria-expanded={commentsOpen}
@@ -188,6 +224,26 @@ export function CommunityPostCard({ post }: { post: Post }) {
 
       {commentsOpen && (
         <div className="mt-4 border-t border-paper-deep pt-4 space-y-3">
+          {commentsFetchLoading && localComments.length === 0 ? (
+            <p className="text-sm text-ink/70" role="status">
+              Loading comments…
+            </p>
+          ) : null}
+          {commentsFetchError && localComments.length === 0 ? (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-magenta" role="alert">
+                {commentsFetchError}
+              </p>
+              <button
+                type="button"
+                onClick={() => void fetchComments()}
+                disabled={commentsFetchLoading}
+                className="rounded-full border border-paper-deep bg-paper px-3 py-1.5 text-xs font-semibold text-violet disabled:opacity-60"
+              >
+                {commentsFetchLoading ? "Retrying…" : "Retry"}
+              </button>
+            </div>
+          ) : null}
           <ul className="space-y-2 max-h-64 overflow-y-auto">
             {localComments.map((c) => (
               <li key={c.id} className="rounded-lg bg-paper px-3 py-2 text-sm">
@@ -196,6 +252,9 @@ export function CommunityPostCard({ post }: { post: Post }) {
               </li>
             ))}
           </ul>
+          {!commentsFetchLoading && !commentsFetchError && localComments.length === 0 ? (
+            <p className="text-sm text-ink/60">No comments yet. Be the first to reply.</p>
+          ) : null}
           <form onSubmit={submitComment} className="space-y-2">
             <label className="sr-only" htmlFor={`comment-${post.id}`}>
               Add a comment

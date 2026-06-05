@@ -19,11 +19,6 @@ export default async function CommunityPage() {
         author: { select: { name: true } },
         _count: { select: { likes: true, comments: true } },
         likes: { where: { userId: user.id }, select: { id: true } },
-        comments: {
-          orderBy: { createdAt: "asc" },
-          take: 40,
-          include: { author: { select: { name: true } } },
-        },
       },
     }),
     prisma.wellnessArticle.findMany({
@@ -37,10 +32,6 @@ export default async function CommunityPage() {
   const serialPosts = posts.map((p) => ({
     ...p,
     createdAt: p.createdAt.toISOString(),
-    comments: p.comments.map((c) => ({
-      ...c,
-      createdAt: c.createdAt.toISOString(),
-    })),
   }));
 
   return (

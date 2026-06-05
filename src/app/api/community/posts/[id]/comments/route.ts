@@ -3,6 +3,31 @@ import { requireAuth, AuthError } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { communityCommentSchema } from "@/lib/validation/community";
 
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  try {
+    await requireAuth();
+  } catch (e) {
+    if (e instanceof AuthError) return unauthorized();
+    throw e;
+  }
+
+  const post = await prisma.communityPost.findUnique({ where: { id: params.id }, select: { id: true } });
+  if (!post) return notFound("Post not found");
+
+  const comments = await prisma.communityComment.findMany({
+    where: { postId: post.id },
+    orderBy: { createdAt: "asc" },
+    include: { author: { select: { name: true } } },
+  });
+
+  return ok(
+    comments.map((comment) => ({
+      ...comment,
+      createdAt: comment.createdAt.toISOString(),
+    })),
+  );
+}
+
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   let user;
   try {
