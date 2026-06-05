@@ -7,6 +7,31 @@
 :root {
   --violet: #8b5cf6;
   --magenta: #ec4899;
+  --color-paper: 5 4 8;
+  --color-paper-deep: 42 36 56;
+  --color-paper-raised: 20 18 31;
+  --color-paper-muted: 26 23 38;
+  --color-ink: 244 240 252;
+  --color-steel: 148 163 184;
+  --color-steel-dim: 100 116 139;
+  --color-steel-bright: 226 232 240;
+  color-scheme: dark;
+}
+
+html.light {
+  --color-paper: 248 250 252;
+  --color-paper-deep: 226 232 240;
+  --color-paper-raised: 255 255 255;
+  --color-paper-muted: 241 245 249;
+  --color-ink: 15 23 42;
+  --color-steel: 71 85 105;
+  --color-steel-dim: 100 116 139;
+  --color-steel-bright: 30 41 59;
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {

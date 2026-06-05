@@ -52,14 +52,36 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050408",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#050408" },
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
 
+const themeInitScript = `
+(() => {
+  let theme = "dark";
+  try {
+    const key = "sss-theme";
+    const stored = window.localStorage.getItem(key);
+    const preferred = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    theme = stored === "light" || stored === "dark" ? stored : preferred;
+  } catch {}
+  const root = document.documentElement;
+  root.classList.remove("light", "dark");
+  root.classList.add(theme);
+  root.dataset.theme = theme;
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>{children}</body>
     </html>
   );

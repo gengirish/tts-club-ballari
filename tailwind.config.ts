@@ -21,19 +21,19 @@ const config: Config = {
           soft: "#f472b6",
         },
         steel: {
-          DEFAULT: "#94a3b8",
-          dim: "#64748b",
-          bright: "#e2e8f0",
+          DEFAULT: "rgb(var(--color-steel) / <alpha-value>)",
+          dim: "rgb(var(--color-steel-dim) / <alpha-value>)",
+          bright: "rgb(var(--color-steel-bright) / <alpha-value>)",
           chrome: "#cbd5e1",
         },
-        /** Primary text on dark surfaces */
-        ink: "#f4f0fc",
-        /** Surfaces — logo “void” + elevated cards */
+        /** Primary text color across themes */
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+        /** Surface colors that adapt per selected theme */
         paper: {
-          DEFAULT: "#050408",
-          deep: "#2a2438",
-          raised: "#14121f",
-          muted: "#1a1726",
+          DEFAULT: "rgb(var(--color-paper) / <alpha-value>)",
+          deep: "rgb(var(--color-paper-deep) / <alpha-value>)",
+          raised: "rgb(var(--color-paper-raised) / <alpha-value>)",
+          muted: "rgb(var(--color-paper-muted) / <alpha-value>)",
         },
         progress: "#34d399",
       },
@@ -52,7 +52,7 @@ const config: Config = {
         chrome: "0 0 40px rgba(148, 163, 184, 0.12)",
       },
       ringOffsetColor: {
-        paper: "#050408",
+        paper: "rgb(var(--color-paper) / 1)",
       },
     },
   },
