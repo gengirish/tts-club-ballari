@@ -71,3 +71,24 @@ export const magicLinkEmailSchema = z.object({
 });
 
 export type MagicLinkEmailInput = z.infer<typeof magicLinkEmailSchema>;
+
+export const forgotPasswordRequestSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email required")
+    .email("Enter a valid email address")
+    .transform((s) => s.toLowerCase()),
+});
+
+export type ForgotPasswordRequestInput = z.infer<typeof forgotPasswordRequestSchema>;
+
+export const resetPasswordSchema = z.object({
+  token: z
+    .string()
+    .trim()
+    .min(20, "Reset token is invalid"),
+  password: z.string().min(8, "At least 8 characters").max(128),
+});
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

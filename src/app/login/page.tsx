@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { getSession, signIn } from "next-auth/react";
+import Link from "next/link";
 import { magicLinkEmailSchema } from "@/lib/validation/auth";
 import { signInEmailPasswordWithTimeout } from "@/lib/client/sign-in-email-password";
 
@@ -314,6 +315,15 @@ export default function LoginPage() {
                     disabled={loading}
                   />
                 </div>
+                <p className="mb-4 text-right text-xs font-semibold">
+                  <Link
+                    href="/login/forgot-password"
+                    className="text-violet-soft underline-offset-2 hover:underline"
+                    data-testid="login-forgot-password-link"
+                  >
+                    Forgot password?
+                  </Link>
+                </p>
                 <button
                   type="button"
                   data-testid="login-password-submit"

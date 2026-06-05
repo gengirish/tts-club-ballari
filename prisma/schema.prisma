@@ -157,6 +157,7 @@ model User {
   payments          Payment[]
   coachBookingRequests CoachBookingRequest[]
   eventApplicationsApproved EventApplication[] @relation("EventApplicationApprover")
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Account {
@@ -191,6 +192,18 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
 }
 
 // Phone OTP login (delivered via AISensy authentication template)
