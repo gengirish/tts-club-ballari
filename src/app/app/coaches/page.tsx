@@ -4,6 +4,7 @@ import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { formatPaiseShort } from "@/lib/utils/money";
 import { formatStars } from "@/lib/utils/percent";
+import { AppBackToHome } from "../app-back-to-home";
 import { CoachesBookButtons } from "./coaches-book-buttons";
 
 export default async function CoachesMarketplacePage() {
@@ -27,6 +28,7 @@ export default async function CoachesMarketplacePage() {
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-3xl mx-auto space-y-6">
+        <AppBackToHome />
         <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">Coaches</h1>
         <p className="text-sm text-ink/60">Running, yoga, strength, and more — book through the crew inbox.</p>
         <ul className="space-y-4">

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/rbac";
 import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
+import { AppBackToHome } from "../app-back-to-home";
 import { ChallengesClient } from "./challenges-client";
 
 export default async function ChallengesPage() {
@@ -31,6 +32,7 @@ export default async function ChallengesPage() {
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-3xl mx-auto">
+        <AppBackToHome />
         <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy">Challenges</h1>
         <p className="text-sm text-ink/60 mt-2 mb-8">Active challenges and live leaderboards.</p>
         <ChallengesClient challenges={challenges} userId={user.id} joinedChallengeIds={joinedChallengeIds} />

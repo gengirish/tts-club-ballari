@@ -4,6 +4,7 @@ import { isMemberOnboarded } from "@/lib/member/onboarding-status";
 import { prisma } from "@/lib/prisma";
 import { formatBps } from "@/lib/utils/percent";
 import { formatDateTimeIST } from "@/lib/utils/datetime";
+import { AppBackToHome } from "../app-back-to-home";
 import { RecomputeScoreButton } from "./recompute-button";
 
 const LEVEL_ORDER = ["BEGINNER", "ACTIVE", "STRONG", "ATHLETE", "CHAMPION"] as const;
@@ -52,6 +53,7 @@ export default async function ScorePage() {
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-xl mx-auto">
+        <AppBackToHome />
         <h1 className="font-display text-4xl uppercase text-transparent bg-clip-text bg-energy" data-testid="score-page-title">
           Fitness score
         </h1>
