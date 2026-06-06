@@ -1,12 +1,22 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("member area (authenticated)", () => {
-  test("dashboard shows greeting and nav", async ({ page }) => {
+  test("dashboard shows greeting, Walking to 5K CTA, and nav", async ({ page }) => {
     await page.goto("/app");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Walking to 5K/i })).toBeVisible();
+    await expect(page.getByTestId("app-home-walking-to-5k-register")).toBeVisible();
     await expect(page.getByRole("link", { name: "Score" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Progress" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Challenges" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Events" })).toBeVisible();
+  });
+
+  test("Walking to 5K home CTA opens interactive registration", async ({ page }) => {
+    await page.goto("/app");
+    await page.getByTestId("app-home-walking-to-5k-register").click();
+    await expect(page).toHaveURL(/\/walking-to-5k\/register/);
+    await expect(page.getByRole("heading", { name: /Walking to 5K registration/i })).toBeVisible();
   });
 
   test("dashboard nav reaches C25K program page", async ({ page }) => {
@@ -34,6 +44,12 @@ test.describe("member area (authenticated)", () => {
     await expect(page.getByRole("heading", { name: /Challenges/i })).toBeVisible();
   });
 
+  test("events hub loads", async ({ page }) => {
+    await page.goto("/app/events");
+    await expect(page.getByTestId("events-page-title")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Events/i })).toBeVisible();
+  });
+
   test("coaches marketplace loads", async ({ page }) => {
     await page.goto("/app/coaches");
     await expect(page.getByRole("heading", { name: /Coaches/i })).toBeVisible();
@@ -45,8 +61,11 @@ test.describe("member area (authenticated)", () => {
     await expect(page.getByRole("button", { name: /SOS/i })).toBeVisible();
   });
 
-  test("C25K program page loads", async ({ page }) => {
+  test("C25K program page loads with Walking to 5K registration CTA", async ({ page }) => {
     await page.goto("/app/programs/couch-to-5k");
+    await expect(page.getByTestId("c25k-page")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByTestId("c25k-walking-to-5k-register")).toBeVisible();
+    await expect(page.getByTestId("c25k-walking-to-5k-register")).toHaveAttribute("href", "/walking-to-5k/register");
   });
 });

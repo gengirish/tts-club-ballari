@@ -26,10 +26,10 @@ export default function Home() {
           Sign in
         </Link>
         <Link
-          href="/walking-to-5k"
+          href="/walking-to-5k/register"
           className="mt-5 text-sm text-ink/50 underline-offset-4 transition-colors hover:text-ink/70 hover:underline"
         >
-          Walking to 5K program
+          Walking to 5K registration
         </Link>
       </div>
     </main>

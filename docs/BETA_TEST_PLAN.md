@@ -84,7 +84,7 @@ Use **Pass / Fail / Blocked** + short notes and **approx. date**. “Blocked” 
 
 | # | Case | Steps | Expected |
 |---|------|--------|----------|
-| W1 | Landing | Open **`/walking-to-5k`** | Programme story, CTAs, link to **PDF** (`/SSS_Walking_to_5K_Form.pdf`) opens or downloads. |
+| W1 | Landing | Open **`/walking-to-5k`** while **signed in** | Programme story and CTAs load (guests are sent straight to **`/walking-to-5k/register`**). |
 | W2 | Preview CTA | From landing, use **preview programme hub** (sign-in if prompted) | After auth, **`/app/programs/couch-to-5k`** loads for onboarded users. |
 | W3 | Register — new account | **`/walking-to-5k/register`** (signed out) → create account (email or username + password) | Session established; wizard steps appear. |
 | W4 | Register — existing user | Use **Sign in** (password or OTP) with `callbackUrl=/walking-to-5k/register` | Lands on wizard with session. |

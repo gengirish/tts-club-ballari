@@ -48,7 +48,7 @@ npm run test:e2e:seed
 |--------|----------------|
 | `npm run test:e2e:seed` | Upserts onboarded user for `E2E_TEST_PHONE` (optional; server/seed only). |
 | `npm run test:e2e` | Runs Playwright (starts `npm run dev` unless CI / reuse). |
-| `npm run test:e2e:prod` | Smoke **public** specs only; set `PLAYWRIGHT_BASE_URL` to production (see [DEPLOYED_URLS.md](./DEPLOYED_URLS.md)). Does **not** start a local dev server when the URL host is not `localhost` / `127.0.0.1`. |
+| `npm run test:e2e:prod` | Smoke **`e2e/public.spec.ts`** only (home, login + Join flow, `/walking-to-5k` guest redirect, APIs, verify-request). Set `PLAYWRIGHT_BASE_URL` for production (see [DEPLOYED_URLS.md](./DEPLOYED_URLS.md)). Does **not** start a local dev server when the URL host is not `localhost` / `127.0.0.1`. |
 | `npm run test:e2e:ui` | Playwright UI mode for debugging. |
 | `npx playwright install chromium` | One-time browser download. |
 
@@ -71,7 +71,7 @@ With **`E2E_PASSWORD_EMAIL` + `E2E_PASSWORD`** set, Playwright runs:
 - **`chromium`** — `e2e/authenticated/*.spec.ts` (member UI, **API routes** with session cookie, challenges join) using `e2e/.auth/member.json`.
 - **`public`** — `e2e/public.spec.ts` and `e2e/password-login.spec.ts` (no session; smoke and fresh sign-up against the same DB).
 
-Without the password env vars, only **`public`** runs (`public.spec.ts` + **`password-login.spec.ts`** — smoke on `/`, `/login`, register API errors, and email/username sign-up against local DB).
+Without the password env vars, only **`public`** runs (`public.spec.ts` + **`password-login.spec.ts`** — smoke on `/`, `/login`, login **Join** sign-up fields, `/walking-to-5k` guest redirect to register, register API errors, and email/username sign-up against local DB).
 
 ## Writing new tests
 

@@ -13,6 +13,7 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
     { href: "/app", label: "Home", exact: true },
     { href: "/app/progress", label: "Progress" },
     { href: "/app/challenges", label: "Challenges" },
+    { href: "/app/events", label: "Events" },
     { href: "/app/community", label: "Community" },
     { href: "/app/programs/couch-to-5k", label: "C25K" },
   ] as const;
@@ -66,7 +67,7 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
         aria-label="Member primary"
         className="fixed inset-x-0 bottom-0 z-50 border-t border-steel/15 bg-paper-raised/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.2)] backdrop-blur-md supports-[backdrop-filter]:bg-paper-raised/80 md:hidden"
       >
-        <div className="mx-auto grid max-w-4xl grid-cols-5 gap-1">
+        <div className="mx-auto grid max-w-4xl grid-cols-6 gap-0.5">
           {tabs.map((tab) => {
             const active = isActive(tab.href, ("exact" in tab && tab.exact) || false);
             return (
@@ -74,7 +75,7 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
                 key={tab.href}
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-xl px-2 py-2 text-center text-[11px] font-extrabold uppercase tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper ${
+                className={`rounded-xl px-1.5 py-2 text-center text-[10px] font-extrabold uppercase tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper sm:px-2 sm:text-[11px] ${
                   active
                     ? "bg-paper-muted text-violet-soft ring-1 ring-violet/35"
                     : "text-steel hover:bg-paper-muted/80 hover:text-ink"

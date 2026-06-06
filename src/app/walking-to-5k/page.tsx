@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 export const metadata: Metadata = {
   title: "Walking to 5K",
@@ -47,7 +49,12 @@ const features = [
   },
 ];
 
-export default function WalkingTo5kLandingPage() {
+export default async function WalkingTo5kLandingPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/walking-to-5k/register");
+  }
+
   return (
     <main className="min-h-screen bg-paper text-ink">
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>

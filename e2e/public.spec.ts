@@ -5,6 +5,11 @@ test.describe("public shell", () => {
   test("home page loads", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Sign in$/i })).toHaveAttribute("href", "/login");
+    await expect(page.getByRole("link", { name: /Walking to 5K registration/i })).toHaveAttribute(
+      "href",
+      "/walking-to-5k/register"
+    );
   });
 
   test("public theme toggle persists after reload", async ({ page }) => {
@@ -66,9 +71,10 @@ test.describe("public shell", () => {
     });
   });
 
-  test("login register tab shows sign-up fields", async ({ page }) => {
+  test("login join flow shows sign-up fields", async ({ page }) => {
     await page.goto("/login");
     await page.getByTestId("login-tab-register").click();
+    await expect(page.getByRole("heading", { name: /^Join$/i })).toBeVisible();
     await expect(page.getByTestId("register-email")).toBeVisible();
     await expect(page.getByTestId("register-username")).toBeVisible();
     await expect(page.getByTestId("register-password")).toBeVisible();
@@ -122,5 +128,13 @@ test.describe("public shell", () => {
     await page.goto("/login/verify-request");
     await expect(page.getByRole("heading", { name: /Check your email/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Back to sign in/i })).toBeVisible();
+  });
+});
+
+test.describe("walking to 5K", () => {
+  test("programme overview redirects guests to registration", async ({ page }) => {
+    await page.goto("/walking-to-5k");
+    await expect(page).toHaveURL(/\/walking-to-5k\/register/);
+    await expect(page.getByRole("heading", { name: /Create your account/i })).toBeVisible();
   });
 });

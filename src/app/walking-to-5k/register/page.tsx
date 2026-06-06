@@ -454,8 +454,8 @@ export default function WalkingTo5kRegisterPage() {
           <div className="absolute -left-20 top-0 h-72 w-72 rounded-full bg-energy-soft blur-3xl" />
         </div>
         <div className="relative mx-auto w-full max-w-lg">
-          <Link href="/walking-to-5k" className="text-sm font-bold text-violet-soft hover:underline">
-            ← Walking to 5K
+          <Link href="/" className="text-sm font-bold text-violet-soft hover:underline">
+            ← Home
           </Link>
           <h1 className="mt-4 font-display text-3xl font-bold uppercase text-violet">Create your account</h1>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">

@@ -85,6 +85,7 @@ export default async function AppHome() {
               ["/app/score", "Score"],
               ["/app/progress", "Progress"],
               ["/app/challenges", "Challenges"],
+              ["/app/events", "Events"],
               ["/app/programs/couch-to-5k", "C25K"],
               ["/app/coaches", "Coaches"],
               ["/app/community", "Community"],
@@ -174,9 +175,21 @@ export default async function AppHome() {
                 <p className="font-bold text-ink mt-2">{nextReg.event.title}</p>
                 <p className="text-sm text-ink/60 mt-1">{formatDateTimeIST(nextReg.event.startsAt)}</p>
                 <p className="text-xs text-ink/50 mt-1">{nextReg.event.location}</p>
+                <Link
+                  href="/app/events"
+                  className="mt-3 inline-block text-xs font-bold uppercase tracking-wide text-violet-soft hover:underline"
+                  data-testid="app-home-next-event-link"
+                >
+                  Events hub →
+                </Link>
               </>
             ) : (
-              <p className="text-sm text-ink/60 mt-2">Browse upcoming events from Community or Events API.</p>
+              <p className="text-sm text-ink/60 mt-2">
+                <Link href="/app/events" className="font-bold text-violet-soft hover:underline" data-testid="app-home-events-empty">
+                  Browse upcoming events
+                </Link>{" "}
+                and register when a session opens.
+              </p>
             )}
           </div>
         </section>
