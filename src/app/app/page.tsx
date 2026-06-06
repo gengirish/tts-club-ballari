@@ -40,7 +40,7 @@ export default async function AppHome() {
 
   const day = istDayBucket();
 
-  const [progressToday, latestScore, health, challengePart, nextReg] = await Promise.all([
+  const [progressToday, latestScore, health, challengePart, nextReg, walkingTo5kEnrollment] = await Promise.all([
     prisma.progressEntry.findUnique({ where: { userId_date: { userId: user.id, date: day } } }),
     prisma.fitnessScore.findFirst({ where: { userId: user.id }, orderBy: { computedAt: "desc" } }),
     prisma.healthProfile.findUnique({ where: { userId: user.id } }),
@@ -53,7 +53,12 @@ export default async function AppHome() {
       orderBy: { event: { startsAt: "asc" } },
       include: { event: true },
     }),
+    prisma.programEnrollment.findFirst({
+      where: { memberId: user.id, program: { slug: "couch-to-5k" } },
+      select: { id: true },
+    }),
   ]);
+  const walkingTo5kEnrolled = !!walkingTo5kEnrollment;
 
   const steps = progressToday?.steps ?? 0;
   const weight = health?.weightKg ?? progressToday?.weightKg ?? null;
@@ -94,6 +99,34 @@ export default async function AppHome() {
             ))}
           </nav>
         </header>
+
+        <section
+          className="rounded-card border border-energy/35 bg-gradient-to-br from-paper-raised to-violet/5 p-5 shadow-sm sm:p-6"
+          aria-labelledby="walking-to-5k-home-heading"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-energy">Happening now</p>
+              <h2 id="walking-to-5k-home-heading" className="mt-1 font-display text-xl font-bold uppercase text-ink sm:text-2xl">
+                Walking to 5K
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-ink/70">
+                {walkingTo5kEnrolled
+                  ? "You are on the roster. Update your medical / consent form or jump into Couch to 5K whenever you like."
+                  : "Our flagship Ballari cohort — complete registration online in a few minutes."}
+              </p>
+            </div>
+            <div className="flex shrink-0 sm:min-w-[11rem]">
+              <Link
+                href="/walking-to-5k/register"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-energy px-5 text-center text-sm font-semibold text-white transition-[filter] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper sm:w-auto"
+                data-testid="app-home-walking-to-5k-register"
+              >
+                {walkingTo5kEnrolled ? "Update registration" : "Register online"}
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <section className="grid md:grid-cols-3 gap-4">
           <div className="rounded-card border border-paper-deep bg-paper-raised p-6 text-center md:col-span-1">

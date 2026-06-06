@@ -71,12 +71,6 @@ export default function WalkingTo5kLandingPage() {
           </Link>
           <nav className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Link
-              href="/SSS_Walking_to_5K_Form.pdf"
-              className="rounded-full border border-paper-deep px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-ink/85 transition-colors hover:border-violet/40 hover:bg-paper-muted/60"
-            >
-              PDF form
-            </Link>
-            <Link
               href="/login?callbackUrl=/walking-to-5k/register"
               className="rounded-full border border-paper-deep px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-ink/85 transition-colors hover:border-violet/40 hover:bg-paper-muted/60"
             >
@@ -128,8 +122,8 @@ export default function WalkingTo5kLandingPage() {
             What you get
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/70">
-            This landing page mirrors the spirit of the official PDF — then connects you to authentication, digital PAR-Q,
-            emergency contacts, and the same Couch to 5K journey your coaches run in Ballari.
+            Online registration walks you through authentication, digital PAR-Q, emergency contacts, and the same Couch to
+            5K journey your coaches run in Ballari.
           </p>
           <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (

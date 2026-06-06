@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/rbac";
 import { isMemberOnboarded } from "@/lib/member/onboarding-status";
@@ -23,6 +24,29 @@ export default async function OnboardingPage() {
           A quick setup so your Ballari crew can support you — personal, health, movement, then goals.
         </p>
       </div>
+
+      <section
+        className="relative mx-auto mb-10 max-w-2xl rounded-card border border-energy/35 bg-paper-raised p-4 text-left shadow-sm sm:p-5"
+        aria-labelledby="onboarding-walking-to-5k-heading"
+      >
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-energy">Happening now</p>
+        <h2 id="onboarding-walking-to-5k-heading" className="mt-1 font-display text-lg font-bold uppercase text-ink sm:text-xl">
+          Walking to 5K
+        </h2>
+        <p className="mt-2 text-sm text-ink/70">
+          Register for the flagship cohort anytime — or finish this welcome flow first and open it from Home.
+        </p>
+        <div className="mt-4">
+          <Link
+            href="/walking-to-5k/register"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-energy px-4 text-sm font-semibold text-white transition-[filter] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper sm:w-auto"
+            data-testid="onboarding-walking-to-5k-register"
+          >
+            Register online
+          </Link>
+        </div>
+      </section>
+
       <OnboardingStepper />
     </main>
   );
