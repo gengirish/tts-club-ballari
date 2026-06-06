@@ -118,7 +118,7 @@ export default function LoginPage() {
         return;
       }
       setError(
-        "Incorrect email/username or password. If you just signed up, use the same details on the Password tab."
+        "Incorrect email/username or password. If you just signed up, use the same email or username you registered with."
       );
     } catch (e) {
       setError(
@@ -195,7 +195,7 @@ export default function LoginPage() {
           return;
         }
       }
-      setSuccess("Account created successfully! Use the Password tab to sign in with your email or username.");
+      setSuccess("Account created! Sign in below with your email or username.");
       setTab("password");
       setIdentifier(loginId);
       setPassword("");
@@ -203,7 +203,7 @@ export default function LoginPage() {
     } catch (e) {
       setError(
         e instanceof Error && e.message === "SIGN_IN_TIMEOUT"
-          ? "Account may have been created, but sign-in timed out. Open Password and try logging in."
+          ? "Account may have been created, but sign-in timed out. Try signing in again below."
           : "Could not finish sign-up. Try again."
       );
     } finally {
@@ -211,78 +211,35 @@ export default function LoginPage() {
     }
   }
 
-  const tabBtn = (
-    t: Tab,
-    label: string,
-    testId: string,
-    Icon: typeof IconLock
-  ) => (
-    <button
-      type="button"
-      data-testid={testId}
-      role="tab"
-      aria-selected={tab === t}
-      id={`${baseId}-tab-${t}`}
-      aria-controls={`${baseId}-panel`}
-      onClick={() => {
-        setTab(t);
-        setError(null);
-        setSuccess(null);
-        if (t !== "magic") {
-          setMagicLinkSent(false);
-          setMagicLinkSentTo("");
-        }
-      }}
-      className={`flex min-h-[44px] w-full min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 rounded-full py-2.5 text-[0.7rem] font-bold leading-tight transition-colors duration-200 sm:gap-1.5 sm:text-xs ${
-        tab === t
-          ? "bg-energy text-white shadow-md shadow-violet/30"
-          : "border border-paper-deep bg-paper-raised text-ink/80 hover:border-violet/30 hover:bg-paper-muted/80"
-      }`}
-    >
-      <Icon className={`shrink-0 ${tab === t ? "text-white" : "text-violet"}`} />
-      <span className="truncate text-center">{label}</span>
-    </button>
-  );
+  function goTab(next: Tab) {
+    setTab(next);
+    setError(null);
+    setSuccess(null);
+    if (next !== "magic") {
+      setMagicLinkSent(false);
+      setMagicLinkSentTo("");
+    }
+  }
+
+  const secondaryLinkClass =
+    "cursor-pointer text-left text-sm font-medium text-ink/55 underline-offset-2 transition-colors hover:text-ink/80 hover:underline disabled:pointer-events-none disabled:opacity-50";
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-paper px-4 py-10 sm:px-6">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40 motion-reduce:opacity-25"
-        aria-hidden
-      >
-        <div className="absolute -left-20 top-0 h-72 w-72 rounded-full bg-energy-soft blur-3xl" />
-        <div className="absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-violet/20 blur-3xl" />
-      </div>
-
-      <div className="relative mx-auto w-full max-w-md">
-        <div className="rounded-screen border border-steel/35 bg-paper-raised/92 p-6 shadow-xl shadow-violet/10 backdrop-blur-md sm:p-8">
-          <h1 className="font-display text-3xl uppercase leading-tight text-violet sm:text-4xl">
-            Welcome, strider
-          </h1>
-          <p className="mt-2 text-sm leading-relaxed text-ink/70">
-            Sign in with a one-time email link, or email or username with a password. New here? Use <strong className="font-semibold text-ink/85">Sign up</strong>.
+    <main className="min-h-screen bg-paper px-4 py-12 sm:px-6">
+      <div className="mx-auto w-full max-w-sm">
+        <div className="rounded-2xl border border-steel/20 bg-paper-raised px-6 py-8 sm:px-8">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">Sign in</h1>
+          <p className="mt-1.5 text-sm text-ink/60">
+            {tab === "password" && "Use the email or username you registered with."}
+            {tab === "magic" && !magicLinkSent && "We will email you a one-time link (no password)."}
+            {tab === "magic" && magicLinkSent && "Open the link from your email on this device."}
+            {tab === "register" && "Create your member account."}
           </p>
 
-          <div
-            className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:flex sm:flex-nowrap"
-            role="tablist"
-            aria-label="Sign in method"
-          >
-            {tabBtn("password", "Password", "login-tab-password", IconLock)}
-            {tabBtn("magic", "Email link", "login-tab-magic", IconMail)}
-            {tabBtn("register", "Sign up", "login-tab-register", IconUserPlus)}
-          </div>
-
-          <div
-            id={`${baseId}-panel`}
-            role="tabpanel"
-            aria-labelledby={`${baseId}-tab-${tab}`}
-            aria-busy={loading}
-            className="mt-6"
-          >
+          <div id={`${baseId}-panel`} aria-busy={loading} className="mt-8">
             {tab === "password" && (
               <>
-                <label htmlFor="login-identifier" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                <label htmlFor="login-identifier" className="mb-1.5 block text-xs font-medium text-ink/50">
                   Email or username
                 </label>
                 <div className="relative mb-3">
@@ -298,7 +255,7 @@ export default function LoginPage() {
                     disabled={loading}
                   />
                 </div>
-                <label htmlFor="login-password-field" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                <label htmlFor="login-password-field" className="mb-1.5 block text-xs font-medium text-ink/50">
                   Password
                 </label>
                 <div className="relative mb-4">
@@ -329,31 +286,39 @@ export default function LoginPage() {
                   data-testid="login-password-submit"
                   onClick={() => void passwordLogin()}
                   disabled={loading}
-                  className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-extrabold text-white shadow-md shadow-violet/25 transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:active:scale-[0.99]"
+                  className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-semibold text-white transition-[filter] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? "Signing in…" : "Sign in"}
                 </button>
+
+                <nav className="mt-8 flex flex-col gap-3 border-t border-steel/15 pt-6" aria-label="Other sign-in options">
+                  <button type="button" data-testid="login-tab-magic" disabled={loading} onClick={() => goTab("magic")} className={secondaryLinkClass}>
+                    Sign in with email link instead
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="login-tab-register"
+                    disabled={loading}
+                    onClick={() => goTab("register")}
+                    className={secondaryLinkClass}
+                  >
+                    New here? Create an account
+                  </button>
+                </nav>
               </>
             )}
 
             {tab === "magic" && (
               <>
                 {magicLinkSent ? (
-                  <div
-                    className="rounded-card border border-violet/30 bg-violet/5 px-4 py-4 text-sm leading-relaxed text-ink/85"
-                    role="status"
-                  >
-                    <p className="font-display text-lg font-bold uppercase tracking-wide text-violet">
-                      Check your email
+                  <div className="rounded-xl border border-steel/20 bg-paper-muted/40 px-4 py-4 text-sm leading-relaxed text-ink/85" role="status">
+                    <p className="font-medium text-ink">Check your email</p>
+                    <p className="mt-2 text-ink/75">
+                      We sent a link to <strong className="font-medium text-ink">{magicLinkSentTo || magicEmail}</strong>. Open
+                      it on this device. Check spam if needed.
                     </p>
-                    <p className="mt-2">
-                      We sent a sign-in link to{" "}
-                      <strong className="font-semibold text-ink">{magicLinkSentTo || magicEmail}</strong>. Open it on
-                      this device to continue. If you do not see it, check spam or promotions.
-                    </p>
-                    <p className="mt-2 text-xs text-ink/60">
-                      Email links only work for accounts registered with that address. Use Password sign-in if you
-                      signed up with a username only.
+                    <p className="mt-2 text-xs text-ink/55">
+                      Links only work for accounts with that email. Username-only accounts should use password sign-in.
                     </p>
                     <button
                       type="button"
@@ -363,17 +328,20 @@ export default function LoginPage() {
                         setMagicEmail("");
                         setError(null);
                       }}
-                      className="mt-4 w-full cursor-pointer rounded-full border border-paper-deep bg-paper-raised py-2.5 text-sm font-bold text-ink/85 transition-colors duration-200 hover:border-violet/35 hover:bg-paper-muted/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
+                      className="mt-4 w-full rounded-lg border border-steel/25 bg-paper-raised py-2.5 text-sm font-medium text-ink/80 transition-colors hover:border-steel/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2"
                     >
                       Use a different email
+                    </button>
+                    <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mt-4 w-full text-center`}>
+                      ← Back to password sign-in
                     </button>
                   </div>
                 ) : (
                   <>
-                    <p className="mb-3 text-xs leading-relaxed text-ink/65">
-                      No password needed — we email you a one-time link. It expires after a short time.
-                    </p>
-                    <label htmlFor="login-magic-email" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                    <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-5`}>
+                      ← Back to password sign-in
+                    </button>
+                    <label htmlFor="login-magic-email" className="mb-1.5 block text-xs font-medium text-ink/50">
                       Email
                     </label>
                     <div className="relative mb-4">
@@ -395,7 +363,7 @@ export default function LoginPage() {
                       data-testid="login-magic-submit"
                       onClick={() => void sendMagicLink()}
                       disabled={loading}
-                      className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-extrabold text-white shadow-md shadow-violet/25 transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:active:scale-[0.99]"
+                      className="mt-2 w-full cursor-pointer rounded-full bg-energy py-3.5 font-semibold text-white transition-[filter] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? "Sending link…" : "Email me a link"}
                     </button>
@@ -406,11 +374,13 @@ export default function LoginPage() {
 
             {tab === "register" && (
               <>
-                <p className="mb-3 text-xs leading-relaxed text-ink/65">
-                  Use at least one of email or username (you can set both). Username: letters, numbers,{" "}
-                  <strong className="font-semibold text-ink/80">dot</strong>, or underscore — no spaces.
+                <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-5`}>
+                  ← Already a member? Sign in
+                </button>
+                <p className="mb-4 text-xs leading-relaxed text-ink/55">
+                  Add at least an email or a username. Usernames: letters, numbers, dot, underscore — no spaces.
                 </p>
-                <label htmlFor="register-email" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                <label htmlFor="register-email" className="mb-1.5 block text-xs font-medium text-ink/50">
                   Email
                 </label>
                 <input
@@ -424,7 +394,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   disabled={loading}
                 />
-                <label htmlFor="register-username" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                <label htmlFor="register-username" className="mb-1.5 block text-xs font-medium text-ink/50">
                   Username
                 </label>
                 <input
@@ -437,7 +407,7 @@ export default function LoginPage() {
                   autoComplete="username"
                   disabled={loading}
                 />
-                <label htmlFor="register-name" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                <label htmlFor="register-name" className="mb-1.5 block text-xs font-medium text-ink/50">
                   Display name
                 </label>
                 <input
@@ -449,7 +419,7 @@ export default function LoginPage() {
                   onChange={(e) => setRegName(e.target.value)}
                   disabled={loading}
                 />
-                <label htmlFor="register-password-field" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink/55">
+                <label htmlFor="register-password-field" className="mb-1.5 block text-xs font-medium text-ink/50">
                   Password
                 </label>
                 <input
@@ -468,7 +438,7 @@ export default function LoginPage() {
                   data-testid="register-submit"
                   onClick={() => void register()}
                   disabled={loading}
-                  className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-extrabold text-white shadow-md shadow-violet/25 transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:active:scale-[0.99]"
+                  className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-semibold text-white transition-[filter] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? "Creating…" : "Create account"}
                 </button>

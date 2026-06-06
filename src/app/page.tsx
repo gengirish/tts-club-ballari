@@ -3,46 +3,34 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-paper text-ink flex flex-col items-center justify-center px-6 text-center">
-      <div className="pointer-events-none absolute inset-0 bg-void opacity-90" aria-hidden />
-      <div
-        className="pointer-events-none absolute -left-24 top-0 h-96 w-96 rounded-full bg-violet/30 blur-3xl motion-reduce:opacity-40"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-steel/20 blur-3xl motion-reduce:opacity-30"
-        aria-hidden
-      />
-
-      <div className="relative z-10 flex max-w-lg flex-col items-center">
-        <div className="relative mb-8 h-44 w-72 sm:h-52 sm:w-80">
+    <main className="relative flex min-h-screen flex-col items-center justify-center bg-paper px-6 text-center text-ink">
+      <div className="relative z-10 flex max-w-sm flex-col items-center">
+        <h1 className="text-xs font-semibold uppercase tracking-[0.35em] text-ink/50">Sister Stride</h1>
+        <div className="relative mt-6 h-36 w-56 sm:h-40 sm:w-64">
           <Image
             src="/brand/logo-full.jpg"
             alt="Steel Sisters & Striders Ballari"
             fill
             priority
-            className="object-contain shadow-brand"
-            sizes="(max-width: 640px) 288px, 320px"
+            className="object-contain"
+            sizes="(max-width: 640px) 224px, 256px"
           />
         </div>
-        <p className="max-w-md text-sm font-semibold leading-relaxed text-steel sm:text-base">
-          Your women-first fitness home in Ballari — progress, challenges, Couch to 5K, coaches, and the strider circle.
+        <p className="mt-6 text-sm leading-relaxed text-ink/65">
+          Women-first fitness in Ballari — programs, coaches, and your strider circle.
         </p>
-        <div className="mt-10 flex w-full max-w-md flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/walking-to-5k"
-            className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border border-steel/45 bg-paper-raised/90 px-8 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] text-ink shadow-md backdrop-blur-sm transition-[transform,colors] duration-200 hover:border-violet/40 hover:bg-paper-muted/80 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-soft/40 focus-visible:ring-offset-4 focus-visible:ring-offset-paper sm:w-auto sm:min-w-[11rem]"
-          >
-            Walking to 5K
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full bg-energy px-10 py-3.5 text-sm font-extrabold uppercase tracking-[0.18em] text-white shadow-brand transition-[transform,filter] duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-soft/50 focus-visible:ring-offset-4 focus-visible:ring-offset-paper motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none sm:w-auto"
-          >
-            Enter app
-          </Link>
-        </div>
-        <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.28em] text-violet-soft/90">Sister Stride</p>
+        <Link
+          href="/login"
+          className="mt-10 inline-flex min-h-[48px] w-full max-w-xs items-center justify-center rounded-full bg-energy px-8 text-sm font-semibold text-white transition-[filter] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+        >
+          Sign in
+        </Link>
+        <Link
+          href="/walking-to-5k"
+          className="mt-5 text-sm text-ink/50 underline-offset-4 transition-colors hover:text-ink/70 hover:underline"
+        >
+          Walking to 5K program
+        </Link>
       </div>
     </main>
   );

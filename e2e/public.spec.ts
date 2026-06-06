@@ -50,7 +50,7 @@ test.describe("public shell", () => {
 
   test("login page shows password sign-in by default", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByText(/Welcome, sister/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Sign in$/i })).toBeVisible();
     await expect(page.getByTestId("login-identifier")).toBeVisible();
     await expect(page.getByTestId("login-password")).toBeVisible();
     await expect(page.getByTestId("login-password-submit")).toBeVisible();

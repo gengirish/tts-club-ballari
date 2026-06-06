@@ -16,7 +16,7 @@ test.describe("beta regression (authenticated UI)", () => {
     await page.getByTestId("app-logout").click();
     await signOutPost;
     await expect(page).toHaveURL(/\/login/, { timeout: 30_000 });
-    await expect(page.getByRole("heading", { name: /Welcome, sister/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Sign in$/i })).toBeVisible();
   });
 
   test("community composer rejects whitespace-only post", async ({ page }) => {

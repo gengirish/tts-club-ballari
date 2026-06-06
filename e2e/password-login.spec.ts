@@ -24,7 +24,6 @@ test.describe("email + password login", () => {
     expect(assertApiEnvelope(regBody).ok).toBe(true);
 
     await page.goto("/login");
-    await page.getByTestId("login-tab-password").click();
     await page.getByTestId("login-identifier").fill(email);
     await page.getByTestId("login-password").fill(E2E_PASSWORD);
     await page.getByTestId("login-password-submit").click();
@@ -49,7 +48,6 @@ test.describe("email + password login", () => {
     expect(assertApiEnvelope(regBody).ok).toBe(true);
 
     await page.goto("/login");
-    await page.getByTestId("login-tab-password").click();
     await page.getByTestId("login-identifier").fill(username);
     await page.getByTestId("login-password").fill(E2E_PASSWORD);
     await page.getByTestId("login-password-submit").click();

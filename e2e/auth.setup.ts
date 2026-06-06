@@ -16,7 +16,6 @@ setup("authenticate member", async ({ page }) => {
   fs.mkdirSync(path.dirname(authFile), { recursive: true });
 
   await page.goto("/login");
-  await page.getByTestId("login-tab-password").click();
   await page.getByTestId("login-identifier").fill(email);
   await page.getByTestId("login-password").fill(password);
   await page.getByTestId("login-password-submit").click();
