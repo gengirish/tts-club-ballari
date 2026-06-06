@@ -228,13 +228,18 @@ export default function LoginPage() {
     <main className="min-h-screen bg-paper px-4 py-12 sm:px-6">
       <div className="mx-auto w-full max-w-sm">
         <div className="rounded-2xl border border-steel/20 bg-paper-raised px-6 py-8 sm:px-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">Sign in</h1>
-          <p className="mt-1.5 text-sm text-ink/60">
-            {tab === "password" && "Use the email or username you registered with."}
-            {tab === "magic" && !magicLinkSent && "We will email you a one-time link (no password)."}
-            {tab === "magic" && magicLinkSent && "Open the link from your email on this device."}
-            {tab === "register" && "Create your member account."}
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+            {tab === "register" ? "Join" : "Sign in"}
+          </h1>
+          {tab === "password" ? (
+            <p className="mt-1.5 text-sm text-ink/60">Use the email or username you registered with.</p>
+          ) : null}
+          {tab === "magic" && !magicLinkSent ? (
+            <p className="mt-1.5 text-sm text-ink/60">We will email you a one-time link (no password).</p>
+          ) : null}
+          {tab === "magic" && magicLinkSent ? (
+            <p className="mt-1.5 text-sm text-ink/60">Open the link from your email on this device.</p>
+          ) : null}
 
           <div id={`${baseId}-panel`} aria-busy={loading} className="mt-8">
             {tab === "password" && (
@@ -293,7 +298,7 @@ export default function LoginPage() {
 
                 <nav className="mt-8 flex flex-col gap-3 border-t border-steel/15 pt-6" aria-label="Other sign-in options">
                   <button type="button" data-testid="login-tab-magic" disabled={loading} onClick={() => goTab("magic")} className={secondaryLinkClass}>
-                    Sign in with email link instead
+                    Email link
                   </button>
                   <button
                     type="button"
@@ -302,7 +307,7 @@ export default function LoginPage() {
                     onClick={() => goTab("register")}
                     className={secondaryLinkClass}
                   >
-                    New here? Create an account
+                    Join
                   </button>
                 </nav>
               </>
@@ -333,13 +338,13 @@ export default function LoginPage() {
                       Use a different email
                     </button>
                     <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mt-4 w-full text-center`}>
-                      ← Back to password sign-in
+                      ← Sign in
                     </button>
                   </div>
                 ) : (
                   <>
                     <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-5`}>
-                      ← Back to password sign-in
+                      ← Sign in
                     </button>
                     <label htmlFor="login-magic-email" className="mb-1.5 block text-xs font-medium text-ink/50">
                       Email
@@ -374,73 +379,73 @@ export default function LoginPage() {
 
             {tab === "register" && (
               <>
-                <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-5`}>
-                  ← Already a member? Sign in
+                <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-6`}>
+                  ← Sign in
                 </button>
-                <p className="mb-4 text-xs leading-relaxed text-ink/55">
-                  Add at least an email or a username. Usernames: letters, numbers, dot, underscore — no spaces.
-                </p>
-                <label htmlFor="register-email" className="mb-1.5 block text-xs font-medium text-ink/50">
-                  Email
-                </label>
-                <input
-                  id="register-email"
-                  data-testid="register-email"
-                  className={`${inputNoIconClass} mb-3`}
-                  placeholder="Optional if you choose a username"
-                  type="email"
-                  value={regEmail}
-                  onChange={(e) => setRegEmail(e.target.value)}
-                  autoComplete="email"
-                  disabled={loading}
-                />
-                <label htmlFor="register-username" className="mb-1.5 block text-xs font-medium text-ink/50">
-                  Username
-                </label>
-                <input
-                  id="register-username"
-                  data-testid="register-username"
-                  className={`${inputNoIconClass} mb-3`}
-                  placeholder="e.g. girish_h or girish.h (no spaces)"
-                  value={regUsername}
-                  onChange={(e) => setRegUsername(e.target.value)}
-                  autoComplete="username"
-                  disabled={loading}
-                />
-                <label htmlFor="register-name" className="mb-1.5 block text-xs font-medium text-ink/50">
-                  Display name
-                </label>
-                <input
-                  id="register-name"
-                  data-testid="register-name"
-                  className={`${inputNoIconClass} mb-3`}
-                  placeholder="Optional"
-                  value={regName}
-                  onChange={(e) => setRegName(e.target.value)}
-                  disabled={loading}
-                />
-                <label htmlFor="register-password-field" className="mb-1.5 block text-xs font-medium text-ink/50">
-                  Password
-                </label>
-                <input
-                  id="register-password-field"
-                  data-testid="register-password"
-                  type="password"
-                  className={`${inputNoIconClass} mb-4`}
-                  placeholder="At least 8 characters"
-                  value={regPassword}
-                  onChange={(e) => setRegPassword(e.target.value)}
-                  autoComplete="new-password"
-                  disabled={loading}
-                />
+                <div className="flex flex-col gap-3">
+                  <label htmlFor="register-email" className="sr-only">
+                    Email (optional if you set a username)
+                  </label>
+                  <input
+                    id="register-email"
+                    data-testid="register-email"
+                    className={inputNoIconClass}
+                    placeholder="Email"
+                    type="email"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    autoComplete="email"
+                    disabled={loading}
+                  />
+                  <label htmlFor="register-username" className="sr-only">
+                    Username (optional if you set an email; letters, numbers, dot, underscore)
+                  </label>
+                  <input
+                    id="register-username"
+                    data-testid="register-username"
+                    className={inputNoIconClass}
+                    placeholder="Username"
+                    value={regUsername}
+                    onChange={(e) => setRegUsername(e.target.value)}
+                    autoComplete="username"
+                    disabled={loading}
+                  />
+                  <label htmlFor="register-name" className="sr-only">
+                    Display name (optional)
+                  </label>
+                  <input
+                    id="register-name"
+                    data-testid="register-name"
+                    className={inputNoIconClass}
+                    placeholder="Name (optional)"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    disabled={loading}
+                  />
+                  <label htmlFor="register-password-field" className="sr-only">
+                    Password (at least 8 characters)
+                  </label>
+                  <input
+                    id="register-password-field"
+                    data-testid="register-password"
+                    type="password"
+                    className={inputNoIconClass}
+                    placeholder="Password (8+ characters)"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    autoComplete="new-password"
+                    disabled={loading}
+                  />
+                </div>
                 <button
                   type="button"
                   data-testid="register-submit"
                   onClick={() => void register()}
                   disabled={loading}
-                  className="w-full cursor-pointer rounded-full bg-energy py-3.5 font-semibold text-white transition-[filter] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-5 w-full cursor-pointer rounded-full bg-energy py-3.5 font-semibold text-white transition-[filter] duration-200 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="Create member account"
                 >
-                  {loading ? "Creating…" : "Create account"}
+                  {loading ? "Joining…" : "Join"}
                 </button>
               </>
             )}
