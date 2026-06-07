@@ -78,7 +78,7 @@ Without the password env vars, only **`public`** runs (`public.spec.ts` + **`pas
 1. **Stable selectors**: prefer `data-testid` on interactive UI (see `login` and score recompute). Use `getByRole` for headings and links when accessible names are stable.
 2. **Authenticated flows**: add files under `e2e/authenticated/`. They automatically use `storageState` from setup when E2E auth env is enabled.
 3. **API-only checks**: use `request` from Playwright; cookies from `storageState` apply to same-origin requests to the app under test.
-4. **Layout**: `e2e/authenticated/` holds session specs (`member.spec`, `api-routes.spec`, `member-interactions`, `beta-regression`, `rbac-redirects`, `challenges-flow`). Shared JSON helpers live in `e2e/helpers/`.
+4. **Layout**: `e2e/authenticated/` holds session specs (`member.spec`, `api-routes.spec`, `member-interactions`, `beta-regression`, `rbac-redirects`, `challenges-flow`, **`product-flows`**). Shared JSON helpers live in `e2e/helpers/`.
 5. **No `any`**: keep fixtures typed; parse JSON as unknown then narrow.
 6. **Money / time**: UI assertions should match formatted copy (IST, DD/MM) only when you intentionally test the view layer; otherwise assert on structure (headings, buttons).
 

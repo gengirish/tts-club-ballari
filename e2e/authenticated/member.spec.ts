@@ -68,4 +68,43 @@ test.describe("member area (authenticated)", () => {
     await expect(page.getByTestId("c25k-walking-to-5k-register")).toBeVisible();
     await expect(page.getByTestId("c25k-walking-to-5k-register")).toHaveAttribute("href", "/walking-to-5k/register");
   });
+
+  test("profile edit page loads for onboarded member", async ({ page }) => {
+    await page.goto("/app/profile");
+    await expect(page.getByRole("heading", { name: /Edit details/i })).toBeVisible();
+    await expect(page.getByTestId("app-back-to-home")).toBeVisible();
+  });
+
+  test("community hub shows wellness section", async ({ page }) => {
+    await page.goto("/app/community");
+    await expect(page.getByRole("heading", { name: /Community/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Women's wellness/i })).toBeVisible();
+  });
+
+  test("C25K page shows hero and weekly session plan", async ({ page }) => {
+    await page.goto("/app/programs/couch-to-5k");
+    await expect(page.getByTestId("c25k-hero-title")).toBeVisible();
+    await expect(page.getByTestId("c25k-session-blocks")).toBeVisible();
+  });
+
+  test("onboarded member visiting /app/onboarding is redirected to dashboard", async ({ page }) => {
+    await page.goto("/app/onboarding");
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  });
+
+  test("events list to detail and back when events exist", async ({ page }) => {
+    await page.goto("/app/events");
+    await expect(page.getByTestId("events-page-title")).toBeVisible();
+    const details = page.getByRole("link", { name: /^Details$/i }).first();
+    if ((await details.count()) === 0) {
+      await expect(page.getByText(/No upcoming events/i)).toBeVisible();
+      return;
+    }
+    await details.click();
+    await expect(page).toHaveURL(/\/app\/events\//);
+    await expect(page.getByTestId("event-back-to-list")).toBeVisible();
+    await page.getByTestId("event-back-to-list").click();
+    await expect(page).toHaveURL(/\/app\/events$/);
+  });
 });

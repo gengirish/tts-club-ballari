@@ -53,6 +53,8 @@ export function ChallengesClient({
           return (
             <div
               key={c.id}
+              data-testid="challenge-card"
+              data-challenge-id={c.id}
               className="rounded-card border border-paper-deep bg-paper-raised p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
             >
               <div>

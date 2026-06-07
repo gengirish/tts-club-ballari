@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { assertApiEnvelope } from "./helpers/envelope";
+import { assertApiEnvelope, assertApiOk } from "./helpers/envelope";
 
 test.describe("public shell", () => {
   test("home page loads", async ({ page }) => {
@@ -128,6 +128,29 @@ test.describe("public shell", () => {
     await page.goto("/login/verify-request");
     await expect(page.getByRole("heading", { name: /Check your email/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Back to sign in/i })).toBeVisible();
+  });
+
+  test("forgot password page loads", async ({ page }) => {
+    await page.goto("/login/forgot-password");
+    await expect(page.getByRole("heading", { name: /^Forgot password$/i })).toBeVisible();
+    await expect(page.getByTestId("forgot-password-email")).toBeVisible();
+    await expect(page.getByTestId("forgot-password-submit")).toBeVisible();
+  });
+
+  test("POST /api/auth/forgot-password returns ok envelope (generic response)", async ({ request }) => {
+    const res = await request.post("/api/auth/forgot-password", {
+      data: { email: `e2e-no-user-${Date.now()}@example.com` },
+    });
+    expect(res.status()).toBe(200);
+    const body: unknown = await res.json();
+    assertApiOk(body);
+  });
+
+  test("login email link tab shows magic email field", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByTestId("login-tab-magic").click();
+    await expect(page.getByTestId("login-magic-email")).toBeVisible();
+    await expect(page.getByTestId("login-magic-submit")).toBeVisible();
   });
 });
 
