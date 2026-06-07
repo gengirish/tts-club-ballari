@@ -232,7 +232,10 @@ export default function LoginPage() {
             {tab === "register" ? "Join" : "Sign in"}
           </h1>
           {tab === "password" ? (
-            <p className="mt-1.5 text-sm text-ink/60">Use the email or username you registered with.</p>
+            <p className="mt-1.5 text-sm text-ink/60">
+              Use the email or username you registered with, or your exact display name if it is unique on your
+              account.
+            </p>
           ) : null}
           {tab === "magic" && !magicLinkSent ? (
             <p className="mt-1.5 text-sm text-ink/60">We will email you a one-time link (no password).</p>

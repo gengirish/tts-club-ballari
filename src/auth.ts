@@ -133,7 +133,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!identifier || !password) return null;
 
           const asEmail = z.string().email().safeParse(identifier);
-          const user = await prisma.user.findFirst({
+          let user = await prisma.user.findFirst({
             where: asEmail.success
               ? { email: identifier.toLowerCase() }
               : { username: identifier.toLowerCase() },
@@ -145,6 +145,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               passwordHash: true,
             },
           });
+          // Allow sign-in with exact display name (case-insensitive) when it uniquely matches —
+          // members often try their name instead of their username.
+          if (!user && !asEmail.success) {
+            const byName = await prisma.user.findMany({
+              where: { name: { equals: identifier, mode: "insensitive" } },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                passwordHash: true,
+              },
+              take: 2,
+            });
+            if (byName.length === 1) user = byName[0]!;
+          }
           if (!user?.passwordHash) return null;
           const valid = await verifyPassword(password, user.passwordHash);
           if (!valid) return null;
