@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PublicThemeToggle } from "@/components/public-theme-toggle";
+import { JsonLd } from "@/components/json-ld";
+import {
+  faqPageJsonLd,
+  localBusinessJsonLd,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/structured-data";
 
 const APP_NAME = "Sister Stride";
 const APP_DEFAULT_TITLE = "Steel Sisters & Striders — SSS Club Ballari";
@@ -33,6 +40,17 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  keywords: [
+    "Sister Stride",
+    "Steel Sisters & Striders",
+    "SSS Club Ballari",
+    "women fitness Ballari",
+    "Bellary fitness",
+    "Couch to 5K India",
+    "Walking to 5K",
+    "Ballari running club",
+  ],
+  robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     siteName: APP_NAME,
@@ -82,6 +100,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <link rel="alternate" type="text/markdown" href="/llms.txt" title="LLM site index" />
+        <JsonLd
+          data={[
+            organizationJsonLd(),
+            websiteJsonLd(),
+            localBusinessJsonLd(),
+            faqPageJsonLd(),
+          ]}
+        />
       </head>
       <body>
         {children}

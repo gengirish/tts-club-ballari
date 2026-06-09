@@ -28,6 +28,7 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|login|sw\\.js|swe-worker|manifest\\.webmanifest|icons/).*)",
+    // Skip auth middleware for static/SEO surfaces (CiteForge-style GEO paths).
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|login|sw\\.js|swe-worker|manifest\\.webmanifest|icons/|llms\\.txt|llms-full\\.txt|robots\\.txt|sitemap\\.xml).*)",
   ],
 };

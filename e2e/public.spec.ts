@@ -152,6 +152,30 @@ test.describe("public shell", () => {
     await expect(page.getByTestId("login-magic-email")).toBeVisible();
     await expect(page.getByTestId("login-magic-submit")).toBeVisible();
   });
+
+  test("GET /llms.txt returns markdown with Sister Stride", async ({ request }) => {
+    const res = await request.get("/llms.txt");
+    expect(res.status()).toBe(200);
+    const text = await res.text();
+    expect(text).toMatch(/Sister Stride/i);
+    expect(text).toMatch(/llms-full/i);
+  });
+
+  test("GET /robots.txt lists AI crawlers and sitemap", async ({ request }) => {
+    const res = await request.get("/robots.txt");
+    expect(res.status()).toBe(200);
+    const text = await res.text();
+    expect(text).toContain("GPTBot");
+    expect(text.toLowerCase()).toContain("sitemap");
+  });
+
+  test("GET /sitemap.xml lists public paths", async ({ request }) => {
+    const res = await request.get("/sitemap.xml");
+    expect(res.status()).toBe(200);
+    const text = await res.text();
+    expect(text).toContain("urlset");
+    expect(text).toContain("login");
+  });
 });
 
 test.describe("walking to 5K", () => {

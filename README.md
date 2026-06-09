@@ -8,6 +8,10 @@ This is a **Cursor scaffold**: the foundation, conventions, and integrations are
 
 **PWA:** [docs/PWA.md](./docs/PWA.md) — installable app (manifest + Serwist service worker; icons in `public/icons/`).
 
+**LLM / answer-engine discoverability (GEO):** [docs/LLM_SEO.md](./docs/LLM_SEO.md) — `/llms.txt`, `/llms-full.txt`, `/robots.txt`, `/sitemap.xml`, JSON-LD (aligned with the CiteForge marketing pattern).
+
+**Member guide (PDF):** [docs/Sister-Stride-Member-Guide.pdf](./docs/Sister-Stride-Member-Guide.pdf) — end-user overview; source HTML [docs/member-guide-print.html](./docs/member-guide-print.html). Regenerate after edits: `npm run docs:member-guide-pdf` (requires `npx playwright install chromium` once).
+
 ---
 
 ## 1. Setup
