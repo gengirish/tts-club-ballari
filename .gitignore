@@ -20,3 +20,6 @@ prisma/*.db
 /playwright-report/
 /test-results/
 /e2e/.auth/
+
+# Accidental duplicate member-guide exports (canonical: docs/Sister-Stride-Member-Guide.pdf)
+docs/Sister-Stride-Member-Guide-2.pdf

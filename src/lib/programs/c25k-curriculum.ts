@@ -1,4 +1,4 @@
-/** Static curriculum copy aligned with `sss-couch-to-5k-design.html` (design reference, not a legal promise). */
+/** Static curriculum copy aligned with `docs/couch-to-5k-design.html` (design reference, not a legal promise). */
 
 import { C25K_WEEKS, type C25kWeek, type C25kWeekSession } from "./c25k-weeks-data";
 

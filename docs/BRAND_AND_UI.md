@@ -30,4 +30,4 @@ The in-app visual system is aligned with the official **logo** (`public/brand/lo
 
 ## Source file
 
-The original high-res file may live at repo root as `105454.jpg`; the deployed asset path is **`/brand/logo-full.jpg`**.
+Canonical logo asset: **`public/brand/logo-full.jpg`** (served at **`/brand/logo-full.jpg`**).
