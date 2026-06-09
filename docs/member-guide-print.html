@@ -76,6 +76,27 @@
       font-size: 9pt;
       color: var(--muted);
     }
+    .shot-note {
+      font-size: 10pt;
+      color: var(--muted);
+      margin: 0 0 1rem;
+    }
+    figure.guide-shot {
+      margin: 1rem 0 1.25rem;
+      page-break-inside: avoid;
+    }
+    figure.guide-shot img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    figure.guide-shot figcaption {
+      font-size: 9pt;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
     @media print {
       .screen-only { display: none !important; }
       body { padding: 0; max-width: 100%; font-size: 10.5pt; }
@@ -104,6 +125,57 @@
     and how the main areas of the product fit together. Sister Stride is the digital home for a
     <strong>women-first fitness community</strong> in and around <strong>Ballari, Karnataka, India</strong>.
   </p>
+
+  <h2>Visual tour (live app)</h2>
+  <p class="shot-note">
+    Screenshots below are produced by running Playwright against your chosen site URL (usually production or staging).
+    From the repo root: set <code>PLAYWRIGHT_BASE_URL</code>, run <code>npm run docs:member-guide-screenshots</code>, then
+    <code>npm run docs:member-guide-pdf</code> to rebuild the PDF. See <strong>docs/MEMBER_GUIDE_SCREENSHOTS.md</strong> for details.
+    Member-area shots need a seeded test account locally or on staging; they are skipped on production hosts unless you set
+    <code>E2E_GUIDE_ALLOW_PROD_MEMBER=1</code> (discouraged for real member databases).
+  </p>
+
+  <h3>Public pages</h3>
+  <figure class="guide-shot">
+    <img src="./guide-screenshots/01-home.png" width="1280" height="800" alt="Sister Stride home landing" />
+    <figcaption>Home — sign in and Walking to 5K registration entry.</figcaption>
+  </figure>
+  <figure class="guide-shot">
+    <img src="./guide-screenshots/02-login.png" width="1280" height="800" alt="Sign in screen" />
+    <figcaption>Sign in — password, email link, and Join.</figcaption>
+  </figure>
+  <figure class="guide-shot">
+    <img src="./guide-screenshots/03-login-join.png" width="1280" height="800" alt="Join account form" />
+    <figcaption>Join — create an account with email and/or username.</figcaption>
+  </figure>
+  <figure class="guide-shot">
+    <img src="./guide-screenshots/04-forgot-password.png" width="1280" height="800" alt="Forgot password" />
+    <figcaption>Forgot password — email reset link.</figcaption>
+  </figure>
+  <figure class="guide-shot">
+    <img src="./guide-screenshots/05-walking-register.png" width="1280" height="800" alt="Walking to 5K registration wizard" />
+    <figcaption>Walking to 5K registration — intake wizard (first screen may vary if you are already signed in).</figcaption>
+  </figure>
+
+  <h3>Member app (after sign-in)</h3>
+  <p class="shot-note">
+    Full-page captures of the signed-in experience (<code>10-app-home.png</code> through <code>17-app-community.png</code>)
+    are written automatically when you run <code>npm run docs:member-guide-screenshots</code> with
+    <code>E2E_PASSWORD_EMAIL</code> and <code>E2E_PASSWORD</code> on <strong>local</strong> or <strong>staging</strong> (see
+    <strong>docs/MEMBER_GUIDE_SCREENSHOTS.md</strong>). They are skipped on production hosts unless you explicitly set
+    <code>E2E_GUIDE_ALLOW_PROD_MEMBER=1</code>. After those PNGs exist in <code>docs/guide-screenshots/</code>, you can paste
+    additional <code>&lt;figure&gt;</code> blocks here or extend the Playwright spec to emit a second HTML template.
+  </p>
+  <ul class="shot-note" style="list-style: disc; padding-left: 1.25rem;">
+    <li><code>10-app-home.png</code> — Member home</li>
+    <li><code>11-app-score.png</code> — Fitness score</li>
+    <li><code>12-app-progress.png</code> — Progress</li>
+    <li><code>13-app-challenges.png</code> — Challenges</li>
+    <li><code>14-app-events.png</code> — Events</li>
+    <li><code>15-app-c25k.png</code> — Couch to 5K</li>
+    <li><code>16-app-coaches.png</code> — Coaches</li>
+    <li><code>17-app-community.png</code> — Community</li>
+  </ul>
 
   <h2>1. Who this is built for</h2>
   <ul>

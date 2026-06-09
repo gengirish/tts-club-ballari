@@ -49,6 +49,7 @@ npm run test:e2e:seed
 | `npm run test:e2e:seed` | Upserts onboarded user for `E2E_TEST_PHONE` (optional; server/seed only). |
 | `npm run test:e2e` | Runs Playwright (starts `npm run dev` unless CI / reuse). |
 | `npm run test:e2e:prod` | Smoke **`e2e/public.spec.ts`** only (home, login + Join flow, `/walking-to-5k` guest redirect, APIs, verify-request). Set `PLAYWRIGHT_BASE_URL` for production (see [DEPLOYED_URLS.md](./DEPLOYED_URLS.md)). Does **not** start a local dev server when the URL host is not `localhost` / `127.0.0.1`. |
+| `npm run docs:member-guide-screenshots` | Playwright capture for **`docs/member-guide-print.html`** images (see [MEMBER_GUIDE_SCREENSHOTS.md](./MEMBER_GUIDE_SCREENSHOTS.md)); uses `playwright.guide-screenshots.config.ts` and `PLAYWRIGHT_BASE_URL`. |
 | `npm run test:e2e:ui` | Playwright UI mode for debugging. |
 | `npx playwright install chromium` | One-time browser download. |
 

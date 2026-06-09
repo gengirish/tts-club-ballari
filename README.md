@@ -10,7 +10,7 @@ This is a **Cursor scaffold**: the foundation, conventions, and integrations are
 
 **LLM / answer-engine discoverability (GEO):** [docs/LLM_SEO.md](./docs/LLM_SEO.md) — `/llms.txt`, `/llms-full.txt`, `/robots.txt`, `/sitemap.xml`, JSON-LD (aligned with the CiteForge marketing pattern).
 
-**Member guide (PDF):** [docs/Sister-Stride-Member-Guide.pdf](./docs/Sister-Stride-Member-Guide.pdf) — end-user overview; source HTML [docs/member-guide-print.html](./docs/member-guide-print.html). Regenerate after edits: `npm run docs:member-guide-pdf` (requires `npx playwright install chromium` once).
+**Member guide (PDF):** [docs/Sister-Stride-Member-Guide.pdf](./docs/Sister-Stride-Member-Guide.pdf) — end-user overview; source HTML [docs/member-guide-print.html](./docs/member-guide-print.html). **Screenshots from a deployed URL:** [docs/MEMBER_GUIDE_SCREENSHOTS.md](./docs/MEMBER_GUIDE_SCREENSHOTS.md) → `npm run docs:member-guide-screenshots` (Playwright) then `npm run docs:member-guide-pdf`.
 
 ---
 

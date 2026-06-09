@@ -1,5 +1,6 @@
 /**
  * Renders docs/member-guide-print.html to docs/Sister-Stride-Member-Guide.pdf (A4).
+ * Embeds ./guide-screenshots/*.png when present (run `npm run docs:member-guide-screenshots` first).
  * Requires: npx playwright install chromium (once).
  */
 import path from "node:path";
