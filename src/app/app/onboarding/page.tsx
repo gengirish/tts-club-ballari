@@ -23,6 +23,16 @@ export default async function OnboardingPage() {
         <p className="text-ink/65 mt-3 text-sm md:text-base max-w-md mx-auto">
           A quick setup so your Ballari crew can support you — personal, health, movement, then goals.
         </p>
+        <p className="mt-4 text-sm">
+          <Link
+            href="/app/help"
+            className="font-bold uppercase tracking-wide text-violet-soft underline-offset-2 hover:underline"
+            data-testid="onboarding-self-help-link"
+          >
+            Self-help guide
+          </Link>
+          <span className="text-ink/50"> · how the app works</span>
+        </p>
       </div>
 
       <section

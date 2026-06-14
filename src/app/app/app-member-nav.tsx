@@ -48,8 +48,32 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
               <span className="text-steel-dim">Signed in as</span>{" "}
               <span className="text-violet-soft">{userLabel}</span>
             </p>
+            <Link
+              href="/app/help"
+              data-testid="app-help-link"
+              aria-current={pathname === "/app/help" || pathname.startsWith("/app/help/") ? "page" : undefined}
+              className={`hidden shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper sm:inline-flex ${
+                pathname === "/app/help" || pathname.startsWith("/app/help/")
+                  ? "border-violet/40 bg-paper-muted text-violet-soft ring-1 ring-violet/35"
+                  : "border-steel/25 bg-paper-muted text-steel hover:border-magenta/40 hover:text-ink"
+              }`}
+            >
+              Self-help
+            </Link>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/app/help"
+              data-testid="app-help-link-mobile"
+              aria-current={pathname === "/app/help" || pathname.startsWith("/app/help/") ? "page" : undefined}
+              className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border text-[10px] font-extrabold uppercase leading-none transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-paper sm:hidden ${
+                pathname === "/app/help" || pathname.startsWith("/app/help/")
+                  ? "border-violet/40 bg-paper-muted text-violet-soft ring-1 ring-violet/35"
+                  : "border-steel/25 bg-paper-muted text-steel hover:border-magenta/40 hover:text-ink"
+              }`}
+            >
+              Help
+            </Link>
             <ThemeToggle />
             <button
               type="button"

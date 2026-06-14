@@ -89,6 +89,7 @@ export default async function AppHome() {
               ["/app/programs/couch-to-5k", "C25K"],
               ["/app/coaches", "Coaches"],
               ["/app/community", "Community"],
+              ["/app/help", "Self-help"],
             ].map(([href, label]) => (
               <Link
                 key={href}
