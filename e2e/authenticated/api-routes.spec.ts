@@ -145,4 +145,21 @@ test.describe("authenticated API (session cookie)", () => {
     const body: unknown = await res.json();
     expect(assertApiEnvelope(body).ok).toBe(false);
   });
+
+  test("POST /api/admin/coaches is forbidden for member", async ({ request }) => {
+    const res = await request.post("/api/admin/coaches", {
+      data: {
+        mode: "create",
+        email: "new-coach-e2e@example.com",
+        password: "ValidLen8!",
+        type: "RUNNING",
+        sessionPaise: 100,
+        experienceYrs: 0,
+        available: true,
+      },
+    });
+    expect(res.status()).toBe(403);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+  });
 });

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sister Stride — Product demo (screenshots)</title>
+  <style>
+    :root {
+      --ink: #1a1523;
+      --muted: #4b5563;
+      --accent: #6d28d9;
+      --line: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      line-height: 1.55;
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+      font-size: 11pt;
+    }
+    .screen-only {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 2rem;
+      font-size: 10pt;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.25rem;
+      line-height: 1.2;
+    }
+    .subtitle { color: var(--muted); font-size: 11pt; margin: 0 0 1.25rem; }
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 2rem 0 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 2px solid var(--line);
+    }
+    p { margin: 0.5rem 0; }
+    .lead {
+      font-size: 12pt;
+      border-left: 4px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0 1.5rem;
+      color: var(--muted);
+    }
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 9pt;
+      color: var(--muted);
+    }
+    figure.demo-shot {
+      margin: 1rem 0 1.25rem;
+      page-break-inside: avoid;
+    }
+    figure.demo-shot img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    figure.demo-shot figcaption {
+      font-size: 9pt;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+    @media print {
+      .screen-only { display: none; }
+      body { padding: 0; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen-only">
+    <strong>Editors:</strong> PNGs are produced by Playwright (<code>npm run docs:demo-screenshots</code>).
+    Member-area shots (10–18) require <code>E2E_PASSWORD_EMAIL</code> + <code>E2E_PASSWORD</code> and a seeded onboarded user — see <a href="./DEMO_DOC_PDF.md">DEMO_DOC_PDF.md</a>.
+    Then run <code>npm run docs:demo-doc-pdf</code> to refresh <code>Sister-Stride-Product-Demo.pdf</code>.
+  </div>
+
+  <h1>Steel Sisters &amp; Striders — Sister Stride</h1>
+  <p class="subtitle">Women-first fitness in Ballari · Product walkthrough with live UI captures</p>
+
+  <p class="lead">
+    This handout follows the same journeys our Playwright end-to-end suite exercises: visitors see sign-in and registration;
+    members see home, score, progress, challenges, events, Couch to 5K, coaches, community, and the self-help guide.
+  </p>
+
+  <h2>1. Welcome</h2>
+  <p>Public landing — brand, positioning, and entry to sign in or programme registration.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/01-home.png" width="1280" height="800" alt="Sister Stride home" />
+    <figcaption>01 — Home</figcaption>
+  </figure>
+
+  <h2>2. Sign in</h2>
+  <p>Returning members use the sign-in screen (password path shown; your deployment may also use WhatsApp OTP where enabled).</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/02-login.png" width="1280" height="800" alt="Sign in" />
+    <figcaption>02 — Sign in</figcaption>
+  </figure>
+
+  <h2>3. Join the club</h2>
+  <p>New accounts can register from the Join tab on the same page.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/03-login-join.png" width="1280" height="800" alt="Join" />
+    <figcaption>03 — Join</figcaption>
+  </figure>
+
+  <h2>4. Account recovery</h2>
+  <p>Forgot-password flow for members who need a reset link.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/04-forgot-password.png" width="1280" height="800" alt="Forgot password" />
+    <figcaption>04 — Forgot password</figcaption>
+  </figure>
+
+  <h2>5. Walking to 5K registration</h2>
+  <p>Guided registration for the 12-week Walking to 5K programme.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/05-walking-register.png" width="1280" height="800" alt="Walking to 5K registration" />
+    <figcaption>05 — Walking to 5K registration</figcaption>
+  </figure>
+
+  <h2>6. Member home</h2>
+  <p>After sign-in, the dashboard surfaces next steps, programmes, and navigation to the rest of the app.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/10-app-home.png" width="1280" height="800" alt="Member home" />
+    <figcaption>10 — Member home</figcaption>
+  </figure>
+
+  <h2>7. Fitness score</h2>
+  <p>Holistic score view and optional recompute for motivated members.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/11-app-score.png" width="1280" height="800" alt="Fitness score" />
+    <figcaption>11 — Fitness score</figcaption>
+  </figure>
+
+  <h2>8. Progress</h2>
+  <p>Logging and charts for habits the club cares about.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/12-app-progress.png" width="1280" height="800" alt="Progress" />
+    <figcaption>12 — Progress</figcaption>
+  </figure>
+
+  <h2>9. Challenges</h2>
+  <p>Friendly group challenges and leaderboards.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/13-app-challenges.png" width="1280" height="800" alt="Challenges" />
+    <figcaption>13 — Challenges</figcaption>
+  </figure>
+
+  <h2>10. Events</h2>
+  <p>Club calendar — browse, register, and attend sessions.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/14-app-events.png" width="1280" height="800" alt="Events" />
+    <figcaption>14 — Events</figcaption>
+  </figure>
+
+  <h2>11. Couch to 5K</h2>
+  <p>In-app structured running/walking programme with purchase path where configured.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/15-app-c25k.png" width="1280" height="800" alt="Couch to 5K" />
+    <figcaption>15 — Couch to 5K</figcaption>
+  </figure>
+
+  <h2>12. Coaches</h2>
+  <p>Discover coaches and book support.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/16-app-coaches.png" width="1280" height="800" alt="Coaches" />
+    <figcaption>16 — Coaches</figcaption>
+  </figure>
+
+  <h2>13. Community</h2>
+  <p>Strider circle — posts, wellness, and safety tools.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/17-app-community.png" width="1280" height="800" alt="Community" />
+    <figcaption>17 — Community</figcaption>
+  </figure>
+
+  <h2>14. Self-help</h2>
+  <p>Common questions and guidance without leaving the app.</p>
+  <figure class="demo-shot">
+    <img src="./demo-screenshots/18-app-help.png" width="1280" height="800" alt="Self-help guide" />
+    <figcaption>18 — Self-help guide</figcaption>
+  </figure>
+
+  <footer>
+    Sister Stride / Steel Sisters &amp; Striders Ballari · Screenshots generated by Playwright (<code>e2e/demo-doc.spec.ts</code>).
+    Canonical production URL: https://sister-stride.intelliforge.tech/
+  </footer>
+</body>
+</html>

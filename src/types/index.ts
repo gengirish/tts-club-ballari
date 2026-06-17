@@ -3,6 +3,7 @@ export type { OnboardingInput } from "@/lib/validation/member";
 export type { ProgressEntryInput } from "@/lib/validation/progress";
 export type { RegisterInput, CredentialsLoginInput } from "@/lib/validation/auth";
 export type { WalkingTo5kEnrollInput } from "@/lib/validation/walking-to-5k";
+export type { AdminCoachPostBody } from "@/lib/validation/admin-coach";
 
 // next-auth session augmentation
 import type { DefaultSession } from "next-auth";

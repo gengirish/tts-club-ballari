@@ -50,6 +50,8 @@ npm run test:e2e:seed
 | `npm run test:e2e` | Runs Playwright (starts `npm run dev` unless CI / reuse). |
 | `npm run test:e2e:prod` | Smoke **`e2e/public.spec.ts`** only (home, login + Join flow, `/walking-to-5k` guest redirect, APIs, verify-request). Set `PLAYWRIGHT_BASE_URL` for production (see [DEPLOYED_URLS.md](./DEPLOYED_URLS.md)). Does **not** start a local dev server when the URL host is not `localhost` / `127.0.0.1`. |
 | `npm run docs:member-guide-screenshots` | Playwright capture for **`docs/member-guide-print.html`** images (see [MEMBER_GUIDE_SCREENSHOTS.md](./MEMBER_GUIDE_SCREENSHOTS.md)); uses `playwright.guide-screenshots.config.ts` and `PLAYWRIGHT_BASE_URL`. |
+| `npm run docs:demo-screenshots` | Playwright capture for **`docs/demo-doc-print.html`** → **`docs/Sister-Stride-Product-Demo.pdf`** (see [DEMO_DOC_PDF.md](./DEMO_DOC_PDF.md)); uses `playwright.demo-doc.config.ts` and `e2e/demo-doc.spec.ts`. |
+| `npm run docs:demo-doc-pdf` | Renders **`docs/demo-doc-print.html`** to **`docs/Sister-Stride-Product-Demo.pdf`** (run `docs:demo-screenshots` first for PNGs). |
 | `npm run test:e2e:ui` | Playwright UI mode for debugging. |
 | `npx playwright install chromium` | One-time browser download. |
 
@@ -79,7 +81,7 @@ Without the password env vars, only **`public`** runs (`public.spec.ts` + **`pas
 1. **Stable selectors**: prefer `data-testid` on interactive UI (see `login` and score recompute). Use `getByRole` for headings and links when accessible names are stable.
 2. **Authenticated flows**: add files under `e2e/authenticated/`. They automatically use `storageState` from setup when E2E auth env is enabled.
 3. **API-only checks**: use `request` from Playwright; cookies from `storageState` apply to same-origin requests to the app under test.
-4. **Layout**: `e2e/authenticated/` holds session specs (`member.spec`, `api-routes.spec`, `member-interactions`, `beta-regression`, `rbac-redirects`, `challenges-flow`, **`product-flows`**). Shared JSON helpers live in `e2e/helpers/`.
+4. **Layout**: `e2e/authenticated/` holds session specs (`member.spec`, `api-routes.spec`, `member-interactions`, `beta-regression`, `rbac-redirects`, `challenges-flow`, **`product-flows`**). Shared JSON helpers live in `e2e/helpers/`. **`e2e/demo-doc.spec.ts`** (with **`playwright.demo-doc.config.ts`**) captures screenshots for **`docs/Sister-Stride-Product-Demo.pdf`** — see [DEMO_DOC_PDF.md](./DEMO_DOC_PDF.md).
 5. **No `any`**: keep fixtures typed; parse JSON as unknown then narrow.
 6. **Money / time**: UI assertions should match formatted copy (IST, DD/MM) only when you intentionally test the view layer; otherwise assert on structure (headings, buttons).
 

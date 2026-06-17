@@ -18,6 +18,11 @@ export function AdminSubnav() {
           </Link>
         </li>
         <li>
+          <Link href="/admin/coaches" className={linkClass}>
+            Coaches
+          </Link>
+        </li>
+        <li>
           <Link href="/admin/event-registrations" className={linkClass}>
             Event registrations
           </Link>

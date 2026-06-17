@@ -12,6 +12,8 @@ This is a **Cursor scaffold**: the foundation, conventions, and integrations are
 
 **Member guide (PDF):** [docs/Sister-Stride-Member-Guide.pdf](./docs/Sister-Stride-Member-Guide.pdf) — end-user overview; source HTML [docs/member-guide-print.html](./docs/member-guide-print.html). **Screenshots from a deployed URL:** [docs/MEMBER_GUIDE_SCREENSHOTS.md](./docs/MEMBER_GUIDE_SCREENSHOTS.md) → `npm run docs:member-guide-screenshots` (Playwright) then `npm run docs:member-guide-pdf`.
 
+**Product demo PDF (Playwright):** [docs/DEMO_DOC_PDF.md](./docs/DEMO_DOC_PDF.md) — `npm run docs:demo-screenshots` then `npm run docs:demo-doc-pdf` → **`docs/Sister-Stride-Product-Demo.pdf`** (screenshots from `e2e/demo-doc.spec.ts`).
+
 ---
 
 ## 1. Setup

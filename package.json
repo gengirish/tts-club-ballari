@@ -24,7 +24,9 @@
     "aisensy": "tsx scripts/aisensy-cli.ts",
     "gen:pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "docs:member-guide-pdf": "tsx scripts/export-member-guide-pdf.ts",
-    "docs:member-guide-screenshots": "playwright test -c playwright.guide-screenshots.config.ts"
+    "docs:member-guide-screenshots": "playwright test -c playwright.guide-screenshots.config.ts",
+    "docs:demo-screenshots": "playwright test -c playwright.demo-doc.config.ts",
+    "docs:demo-doc-pdf": "tsx scripts/export-demo-doc-pdf.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
