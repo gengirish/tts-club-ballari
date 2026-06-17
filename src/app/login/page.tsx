@@ -80,7 +80,6 @@ export default function LoginPage() {
   const [regEmail, setRegEmail] = useState("");
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
-  const [regName, setRegName] = useState("");
   const [magicEmail, setMagicEmail] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [magicLinkSentTo, setMagicLinkSentTo] = useState("");
@@ -169,7 +168,6 @@ export default function LoginPage() {
     };
     if (regEmail.trim()) payload.email = regEmail.trim();
     if (regUsername.trim()) payload.username = regUsername.trim();
-    if (regName.trim()) payload.name = regName.trim();
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -411,18 +409,6 @@ export default function LoginPage() {
                     value={regUsername}
                     onChange={(e) => setRegUsername(e.target.value)}
                     autoComplete="username"
-                    disabled={loading}
-                  />
-                  <label htmlFor="register-name" className="sr-only">
-                    Display name (optional)
-                  </label>
-                  <input
-                    id="register-name"
-                    data-testid="register-name"
-                    className={inputNoIconClass}
-                    placeholder="Name (optional)"
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
                     disabled={loading}
                   />
                   <label htmlFor="register-password-field" className="sr-only">

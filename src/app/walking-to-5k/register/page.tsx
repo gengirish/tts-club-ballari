@@ -102,7 +102,6 @@ export default function WalkingTo5kRegisterPage() {
   const [regEmail, setRegEmail] = useState("");
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
-  const [regName, setRegName] = useState("");
 
   // Programme form
   const [fullName, setFullName] = useState("");
@@ -258,7 +257,6 @@ export default function WalkingTo5kRegisterPage() {
     const payload: Record<string, string> = { password: regPassword };
     if (regEmail.trim()) payload.email = regEmail.trim();
     if (regUsername.trim()) payload.username = regUsername.trim();
-    if (regName.trim()) payload.name = regName.trim();
 
     const parsed = registerSchema.safeParse(payload);
     if (!parsed.success) {
@@ -484,16 +482,6 @@ export default function WalkingTo5kRegisterPage() {
               autoComplete="username"
               value={regUsername}
               onChange={(e) => setRegUsername(e.target.value)}
-              disabled={loading}
-            />
-            <label htmlFor={`${baseId}-reg-name`} className={labelClass}>
-              Display name
-            </label>
-            <input
-              id={`${baseId}-reg-name`}
-              className={`${inputClass} mb-3`}
-              value={regName}
-              onChange={(e) => setRegName(e.target.value)}
               disabled={loading}
             />
             <label htmlFor={`${baseId}-reg-pass`} className={labelClass}>
