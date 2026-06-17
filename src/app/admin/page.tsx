@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AdminSubnav } from "./admin-subnav";
 import { getAisensyOtpCampaignName } from "@/integrations/aisensy/templates";
 import { getSessionUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
@@ -138,15 +139,8 @@ export default async function AdminDashboardPage() {
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="max-w-4xl mx-auto">
         <h1 className="font-display text-4xl uppercase text-violet">Admin</h1>
-        <p className="text-sm text-ink/60 mt-2 mb-8">Operational snapshot — efficient counts, no N+1 loops.</p>
-        <p className="-mt-6 mb-8 text-sm">
-          <Link
-            href="/admin/members"
-            className="font-bold text-violet-soft underline-offset-2 hover:underline"
-          >
-            View member directory (table)
-          </Link>
-        </p>
+        <p className="text-sm text-ink/60 mt-2 mb-6">Operational snapshot — efficient counts, no N+1 loops.</p>
+        <AdminSubnav />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {statCards.map((card) => (
             <div key={card.label} className="rounded-card border border-paper-deep bg-paper-raised p-4">
@@ -163,12 +157,12 @@ export default async function AdminDashboardPage() {
             Web form, payment proof, approvals, QR passes, and WhatsApp handoff — all in-product (no Google Form /
             Sheet).
           </p>
-          <a
+          <Link
             href="/admin/event-registrations"
             className="inline-flex rounded-full bg-energy px-5 py-2 text-sm font-extrabold text-white"
           >
             Open registration desk
-          </a>
+          </Link>
         </section>
 
         <section className="mt-10 rounded-card border border-paper-deep bg-paper-raised p-6">

@@ -64,7 +64,34 @@ npx tsx prisma/seed.ts --reset --wipe-community
 $env:SEED_WIPE_COMMUNITY="1"; $env:SEED_RESET="1"; npm run db:seed
 ```
 
-**Not removed:** other users (e.g. real Gmail sign-ups), `Program` / `Badge` rows, enrollments or data owned only by non-beta users. For a full database wipe use your provider’s branch reset or `prisma migrate reset` on a throwaway DB.
+**Not removed:** other users (e.g. real Gmail sign-ups), `Program` / `Badge` rows, enrollments or data owned only by non-beta users.
+
+## Full wipe before a user demo (empty DB → re-seed)
+
+Use only on a **staging / demo** Postgres you are allowed to erase. This **truncates every application table** (all users, events, enrollments, community, OTP, notification logs, etc.), keeps **`_prisma_migrations`** intact, then you run **`db:seed`** to restore programs, badges, the sample challenge, and beta accounts.
+
+**Local database:**
+
+```bash
+npm run db:wipe -- --confirm
+npm run db:seed
+```
+
+**Hosted database** (Neon, Supabase, … — anything not `localhost` / `127.0.0.1`):
+
+```bash
+# bash
+I_ACCEPT_DATA_LOSS_ON_REMOTE_DB=1 npx tsx scripts/wipe-all-application-data.ts --confirm && npm run db:seed
+```
+
+```powershell
+$env:I_ACCEPT_DATA_LOSS_ON_REMOTE_DB = "1"
+npm run db:wipe -- --confirm
+npm run db:seed
+Remove-Item Env:I_ACCEPT_DATA_LOSS_ON_REMOTE_DB
+```
+
+For a throwaway branch you can also use your provider’s **branch reset** or `npx prisma migrate reset` (drops and recreates the schema — use only when you use migrations, not `db push` alone).
 
 ## Set password for a real email (no `passwordHash` yet)
 

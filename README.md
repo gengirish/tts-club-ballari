@@ -23,6 +23,7 @@ npx auth secret             # writes AUTH_SECRET
 npm run db:push             # push schema to Postgres (Neon, Supabase, etc.)
 npm run db:seed             # program + badges + sample challenge + **beta test users** (loads .env via dotenv; see [docs/BETA_USERS.md](./docs/BETA_USERS.md))
 npm run db:seed:reset       # same as db:seed after wiping @sss-club.example.com users + sample challenge + auth/OTP/notify logs (staging / beta DB only)
+npm run db:wipe -- --confirm   # truncate ALL app tables (demo reset); hosted DB needs I_ACCEPT_DATA_LOSS_ON_REMOTE_DB=1 — then run db:seed (see docs/BETA_USERS.md)
 npm run lint && npm run typecheck   # same checks as GitHub CI (see [docs/CI_CD.md](./docs/CI_CD.md))
 npm run dev                 # web (Vercel target)
 npm run worker              # BullMQ worker (Fly.io target) — separate terminal

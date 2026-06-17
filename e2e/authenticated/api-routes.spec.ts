@@ -129,4 +129,20 @@ test.describe("authenticated API (session cookie)", () => {
     const body: unknown = await res.json();
     expect(assertApiEnvelope(body).ok).toBe(false);
   });
+
+  test("GET /api/event-applications is forbidden for member", async ({ request }) => {
+    const res = await request.get("/api/event-applications");
+    expect(res.status()).toBe(403);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+  });
+
+  test("POST /api/programs/couch-to-5k/order returns 422 for invalid assessment", async ({ request }) => {
+    const res = await request.post("/api/programs/couch-to-5k/order", {
+      data: { assessment: { age: 10 } },
+    });
+    expect(res.status()).toBe(422);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+  });
 });

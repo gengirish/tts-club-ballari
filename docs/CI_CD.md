@@ -49,3 +49,7 @@ The workflow runs on pushes that touch worker-related paths (see `on.push.paths`
 - **CI Postgres / Prisma**: The database segment in `DATABASE_URL` / `DIRECT_URL` must match `POSTGRES_DB` in `.github/workflows/ci.yml`.
 - **Playwright failures**: Download the **playwright-report** artifact from the failed run’s job summary.
 - **Fly deploy skipped**: Confirm `FLY_DEPLOY_ENABLED` is exactly `true` and the push matches the configured `paths` filters.
+
+## See also
+
+- **Versioning, rollback (Vercel + Fly), migration caveats:** [TODOs/CI_CD_VERSIONING_ROLLBACK.md](../TODOs/CI_CD_VERSIONING_ROLLBACK.md)

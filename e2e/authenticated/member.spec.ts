@@ -61,6 +61,13 @@ test.describe("member area (authenticated)", () => {
     await expect(page.getByRole("button", { name: /SOS/i })).toBeVisible();
   });
 
+  test("self-help guide loads", async ({ page }) => {
+    await page.goto("/app/help");
+    await expect(page.getByTestId("app-self-help")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Self-help guide$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Common questions$/i })).toBeVisible();
+  });
+
   test("C25K program page loads with Walking to 5K registration CTA", async ({ page }) => {
     await page.goto("/app/programs/couch-to-5k");
     await expect(page.getByTestId("c25k-page")).toBeVisible();

@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen">
-      {user ? <AppMemberNav userLabel={label} /> : null}
+      {user ? <AppMemberNav userLabel={label} isAdmin={user.role === "ADMIN"} /> : null}
       <main className="pb-[calc(env(safe-area-inset-bottom)+4.75rem)] md:pb-0">{children}</main>
     </div>
   );

@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:reset": "tsx prisma/seed.ts --reset",
+    "db:wipe": "tsx scripts/wipe-all-application-data.ts",
     "db:set-password": "tsx scripts/set-password-for-email.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",

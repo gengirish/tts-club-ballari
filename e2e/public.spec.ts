@@ -185,3 +185,63 @@ test.describe("walking to 5K", () => {
     await expect(page.getByRole("heading", { name: /Create your account/i })).toBeVisible();
   });
 });
+
+/** Stable fake CUID-shaped id that should not exist after a normal seed. */
+const NONEXISTENT_EVENT_ID = "cle2epublic0000000000001";
+
+test.describe("public event APIs", () => {
+  test("GET /api/public/events/:id returns 404 envelope when event missing", async ({ request }) => {
+    const res = await request.get(`/api/public/events/${NONEXISTENT_EVENT_ID}`);
+    expect(res.status()).toBe(404);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+    expect((body as { error?: { code?: string } }).error?.code).toBe("NOT_FOUND");
+  });
+
+  test("POST /api/public/events/:id/apply returns 404 when event missing", async ({ request }) => {
+    const res = await request.post(`/api/public/events/${NONEXISTENT_EVENT_ID}/apply`, {
+      data: { applicantName: "x" },
+    });
+    expect(res.status()).toBe(404);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+  });
+});
+
+test.describe("auth-related public APIs", () => {
+  test("GET /api/members/me without session returns 401", async ({ request }) => {
+    const res = await request.get("/api/members/me");
+    expect(res.status()).toBe(401);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+  });
+
+  test("POST /api/auth/reset-password returns 400 for invalid token", async ({ request }) => {
+    const res = await request.post("/api/auth/reset-password", {
+      data: { token: "e2e-invalid-reset-token-24chars", password: "ValidLen8!" },
+    });
+    expect(res.status()).toBe(400);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+    expect((body as { error?: { code?: string } }).error?.code).toBe("INVALID_OR_EXPIRED_TOKEN");
+  });
+
+  test("POST /api/auth/otp returns 422 for invalid phone", async ({ request }) => {
+    const res = await request.post("/api/auth/otp", {
+      data: { phone: "123" },
+    });
+    expect(res.status()).toBe(422);
+    const body: unknown = await res.json();
+    expect(assertApiEnvelope(body).ok).toBe(false);
+  });
+});
+
+test.describe("password reset page", () => {
+  test("reset password page loads with form fields", async ({ page }) => {
+    await page.goto("/login/reset-password");
+    await expect(page.getByRole("heading", { name: /^Reset password$/i })).toBeVisible();
+    await expect(page.getByTestId("reset-password-new")).toBeVisible();
+    await expect(page.getByTestId("reset-password-confirm")).toBeVisible();
+    await expect(page.getByTestId("reset-password-submit")).toBeVisible();
+  });
+});

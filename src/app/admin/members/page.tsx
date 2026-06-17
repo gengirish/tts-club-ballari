@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/rbac";
+import { AdminSubnav } from "../admin-subnav";
 import { listAdminMemberDirectory, ADMIN_MEMBER_DIRECTORY_LIMIT } from "@/server/admin/member-directory";
 import { formatDateTimeIST } from "@/lib/utils/datetime";
 
@@ -14,12 +14,8 @@ export default async function AdminMembersPage() {
   return (
     <main className="min-h-screen bg-paper px-4 py-10">
       <div className="mx-auto max-w-6xl">
-        <p className="text-sm font-bold uppercase tracking-wide text-magenta">
-          <Link href="/admin" className="text-violet-soft hover:underline">
-            ← Admin
-          </Link>
-        </p>
-        <h1 className="mt-2 font-display text-3xl uppercase text-violet sm:text-4xl">Members</h1>
+        <AdminSubnav />
+        <h1 className="font-display text-3xl uppercase text-violet sm:text-4xl">Members</h1>
         <p className="mt-2 max-w-2xl text-sm text-ink/60">
           Latest {ADMIN_MEMBER_DIRECTORY_LIMIT} accounts with role <strong className="text-ink/80">MEMBER</strong>{" "}
           (newest first). Same data as <code className="rounded bg-paper-muted px-1 py-0.5 text-xs">GET /api/members</code>

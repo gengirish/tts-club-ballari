@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-export function AppMemberNav({ userLabel }: { userLabel: string }) {
+export function AppMemberNav({ userLabel, isAdmin }: { userLabel: string; isAdmin?: boolean }) {
   const pathname = usePathname();
 
   const tabs = [
@@ -60,6 +60,24 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
             >
               Self-help
             </Link>
+            {isAdmin ? (
+              <>
+                <Link
+                  href="/admin"
+                  data-testid="app-admin-dashboard-link"
+                  className="hidden shrink-0 rounded-full border border-magenta/30 bg-paper-muted px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-magenta transition hover:border-magenta/50 hover:text-magenta sm:inline-flex"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/admin/members"
+                  data-testid="app-admin-members-link"
+                  className="hidden max-w-[7rem] shrink-0 truncate rounded-full border border-magenta/30 bg-paper-muted px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-magenta transition hover:border-magenta/50 hover:text-magenta sm:inline-flex"
+                >
+                  Members
+                </Link>
+              </>
+            ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Link
@@ -74,6 +92,25 @@ export function AppMemberNav({ userLabel }: { userLabel: string }) {
             >
               Help
             </Link>
+            {isAdmin ? (
+              <div className="flex shrink-0 gap-1 sm:hidden">
+                <Link
+                  href="/admin"
+                  data-testid="app-admin-dashboard-link-mobile"
+                  title="Admin dashboard"
+                  className="inline-flex min-h-[44px] min-w-[3.25rem] items-center justify-center rounded-full border border-magenta/35 bg-paper-muted px-2 text-[10px] font-extrabold uppercase leading-none text-magenta transition hover:border-magenta/55"
+                >
+                  Admin
+                </Link>
+                <Link
+                  href="/admin/members"
+                  data-testid="app-admin-members-link-mobile"
+                  className="inline-flex min-h-[44px] min-w-[3.25rem] items-center justify-center rounded-full border border-magenta/35 bg-paper-muted px-2 text-[10px] font-extrabold uppercase leading-none text-magenta transition hover:border-magenta/55"
+                >
+                  Members
+                </Link>
+              </div>
+            ) : null}
             <ThemeToggle />
             <button
               type="button"

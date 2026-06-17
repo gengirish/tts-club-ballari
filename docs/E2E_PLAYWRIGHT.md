@@ -72,7 +72,7 @@ With **`E2E_PASSWORD_EMAIL` + `E2E_PASSWORD`** set, Playwright runs:
 - **`chromium`** — `e2e/authenticated/*.spec.ts` (member UI, **API routes** with session cookie, challenges join) using `e2e/.auth/member.json`.
 - **`public`** — `e2e/public.spec.ts` and `e2e/password-login.spec.ts` (no session; smoke and fresh sign-up against the same DB).
 
-Without the password env vars, only **`public`** runs (`public.spec.ts` + **`password-login.spec.ts`** — smoke on `/`, `/login`, login **Join** sign-up fields, `/walking-to-5k` guest redirect to register, register API errors, and email/username sign-up against local DB).
+Without the password env vars, only **`public`** runs (`public.spec.ts` + **`password-login.spec.ts`** — smoke on `/`, `/login`, login **Join** sign-up fields, `/walking-to-5k` guest redirect to register, register API errors, email/username sign-up against local DB, **public event registration APIs** (missing event → `NOT_FOUND`), **unauthenticated auth APIs** (reset token, OTP validation), and **`GET /api/members/me` → 401**).
 
 ## Writing new tests
 
