@@ -380,9 +380,12 @@ export default function LoginPage() {
 
             {tab === "register" && (
               <>
-                <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-6`}>
+                <button type="button" data-testid="login-tab-password" onClick={() => goTab("password")} className={`${secondaryLinkClass} mb-4`}>
                   ← Sign in
                 </button>
+                <p className="mb-5 text-xs text-ink/55 rounded-lg border border-paper-deep bg-paper-muted/50 px-3 py-2.5 leading-relaxed">
+                  Email or username required (either or both). Password must be 8+ characters. You can add the other later from your profile.
+                </p>
                 <div className="flex flex-col gap-3">
                   <label htmlFor="register-email" className="sr-only">
                     Email (optional if you set a username)

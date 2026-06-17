@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { OnboardingInput } from "@/lib/validation/member";
 import { onboardingSchema } from "@/lib/validation/member";
@@ -59,6 +59,14 @@ function buildPayload(form: FormState): unknown {
   return onboardingFormToPayload(form);
 }
 
+function CheckIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+      <path d="M1.5 6.5l3 3 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function OnboardingStepper({
   mode = "onboard",
   initialForm,
@@ -74,31 +82,11 @@ export function OnboardingStepper({
   const [loading, setLoading] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
   const [draftNotice, setDraftNotice] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
-  const progressPct = useMemo(() => ((step + 1) / STEPS.length) * 100, [step]);
-
-  function setFieldError(field: string, message?: string) {
-    setFieldErrors((prev) => {
-      if (!message) {
-        if (!(field in prev)) return prev;
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      }
-      if (prev[field] === message) return prev;
-      return { ...prev, [field]: message };
-    });
-  }
-
-  function validateOptionalEmail(value: string) {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      setFieldError("email");
-      return;
-    }
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-    setFieldError("email", ok ? undefined : "Enter a valid email address.");
-  }
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const heightInputRef = useRef<HTMLInputElement>(null);
+  const hasNavigatedRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -136,6 +124,39 @@ export function OnboardingStepper({
   useEffect(() => {
     if (form.goals.length > 0) setFieldError("goals");
   }, [form.goals.length]);
+
+  // Auto-focus first field when navigating between steps (not on initial render).
+  useEffect(() => {
+    if (!hasNavigatedRef.current) {
+      hasNavigatedRef.current = true;
+      return;
+    }
+    if (step === 0) nameInputRef.current?.focus();
+    else if (step === 1) heightInputRef.current?.focus();
+  }, [step]);
+
+  function setFieldError(field: string, message?: string) {
+    setFieldErrors((prev) => {
+      if (!message) {
+        if (!(field in prev)) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      }
+      if (prev[field] === message) return prev;
+      return { ...prev, [field]: message };
+    });
+  }
+
+  function validateOptionalEmail(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setFieldError("email");
+      return;
+    }
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    setFieldError("email", ok ? undefined : "Enter a valid email address.");
+  }
 
   function toggleActivity(id: string) {
     setForm((f) => ({
@@ -217,18 +238,76 @@ export function OnboardingStepper({
       // Ignore storage cleanup failures.
     }
 
-    router.push("/app");
-    router.refresh();
+    setDone(true);
+    setTimeout(() => {
+      router.push("/app");
+      router.refresh();
+    }, 1500);
+  }
+
+  if (done) {
+    return (
+      <div className="max-w-lg mx-auto">
+        <div className="rounded-card border border-progress/30 bg-paper-raised/85 backdrop-blur-sm p-8 shadow-sm text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-progress/15">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Done">
+              <path d="M4.5 14l6 6 13-12" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h2 className="font-display text-2xl uppercase text-transparent bg-clip-text bg-energy">
+            {mode === "edit" ? "Saved!" : "You're in!"}
+          </h2>
+          <p className="mt-2 text-sm text-ink/60">
+            {mode === "edit"
+              ? "Your profile has been updated."
+              : "Welcome to Steel Sisters & Striders — taking you home…"}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-lg mx-auto">
-      <div className="h-2 rounded-full bg-paper-deep overflow-hidden mb-8">
-        <div
-          className="h-full bg-energy transition-[width] duration-300 ease-out"
-          style={{ width: `${progressPct}%` }}
-        />
-      </div>
+      {/* Labeled step indicator */}
+      <nav aria-label="Setup progress" className="mb-8">
+        <div className="flex items-start">
+          {STEPS.map((name, i) => {
+            const isCompleted = i < step;
+            const isActive = i === step;
+            return (
+              <Fragment key={name}>
+                <div className="flex flex-col items-center gap-1.5">
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-200 ${
+                      isCompleted
+                        ? "bg-violet text-white"
+                        : isActive
+                        ? "bg-violet text-white ring-2 ring-violet/40 ring-offset-2 ring-offset-paper"
+                        : "bg-paper-deep text-ink/35"
+                    }`}
+                    aria-current={isActive ? "step" : undefined}
+                  >
+                    {isCompleted ? <CheckIcon /> : i + 1}
+                  </span>
+                  <span
+                    className={`text-[10px] font-semibold uppercase tracking-wide ${
+                      isActive ? "text-violet-soft" : isCompleted ? "text-ink/55" : "text-ink/25"
+                    }`}
+                  >
+                    {name}
+                  </span>
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className="flex-1 mt-4 mx-1 h-0.5 rounded-full bg-paper-deep overflow-hidden">
+                    <div className={`h-full transition-all duration-500 ${isCompleted ? "bg-violet w-full" : "w-0"}`} />
+                  </div>
+                )}
+              </Fragment>
+            );
+          })}
+        </div>
+      </nav>
 
       <div className="rounded-card border border-paper-deep bg-paper-raised/85 backdrop-blur-sm p-6 shadow-sm">
         {step === 0 && (
@@ -240,6 +319,7 @@ export function OnboardingStepper({
             <label className="block text-sm font-semibold text-ink">
               Name <span className="text-magenta">*</span>
               <input
+                ref={nameInputRef}
                 className={inputClass}
                 value={form.name}
                 onChange={(e) => {
@@ -336,6 +416,7 @@ export function OnboardingStepper({
               <label className="block text-sm font-semibold text-ink col-span-2 sm:col-span-1">
                 Height (cm)
                 <input
+                  ref={heightInputRef}
                   inputMode="numeric"
                   className={inputClass}
                   value={form.heightCm}
@@ -417,6 +498,9 @@ export function OnboardingStepper({
                 onChange={(e) => setForm((f) => ({ ...f, injuryHistory: e.target.value }))}
               />
             </label>
+            <p className="text-xs text-ink/45 pt-1">
+              All fields optional — tap Continue whenever ready.
+            </p>
           </section>
         )}
 
@@ -544,14 +628,18 @@ export function OnboardingStepper({
         )}
 
         <div className="mt-8 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={back}
-            disabled={step === 0 || loading}
-            className="rounded-full px-5 py-2.5 text-sm font-bold text-violet border border-violet/30 disabled:opacity-40"
-          >
-            Back
-          </button>
+          {step > 0 ? (
+            <button
+              type="button"
+              onClick={back}
+              disabled={loading}
+              className="rounded-full px-5 py-2.5 text-sm font-bold text-violet border border-violet/30 disabled:opacity-40"
+            >
+              Back
+            </button>
+          ) : (
+            <span />
+          )}
           {step < STEPS.length - 1 ? (
             <button
               type="button"
@@ -576,10 +664,6 @@ export function OnboardingStepper({
           {draftNotice ?? (draftReady ? "Draft autosaves on this device." : "Preparing draft autosave…")}
         </p>
       </div>
-
-      <p className="text-center text-xs text-ink/40 mt-6">
-        Step {step + 1} of {STEPS.length} · {STEPS[step]}
-      </p>
     </div>
   );
 }
